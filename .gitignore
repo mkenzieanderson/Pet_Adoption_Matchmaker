@@ -36,3 +36,8 @@ backend/build/
 # Virtual environment
 venv/
 backend/venv/
+
+# Ignore package-lock.json files
+package-lock.json
+frontend/package-lock.json
+backend/package-lock.json
