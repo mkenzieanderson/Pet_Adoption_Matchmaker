@@ -68,6 +68,72 @@ def create_table(db: sqlalchemy.engine.base.Engine) -> None:
             )
         )
 
+        conn.execute(
+            sqlalchemy.text(
+                '''
+                CREATE TABLE IF NOT EXISTS shelters (
+                    shelter_id BIGINT AUTO_INCREMENT NOT NULL,
+                    name VARCHAR(100) NOT NULL,
+                    zip_code VARCHAR(10),
+                    user_id BIGINT NOT NULL,
+                    PRIMARY KEY (shelter_id),
+                    FOREIGN KEY (user_id) REFERENCES users(user_id)
+                );
+                '''
+            )
+        )
+
+        conn.execute(
+            sqlalchemy.text(
+                '''
+                CREATE TABLE IF NOT EXISTS pets (
+                    pet_id BIGINT AUTO_INCREMENT NOT NULL,
+                    name VARCHAR(100),
+                    type ENUM('dog', 'cat', 'other'),
+                    gender ENUM('male', 'female', 'unknown'),
+                    news_item VARCHAR(255),
+                    date_created DATETIME NOT NULL,
+                    age INT,
+                    breed VARCHAR(100),
+                    disposition VARCHAR(255),
+                    description VARCHAR(255),
+                    availability ENUM('available', 'not available', 'adopted', 'pending') NOT NULL,
+                    picture_url VARCHAR(255),
+                    shelter_id BIGINT,
+                    PRIMARY KEY (pet_id),
+                    FOREIGN KEY (shelter_id) REFERENCES shelters(shelter_id) ON DELETE SET NULL
+                );
+                '''
+            )
+        )
+
+        conn.execute(
+            sqlalchemy.text(
+                '''
+                CREATE TABLE IF NOT EXISTS favorites (
+                    id BIGINT AUTO_INCREMENT NOT NULL,
+                    favorited_at DATETIME NOT NULL,
+                    pet_id BIGINT NOT NULL,
+                    user_id BIGINT NOT NULL,
+                    PRIMARY KEY (id),
+                    FOREIGN KEY (user_id) REFERENCES users(user_id),
+                    FOREIGN KEY (pet_id) REFERENCES pets(pet_id)
+                );
+                '''
+            )
+        )
+        conn.execute(
+            sqlalchemy.text(
+                '''
+                CREATE TABLE IF NOT EXISTS pet_dispositions (
+                    disposition VARCHAR(255) NOT NULL,
+                    pet_id BIGINT NOT NULL,
+                    FOREIGN KEY (pet_id) REFERENCES pets(pet_id)
+                );
+                '''
+            )
+        )
+
         conn.commit()
 
 
