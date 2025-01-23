@@ -44,3 +44,6 @@ backend/key.json/.env
 package-lock.json
 frontend/package-lock.json
 backend/package-lock.json
+
+#python byte code
+__pycache__/
