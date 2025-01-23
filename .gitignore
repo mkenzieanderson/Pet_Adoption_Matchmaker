@@ -37,6 +37,9 @@ backend/build/
 venv/
 backend/venv/
 
+#private files
+backend/key.json/.env
+
 # Ignore package-lock.json files
 package-lock.json
 frontend/package-lock.json
