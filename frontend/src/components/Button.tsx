@@ -14,8 +14,8 @@ function Button (props: ButtonProps) {
                 ? props.className 
                 : `bg-mustard text-espresso font-header 
                   font-semibold border-tawny-brown border-4
-                  rounded-lg px-6 py-2 hover:border-clay 
-                  mt-4 w-auto`
+                  rounded-lg px-6 py-2 hover:border-espresso
+                  mt-4 mb-2 w-auto hover:bg-transparent-clay`
             }
             onClick={props.onClick}
         >

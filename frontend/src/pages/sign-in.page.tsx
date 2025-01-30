@@ -1,15 +1,50 @@
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Button from "../components/Button";
+import TextInput from "../components/TextInput";
+import Form from "../components/Form";
 
 export const SignInPage = () => {
     const navigate = useNavigate();
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+
+    const handleSubmit = () => {
+        setEmail("");
+        setPassword("");
+        navigate('/');
+    }
 
     return (
         <>
-            <div className="bg-red-400 rounded-lg p-4">
-                <h1>Sign In Page</h1>
-                <button onClick={() => navigate('/')} className="m-4">
-                    Login
-                </button>
+            <div style={{ width: "550px" }}>
+                <Form
+                    title="Sign in to continue"
+                    description="Welcome back!"
+                >
+                    <TextInput
+                        title="Email"
+                        width="w-80"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    >
+                    </TextInput>
+
+                    <TextInput
+                        type="password"
+                        title="Password"
+                        width="w-80"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                    >
+                    </TextInput>
+
+                    <Button
+                        text="SIGN IN"
+                        onClick={handleSubmit}
+                    >
+                    </Button>
+                </Form>
             </div>
         </>
     )
