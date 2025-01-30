@@ -10,7 +10,8 @@ export default {
         'mustard': '#bd912987',     /* navigation bar, buttons, etc. */ 
         'tawny-brown': '#755509',   /* container and button outlines */
         'cream': '#fffdf7',         /* forms */ 
-        'light-rose': '#d775895e'   /* error and buttons */ 
+        'light-rose': '#d775895e',  /* error and buttons */ 
+        'clay': '#ca8236'           /* button outlines while hovering */
       },
       fontFamily: {
         header: ['Noto Serif'],     /* Headers, Titles, Larger Body Text */
