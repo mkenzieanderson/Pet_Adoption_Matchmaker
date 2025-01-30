@@ -23,6 +23,7 @@ export const SignInPage = () => {
                     description="Welcome back!"
                 >
                     <TextInput
+                        type="email"
                         title="Email"
                         width="w-80"
                         value={email}
