@@ -47,3 +47,6 @@ backend/package-lock.json
 
 #python byte code
 __pycache__/
+
+#Test pet imgs
+backend/pet_imgs

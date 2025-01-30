@@ -315,7 +315,7 @@ def get_all_users():
                 raise ValueError(403)
 
             users_stmt = sqlalchemy.text (
-                'SELECT * from users'
+                'SELECT user_id, email, name, role, sub from users'
             )
             users_result = conn.execute(users_stmt)
             users = [row._asdict() for row in users_result]
@@ -366,7 +366,32 @@ def get_user(user_id):
         }
 
         return user
+    except ValueError as e:
+        status_code = int(str(e))
+        return get_error_message(status_code), status_code
+    except AuthError as e:
+        _, status_code = e.args
+        return get_error_message(status_code), status_code
 
+@app.route('/'+PETS, methods = ['POST'])
+def add_pet():
+    try:
+        payload = verify_jwt(request)
+        if not payload:
+            raise ValueError(401)
+        owner_sub = payload['sub']
+
+        with db.connect as conn:
+            stmt = sqlalchemy.text (
+                'SELECT role FROM users WHERE sub = :sub'
+            )
+        result = conn.execute(stmt, parameters={'sub': owner_sub}).one_or_none()
+        user = result._asdict()
+        role = user['role']
+        if role != 'admin':
+            raise ValueError(403)
+
+        return "yay"
 
     except ValueError as e:
         status_code = int(str(e))
@@ -374,6 +399,7 @@ def get_user(user_id):
     except AuthError as e:
         _, status_code = e.args
         return get_error_message(status_code), status_code
+
 
 if __name__ == '__main__':
     init_db()
