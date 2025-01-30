@@ -28,6 +28,8 @@ from jose import jwt
 from authlib.integrations.flask_client import OAuth
 from flask import Flask, request, jsonify, send_file
 from connect_connector import connect_with_connector
+from google.cloud import storage
+
 
 load_dotenv()
 
@@ -206,7 +208,6 @@ def create_table(db: sqlalchemy.engine.base.Engine) -> None:
                     date_created DATETIME NOT NULL,
                     age INT,
                     breed VARCHAR(100),
-                    disposition VARCHAR(255),
                     description VARCHAR(255),
                     availability ENUM('available', 'not available', 'adopted', 'pending') NOT NULL,
                     picture_url VARCHAR(255),
@@ -338,6 +339,7 @@ def get_all_users():
 
 @app.route('/'+USERS+'/<int:user_id>', methods = ['GET'])
 def get_user(user_id):
+    """Gets a user provided the id of the user"""
     try:
         payload = verify_jwt(request)
         if not payload:
@@ -375,23 +377,76 @@ def get_user(user_id):
 
 @app.route('/'+PETS, methods = ['POST'])
 def add_pet():
+    """Adds a pet to the database"""
     try:
+
+        #verify uploader is an admin
         payload = verify_jwt(request)
         if not payload:
             raise ValueError(401)
         owner_sub = payload['sub']
 
-        with db.connect as conn:
+        with db.connect() as conn:
             stmt = sqlalchemy.text (
                 'SELECT role FROM users WHERE sub = :sub'
             )
-        result = conn.execute(stmt, parameters={'sub': owner_sub}).one_or_none()
+            result = conn.execute(stmt, parameters={'sub': owner_sub}).one_or_none()
+
         user = result._asdict()
         role = user['role']
         if role != 'admin':
             raise ValueError(403)
 
-        return "yay"
+        content = request.get_json()
+
+        #check required fields
+        if not content or not all(key in content for key in ["name", "type", "gender", "age", "breed","description", "availability", "shelter_id"]):
+            print('gey')
+            raise ValueError(400)
+
+        with db.connect() as conn:
+            stmt = sqlalchemy.text (
+                '''
+                INSERT INTO pets (name, type, gender, news_item, date_created, age, breed,
+                                description, availability, shelter_id)
+                VALUES (:name, :type, :gender, :news_item, NOW(), :age, :breed,
+                        :description, :availability, :shelter_id)
+                '''
+            )
+            conn.execute(
+                stmt,
+                {
+                    'name': content['name'],
+                    'type': content['type'],
+                    'gender': content['gender'],
+                    'news_item': content.get('news_item', None),  # Optional field
+                    'age': content['age'],
+                    'breed': content['breed'],
+                    'description': content['description'],
+                    'availability': content['availability'],
+                    'shelter_id': content['shelter_id'],
+                }
+            )
+            stmt2 = sqlalchemy.text('SELECT last_insert_id()')
+            pet_id = conn.execute(stmt2).scalar()
+            print(f"new petid: ${pet_id}")
+
+            conn.commit()
+
+        response = {
+                'pet_id': pet_id,
+                'name': content['name'],
+                'type': content['type'],
+                'gender': content['gender'],
+                'age': content['age'],
+                'breed': content['breed'],
+                'description': content['description'],
+                'availability': content['availability'],
+                'shelter_id': content['shelter_id']
+            }
+        if content.get('news_item'):
+                response['news_item'] = content['news_item']
+        return response, 200
 
     except ValueError as e:
         status_code = int(str(e))
