@@ -606,6 +606,70 @@ def get_pet_avatar(pet_id):
         _, status_code = e.args
         return get_error_message(status_code), status_code
 
+@app.route('/'+SHELTERS, methods = ['GET'])
+def get_all_shelters():
+    """Returns a list of all shelters"""
+    try:
+        payload = verify_jwt(request)
+        if not payload:  # Handle missing or invalid JWT
+            raise ValueError(401)
+
+        with db.connect() as conn:
+
+            stmt = sqlalchemy.text (
+                'SELECT * FROM shelters'
+            )
+            result = conn.execute(stmt)
+            shelters = [row._asdict() for row in result]
+
+            for shelter in shelters:
+                shelter['self'] = f"{request.host_url.rstrip('/')}/{SHELTERS}/{shelter['shelter_id']}"
+
+            response = {
+                'users':shelters
+            }
+
+            return response, 200
+    except ValueError as e:
+        status_code = int(str(e))
+        return get_error_message(status_code), status_code
+    except AuthError as e:
+        _, status_code = e.args
+        return get_error_message(status_code), status_code
+
+@app.route('/'+SHELTERS+'/<int:shelter_id>', methods = ['GET'])
+def get_shelter(shelter_id):
+    """Gets a shelter provided the id of the shelter"""
+    try:
+        payload = verify_jwt(request)
+        if not payload:
+            raise ValueError(401)
+
+        with db.connect() as conn:
+            stmt =sqlalchemy.text(
+                '''SELECT * FROM shelters WHERE shelter_id = :shelter_id'''
+            )
+            result = conn.execute(stmt, parameters={'shelter_id':shelter_id}).one_or_none()
+        if result is None:
+            raise ValueError(404)
+
+        shelter = result._asdict()
+
+        shelter = {
+            'shelter_id':shelter['shelter_id'],
+            'name':shelter['name'],
+            'user_id':shelter['user_id'],
+            'zip_code':shelter['zip_code']
+            }
+
+        return shelter
+    except ValueError as e:
+        status_code = int(str(e))
+        return get_error_message(status_code), status_code
+    except AuthError as e:
+        _, status_code = e.args
+        return get_error_message(status_code), status_code
+
 if __name__ == '__main__':
     init_db()
     create_table(db)
