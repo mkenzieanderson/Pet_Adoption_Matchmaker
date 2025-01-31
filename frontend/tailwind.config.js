@@ -12,7 +12,8 @@ export default {
         'cream': '#fffdf7',                   /* forms */ 
         'light-rose': '#d775895e',            /* error and buttons */ 
         'clay': '#ca8236',                    /* button outline on hover */
-        'transparent-clay': '#ca8236b7'       /* button fill on hover */
+        'transparent-clay': '#ca8236b7',      /* button fill on hover */
+        'dark-rose': '#d77589cc'             /* error button fill on hover */
       },
       fontFamily: {
         header: ['Noto Serif'],     /* Headers, Titles, Larger Body Text */

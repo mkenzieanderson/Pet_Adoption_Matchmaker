@@ -31,7 +31,6 @@ export const SignInPage = () => {
                             onChange={(e) => setEmail(e.target.value)}
                         >
                         </TextInput>
-
                         <TextInput
                             type="password"
                             title="Password"
@@ -41,11 +40,11 @@ export const SignInPage = () => {
                         >
                         </TextInput>
                         <div className="self-start">
-                        <Button
-                            text="SIGN IN"
-                            onClick={handleSubmit}
-                        >
-                        </Button>
+                            <Button
+                                text="SIGN IN"
+                                onClick={handleSubmit}
+                            >
+                            </Button>
                         </div>
                     </Form>
                 </div>
