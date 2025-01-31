@@ -626,7 +626,7 @@ def get_all_shelters():
                 shelter['self'] = f"{request.host_url.rstrip('/')}/{SHELTERS}/{shelter['shelter_id']}"
 
             response = {
-                'users':shelters
+                'shelters':shelters
             }
 
             return response, 200
@@ -663,6 +663,94 @@ def get_shelter(shelter_id):
             }
 
         return shelter
+    except ValueError as e:
+        status_code = int(str(e))
+        return get_error_message(status_code), status_code
+    except AuthError as e:
+        _, status_code = e.args
+        return get_error_message(status_code), status_code
+
+@app.route('/'+FAVORITES+'/<int:user_id>', methods = ['GET'])
+def get_user_favorites(user_id):
+    try:
+        payload = verify_jwt(request)
+        if not payload:
+            raise ValueError(401)
+
+        with db.connect() as conn:
+            stmt =sqlalchemy.text(
+                '''SELECT * FROM favorites WHERE user_id = :user_id'''
+            )
+            result = conn.execute(stmt, parameters={'user_id':user_id}).fetchall()
+        if not result:
+            return {"Error":"No favorites found for given user ID"},404
+
+        favorites = [row._asdict() for row in result]
+#
+        response = {
+                'favorites':favorites
+            }
+
+        return response, 200
+
+    except ValueError as e:
+        status_code = int(str(e))
+        return get_error_message(status_code), status_code
+    except AuthError as e:
+        _, status_code = e.args
+        return get_error_message(status_code), status_code
+
+@app.route('/favorites', methods=['POST'])
+def add_favorite():
+    try:
+        payload = verify_jwt(request)
+        if not payload:
+            raise ValueError(401)
+
+        content = request.get_json()
+
+        if not content or not all(key in content for key in ["user_id", "pet_id"]):
+            raise ValueError(400)
+
+        user_id = request.json.get('user_id')
+        pet_id = request.json.get('pet_id')
+
+        if not user_id or not pet_id:
+            return jsonify({"Error": "User ID and Pet ID are required"}), 400
+
+        # Check if user exists
+        with db.connect() as conn:
+            stmt = sqlalchemy.text('SELECT * FROM users WHERE user_id = :user_id')
+            user_result = conn.execute(stmt, {'user_id': user_id}).fetchone()
+
+        if user_result is None:
+            return jsonify({"Error": "User not found"}), 404
+
+        # Check if pet exists
+        with db.connect() as conn:
+            stmt = sqlalchemy.text('SELECT * FROM pets WHERE pet_id = :pet_id')
+            pet_result = conn.execute(stmt, {'pet_id': pet_id}).fetchone()
+
+        if pet_result is None:
+            return jsonify({"Error": "Pet not found"}), 404
+
+        # Add pet to favorites
+        with db.connect() as conn:
+            stmt = sqlalchemy.text('''
+                INSERT INTO favorites (user_id, pet_id, favorited_at)
+                VALUES (:user_id, :pet_id, NOW())
+            ''')
+            conn.execute(stmt, {'user_id': user_id, 'pet_id': pet_id})
+            new_favorite_id = conn.execute(sqlalchemy.text('SELECT LAST_INSERT_ID()')).scalar()
+
+        return jsonify({
+            "favorite": {
+                "id": new_favorite_id,
+                "user_id": user_id,
+                "pet_id": pet_id,
+            }
+        }), 201
+
     except ValueError as e:
         status_code = int(str(e))
         return get_error_message(status_code), status_code
