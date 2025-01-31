@@ -83,7 +83,6 @@ pets_data = [
         'date_created': '2025-01-26 12:00:00',
         'age': 3,
         'breed': 'Labrador Retriever',
-        'disposition': 'Friendly and energetic',
         'description': 'Loves to play fetch and enjoys long walks.',
         'availability': 'available',
         'picture_url': 'https://example.com/images/buddy.jpg',
@@ -97,7 +96,6 @@ pets_data = [
         'date_created': '2025-01-26 12:00:00',
         'age': 2,
         'breed': 'Siamese',
-        'disposition': 'Independent but affectionate',
         'description': 'A bit shy, but loves to cuddle once comfortable.',
         'availability': 'adopted',
         'picture_url': 'https://example.com/images/whiskers.jpg',
@@ -111,7 +109,6 @@ pets_data = [
         'date_created': '2025-01-26 12:00:00',
         'age': 1,
         'breed': 'Rabbit',
-        'disposition': 'Curious and playful',
         'description': 'Loves to hop around and explore.',
         'availability': 'pending',
         'picture_url': 'https://example.com/images/fluffy.jpg',
@@ -239,8 +236,8 @@ def insert_seed_data(db: sqlalchemy.engine.base.Engine) -> None:
             conn.execute(
                 sqlalchemy.text(
                     '''
-                    INSERT INTO pets (name, type, gender, news_item, date_created, age, breed, disposition, description, availability, picture_url, shelter_id)
-                    VALUES (:name, :type, :gender, :news_item, :date_created, :age, :breed, :disposition, :description, :availability, :picture_url, :shelter_id);
+                    INSERT INTO pets (name, type, gender, news_item, date_created, age, breed, description, availability, picture_url, shelter_id)
+                    VALUES (:name, :type, :gender, :news_item, :date_created, :age, :breed, :description, :availability, :picture_url, :shelter_id);
                     '''
                 ),
                 {
@@ -251,7 +248,6 @@ def insert_seed_data(db: sqlalchemy.engine.base.Engine) -> None:
                     "date_created": datetime.strptime(pet_data['date_created'], "%Y-%m-%d %H:%M:%S"),
                     "age": pet_data['age'],
                     "breed": pet_data['breed'],
-                    "disposition": pet_data['disposition'],
                     "description": pet_data['description'],
                     "availability": pet_data['availability'],
                     "picture_url": pet_data['picture_url'],

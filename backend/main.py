@@ -345,7 +345,6 @@ def get_user(user_id):
         if not payload:
             raise ValueError(401)
 
-
         with db.connect() as conn:
             stmt =sqlalchemy.text(
                 '''SELECT email, name, phone_number, role, user_id
@@ -429,7 +428,6 @@ def add_pet():
             )
             stmt2 = sqlalchemy.text('SELECT last_insert_id()')
             pet_id = conn.execute(stmt2).scalar()
-            print(f"new petid: ${pet_id}")
 
             conn.commit()
 
@@ -448,6 +446,36 @@ def add_pet():
                 response['news_item'] = content['news_item']
         return response, 200
 
+    except ValueError as e:
+        status_code = int(str(e))
+        return get_error_message(status_code), status_code
+    except AuthError as e:
+        _, status_code = e.args
+        return get_error_message(status_code), status_code
+
+@app.route('/'+PETS, methods = ['GET'])
+def get_all_pets():
+    """Returns a list of all pets"""
+    try:
+        #after initial development, add a check here for a valid JWT
+
+        # owner_sub = payload['sub']
+        with db.connect() as conn:
+
+            stmt = sqlalchemy.text (
+                'SELECT * FROM pets'
+            )
+            pet_result = conn.execute(stmt)
+            pets = [row._asdict() for row in pet_result]
+
+            for pet in pets:
+                pet['self'] = f"{request.host_url.rstrip('/')}/{PETS}/{pet['pet_id']}"
+
+            response = {
+                'pets':pets
+            }
+
+            return response, 200
     except ValueError as e:
         status_code = int(str(e))
         return get_error_message(status_code), status_code
