@@ -453,29 +453,68 @@ def add_pet():
         _, status_code = e.args
         return get_error_message(status_code), status_code
 
-@app.route('/'+PETS, methods = ['GET'])
+@app.route('/' + PETS, methods=['GET'])
 def get_all_pets():
-    """Returns a list of all pets"""
+    """Returns a list of all pets or a filtered list based on shelter_id."""
     try:
-        #after initial development, add a check here for a valid JWT
+        # Get shelter_id from query parameters (e.g., /pets?shelter_id=123)
+        print(f"Received query params: {request.args}")
 
-        # owner_sub = payload['sub']
+        shelter_id = request.args.get('shelter_id')
+        print(shelter_id)
+
         with db.connect() as conn:
+            if shelter_id is not None:
+                shelter_check_stmt = sqlalchemy.text(
+                    'SELECT COUNT(*) FROM shelters WHERE shelter_id = :shelter_id'
+                )
+                shelter_exists = conn.execute(shelter_check_stmt, {'shelter_id': shelter_id}).scalar()
 
-            stmt = sqlalchemy.text (
-                'SELECT * FROM pets'
-            )
-            pet_result = conn.execute(stmt)
+                if shelter_exists == 0:
+                    return {'Error': 'Shelter not found'}, 404  # Shelter does not exist
+
+                stmt = sqlalchemy.text('SELECT * FROM pets WHERE shelter_id = :shelter_id')
+                pet_result = conn.execute(stmt, {'shelter_id': shelter_id})
+            else:
+                stmt = sqlalchemy.text('SELECT * FROM pets')
+                pet_result = conn.execute(stmt)
+
+
             pets = [row._asdict() for row in pet_result]
+
+            if not pets:
+                return {'message': 'No pets found'}, 204
 
             for pet in pets:
                 pet['self'] = f"{request.host_url.rstrip('/')}/{PETS}/{pet['pet_id']}"
 
-            response = {
-                'pets':pets
-            }
+            return {'pets': pets}, 200
 
-            return response, 200
+    except ValueError as e:
+        status_code = int(str(e))
+        return get_error_message(status_code), status_code
+    except AuthError as e:
+        _, status_code = e.args
+        return get_error_message(status_code), status_code
+    except Exception as e:
+        print(e)
+
+@app.route('/'+PETS+'/<int:pet_id>', methods = ['GET'])
+def get_pet(pet_id):
+    """Gets a pet provided the id of the pet"""
+    try:
+
+        with db.connect() as conn:
+
+            stmt = sqlalchemy.text (
+                'SELECT * FROM pets where pet_id = :pet_id'
+            )
+            pet_result = conn.execute(stmt, parameters={'pet_id': pet_id})
+            pet = [row._asdict() for row in pet_result]
+
+            return pet, 200
+
+
     except ValueError as e:
         status_code = int(str(e))
         return get_error_message(status_code), status_code
