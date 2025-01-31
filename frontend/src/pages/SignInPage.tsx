@@ -17,35 +17,38 @@ export const SignInPage = () => {
 
     return (
         <>
-            <div style={{ width: "550px" }}>
-                <Form
-                    title="Sign in to continue"
-                    description="Welcome back!"
-                >
-                    <TextInput
-                        type="email"
-                        title="Email"
-                        width="w-80"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+            <div  className="place-items-center">
+                <div className="w-1/2">
+                    <Form
+                        title="Sign in to continue"
+                        description="Welcome back!"
                     >
-                    </TextInput>
+                        <TextInput
+                            type="email"
+                            title="Email"
+                            width="w-4/6"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                        >
+                        </TextInput>
 
-                    <TextInput
-                        type="password"
-                        title="Password"
-                        width="w-80"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    >
-                    </TextInput>
-
-                    <Button
-                        text="SIGN IN"
-                        onClick={handleSubmit}
-                    >
-                    </Button>
-                </Form>
+                        <TextInput
+                            type="password"
+                            title="Password"
+                            width="w-4/6"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        >
+                        </TextInput>
+                        <div className="self-start">
+                        <Button
+                            text="SIGN IN"
+                            onClick={handleSubmit}
+                        >
+                        </Button>
+                        </div>
+                    </Form>
+                </div>
             </div>
         </>
     )

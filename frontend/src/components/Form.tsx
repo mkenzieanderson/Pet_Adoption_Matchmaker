@@ -14,7 +14,7 @@ function Form ({ title, description, children, width }: FormProps) {
             {title && <h2 className="font-bold text-3xl mb-1">{title}</h2>}
             {description && <p className="mb-8">{description}</p>}
 
-            <form className="flex flex-col gap-4 items-start">
+            <form className="flex flex-col gap-4">
                 {children}
             </form>
         </div>
