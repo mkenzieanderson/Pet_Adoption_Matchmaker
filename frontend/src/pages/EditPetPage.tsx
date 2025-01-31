@@ -1,12 +1,12 @@
 import { useNavigate } from "react-router-dom";
 
-export const AddPetPage = () => {
+export const EditPetPage = () => {
     const navigate = useNavigate();
 
     return (
         <>
-            <div className="bg-red-400 rounded-lg p-4">
-                <h1>Add Pets Page</h1>
+            <div className=" rounded-lg p-4">
+                <h1>Edit Pets Page</h1>
                 <button onClick={() => navigate('/')} className="m-4">
                     HomePage
                 </button>
@@ -19,14 +19,14 @@ export const AddPetPage = () => {
                 <button onClick={() => navigate('/pets-page')} className="m-4">
                     Pets Page
                 </button>
-                <button onClick={() => navigate('/edit-pet-page')} className="m-4">
-                    Edit Pet Page
+                <button onClick={() => navigate('/add-pet-page')} className="m-4">
+                    Add Pet Page
                 </button>
             </div>
         </>
     )
 }
 
-const App: React.FC = () => <AddPetPage />
+const App: React.FC = () => <EditPetPage />
 
 export default App;

@@ -5,7 +5,7 @@ export const ShelterPage = () => {
 
     return (
         <>
-            <div className="bg-red-400 rounded-lg p-4">
+            <div className="rounded-lg p-4">
                 <h1>Shelter Page</h1>
                 <button onClick={() => navigate('/')} className="m-4">
                     HomePage
