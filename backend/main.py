@@ -21,6 +21,7 @@ import requests
 import sqlalchemy
 import bcrypt
 from jose import jwt
+import io
 
 from dotenv import load_dotenv
 from six.moves.urllib.request import urlopen
@@ -515,9 +516,9 @@ def get_pet(pet_id):
                 raise ValueError(404)
 
 
-            pet = [row._asdict() for row in pet_result]
+            pet = pet_result._asdict()
 
-            return pet, 200
+            return pet,200
 
 
     except ValueError as e:
@@ -527,6 +528,94 @@ def get_pet(pet_id):
         _, status_code = e.args
         return get_error_message(status_code), status_code
 
+@app.route('/'+PETS+'/<int:pet_id>/avatar', methods = ['POST'])
+def upload_pet_avatar(pet_id):
+    """Upload a picture for the pet"""
+    try:
+       if 'file' not in request.files:
+            raise ValueError(400)
+
+       with db.connect() as conn:
+
+            stmt = sqlalchemy.text (
+                'SELECT * FROM pets where pet_id = :pet_id'
+            )
+            pet_result = conn.execute(stmt, parameters={'pet_id': pet_id}).one_or_none()
+            print(pet_result)
+            if pet_result is None:
+                raise ValueError(404)
+       pet = pet_result._asdict()
+
+
+       file_obj = request.files['file']
+       storage_client = storage.Client()
+       bucket = storage_client.get_bucket(PET_PIC_BUCKET)
+        # Create a blob object for the bucket with the name of the file
+       blob = bucket.blob(file_obj.filename)
+        # Position the file_obj to its beginning
+       file_obj.seek(0)
+        # Upload the file into Cloud Storage
+       blob.upload_from_file(file_obj)
+
+       with db.connect() as conn:
+
+            stmt = sqlalchemy.text (
+                'UPDATE pets SET picture_url = :picture_url WHERE pet_id = :pet_id'
+            )
+            picture = conn.execute(stmt, parameters={'picture_url':file_obj.filename,
+                                                        'pet_id': pet_id})
+            conn.commit()
+            print(picture)
+
+       pet['picture_url'] = file_obj.filename
+
+       return ({'picture_url':f"{request.host_url.rstrip('/')}/pets/{pet_id}/avatar"},200)
+
+    except ValueError as e:
+        status_code = int(str(e))
+        return get_error_message(status_code), status_code
+    except AuthError as e:
+        _, status_code = e.args
+        return get_error_message(status_code), status_code
+
+@app.route('/'+PETS+'/<int:pet_id>/avatar', methods = ['GET'])
+def get_pet_avatar(pet_id):
+    try:
+        with db.connect() as conn:
+
+            stmt = sqlalchemy.text (
+                'SELECT * FROM pets where pet_id = :pet_id'
+            )
+            pet_result = conn.execute(stmt, parameters={'pet_id': pet_id}).one_or_none()
+            print(pet_result)
+            if pet_result is None:
+                raise ValueError(404)
+        pet = pet_result._asdict()
+        file_name = pet['picture_url']
+        print(file_name)
+        if not file_name:
+            raise ValueError(404)
+
+        storage_client = storage.Client()
+        bucket = storage_client.get_bucket(PET_PIC_BUCKET)
+        # Create a blob with the given file name
+        blob = bucket.blob(file_name)
+        # Create a file object in memory using Python io package
+        file_obj = io.BytesIO()
+        # Download the file from Cloud Storage to the file_obj variable
+        blob.download_to_file(file_obj)
+        # Position the file_obj to its beginning
+        file_obj.seek(0)
+        # Send the object as a file in the response with the correct MIME type and file
+        # name
+        return send_file(file_obj, mimetype='image/png', download_name=file_name)
+
+    except ValueError as e:
+        status_code = int(str(e))
+        return get_error_message(status_code), status_code
+    except AuthError as e:
+        _, status_code = e.args
+        return get_error_message(status_code), status_code
 
 if __name__ == '__main__':
     init_db()
