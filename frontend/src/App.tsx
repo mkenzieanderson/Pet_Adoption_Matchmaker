@@ -1,11 +1,11 @@
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
-import { ShelterPage } from './pages/shelter.page'
-import { SignInPage } from './pages/sign-in.page'
-import { HomePage } from './pages/home.page'
-import { MyAccountPage } from './pages/my-account.page'
-import { PetsPage } from './pages/pets.page'
-import { EditPetPage } from './pages/edit-pet.page'
-import { AddPetPage } from './pages/add-pet.page'
+import { ShelterPage } from './pages/ShelterPage'
+import { SignInPage } from './pages/SignInPage'
+import { HomePage } from './pages/HomePage'
+import { MyAccountPage } from './pages/MyAccountPage'
+import { PetsPage } from './pages/PetsPage'
+import { EditPetPage } from './pages/EditPetPage'
+import { AddPetPage } from './pages/AddPetPage'
 import './App.css'
 
 const routes = createBrowserRouter([
