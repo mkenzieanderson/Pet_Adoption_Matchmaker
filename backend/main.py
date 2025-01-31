@@ -509,7 +509,12 @@ def get_pet(pet_id):
             stmt = sqlalchemy.text (
                 'SELECT * FROM pets where pet_id = :pet_id'
             )
-            pet_result = conn.execute(stmt, parameters={'pet_id': pet_id})
+            pet_result = conn.execute(stmt, parameters={'pet_id': pet_id}).one_or_none()
+            print(pet_result)
+            if pet_result is None:
+                raise ValueError(404)
+
+
             pet = [row._asdict() for row in pet_result]
 
             return pet, 200
