@@ -743,13 +743,13 @@ def add_favorite():
             conn.execute(stmt, {'user_id': user_id, 'pet_id': pet_id})
             new_favorite_id = conn.execute(sqlalchemy.text('SELECT LAST_INSERT_ID()')).scalar()
 
-        return jsonify({
-            "favorite": {
+        return jsonify(
+            {
                 "id": new_favorite_id,
                 "user_id": user_id,
                 "pet_id": pet_id,
             }
-        }), 201
+        ), 201
 
     except ValueError as e:
         status_code = int(str(e))
