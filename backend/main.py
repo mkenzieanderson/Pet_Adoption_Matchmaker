@@ -229,8 +229,8 @@ def create_table(db: sqlalchemy.engine.base.Engine) -> None:
                     pet_id BIGINT NOT NULL,
                     user_id BIGINT NOT NULL,
                     PRIMARY KEY (id),
-                    FOREIGN KEY (user_id) REFERENCES users(user_id),
-                    FOREIGN KEY (pet_id) REFERENCES pets(pet_id)
+                    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+                    FOREIGN KEY (pet_id) REFERENCES pets(pet_id) ON DELETE SET NULL
                 );
                 '''
             )
@@ -336,7 +336,6 @@ def get_all_users():
     except AuthError as e:
         _, status_code = e.args
         return get_error_message(status_code), status_code
-
 
 @app.route('/'+USERS+'/<int:user_id>', methods = ['GET'])
 def get_user(user_id):
