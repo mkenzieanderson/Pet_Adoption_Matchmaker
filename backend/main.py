@@ -226,7 +226,7 @@ def create_table(db: sqlalchemy.engine.base.Engine) -> None:
                 CREATE TABLE IF NOT EXISTS favorites (
                     id BIGINT AUTO_INCREMENT NOT NULL,
                     favorited_at DATETIME NOT NULL,
-                    pet_id BIGINT NOT NULL,
+                    pet_id BIGINT,
                     user_id BIGINT NOT NULL,
                     PRIMARY KEY (id),
                     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
@@ -400,7 +400,6 @@ def add_pet():
 
         #check required fields
         if not content or not all(key in content for key in ["name", "type", "gender", "age", "breed","description", "availability", "shelter_id"]):
-            print('gey')
             raise ValueError(400)
 
         with db.connect() as conn:
@@ -458,10 +457,8 @@ def get_all_pets():
     """Returns a list of all pets or a filtered list based on shelter_id."""
     try:
         # Get shelter_id from query parameters (e.g., /pets?shelter_id=123)
-        print(f"Received query params: {request.args}")
 
         shelter_id = request.args.get('shelter_id')
-        print(shelter_id)
 
         with db.connect() as conn:
             if shelter_id is not None:
@@ -496,8 +493,6 @@ def get_all_pets():
     except AuthError as e:
         _, status_code = e.args
         return get_error_message(status_code), status_code
-    except Exception as e:
-        print(e)
 
 @app.route('/'+PETS+'/<int:pet_id>', methods = ['GET'])
 def get_pet(pet_id):
@@ -510,7 +505,6 @@ def get_pet(pet_id):
                 'SELECT * FROM pets where pet_id = :pet_id'
             )
             pet_result = conn.execute(stmt, parameters={'pet_id': pet_id}).one_or_none()
-            print(pet_result)
             if pet_result is None:
                 raise ValueError(404)
 
@@ -540,7 +534,6 @@ def upload_pet_avatar(pet_id):
                 'SELECT * FROM pets where pet_id = :pet_id'
             )
             pet_result = conn.execute(stmt, parameters={'pet_id': pet_id}).one_or_none()
-            print(pet_result)
             if pet_result is None:
                 raise ValueError(404)
        pet = pet_result._asdict()
@@ -561,10 +554,9 @@ def upload_pet_avatar(pet_id):
             stmt = sqlalchemy.text (
                 'UPDATE pets SET picture_url = :picture_url WHERE pet_id = :pet_id'
             )
-            picture = conn.execute(stmt, parameters={'picture_url':file_obj.filename,
+            conn.execute(stmt, parameters={'picture_url':file_obj.filename,
                                                         'pet_id': pet_id})
             conn.commit()
-            print(picture)
 
        pet['picture_url'] = file_obj.filename
 
@@ -586,12 +578,10 @@ def get_pet_avatar(pet_id):
                 'SELECT * FROM pets where pet_id = :pet_id'
             )
             pet_result = conn.execute(stmt, parameters={'pet_id': pet_id}).one_or_none()
-            print(pet_result)
             if pet_result is None:
                 raise ValueError(404)
         pet = pet_result._asdict()
         file_name = pet['picture_url']
-        print(file_name)
         if not file_name:
             raise ValueError(404)
 
