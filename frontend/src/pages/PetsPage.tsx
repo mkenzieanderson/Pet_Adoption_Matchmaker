@@ -1,14 +1,18 @@
 import { useNavigate } from "react-router-dom";
 import PetProfileCard from "../components/PetProfileCard";
 import pitbull from "../assets/pitbull.png"
+import { dummyUser } from "../state/User.types";
+import Header from "../components/Header";
 
 export const PetsPage = () => {
     const navigate = useNavigate();
 
     return (
         <>
+            <div className="w-full">
+                <Header user={dummyUser} path={location.pathname} loginStatus={true}/>
+            </div>
             <div className=" rounded-lg p-4">
-                <h1>Pets Page</h1>
                 <button onClick={() => navigate('/')} className="m-4">
                     HomePage
                 </button>
@@ -24,7 +28,7 @@ export const PetsPage = () => {
                 <button onClick={() => navigate('/edit-pet-page')} className="m-4">
                     Edit Pet Page
                 </button>
-                <PetProfileCard pet={{ name: 'Buddy', breed: 'Pitbull', image: pitbull, age: 4 }} userType="admin" />
+                <PetProfileCard pet={{ name: 'Buddy', breed: 'Pitbull', image: pitbull, age: 4 }} user={dummyUser} />
             </div>
         </>
     )

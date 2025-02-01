@@ -1,10 +1,13 @@
 import { useNavigate } from "react-router-dom";
+import Header from "../components/Header";
+import { dummyUser } from "../state/User.types";
 
 export const HomePage = () => {
     const navigate = useNavigate();
 
     return (
         <>
+            <Header user={dummyUser} path={location.pathname} loginStatus={false} />
             <div className="rounded-lg p-4">
                 <h1>Home Page</h1>
                 <button onClick={() => navigate('/shelter-page')} className="m-4">

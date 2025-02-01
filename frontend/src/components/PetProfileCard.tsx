@@ -1,23 +1,16 @@
 import { useNavigate } from "react-router-dom";
 import Edit from "../assets/edit.svg";
 import Delete from "../assets/delete.svg";
+import { Pet } from "../state/Pet.types";
+import { User} from "../state/User.types";
 
-// Pet type and UserType are temporary. Will be replaced when global state/store is implemented.
-type Pet = {
-    name: string;
-    breed: string;
-    image: string;
-    age: number;
-}
-
-type UserType = 'admin' | 'user';
 
 interface PetProfileCardProps {
     pet: Pet;
-    userType: UserType;
+    user: User;
     }
 
-    const PetProfileCard = ({ pet, userType }: PetProfileCardProps) => {
+    const PetProfileCard = ({ pet, user }: PetProfileCardProps) => {
         const navigate = useNavigate();
     
         return (
@@ -30,7 +23,7 @@ interface PetProfileCardProps {
                     className="w-full h-[150px] sm:h-[200px] object-cover rounded-t-lg" 
                 />
                   <div className="absolute top-2 right-1">
-                {userType === 'user' ? (
+                {user.type === 'user' ? (
                     <button className="w-6 h-6" onClick={() => navigate('/edit-pet-page')}>
                         <Delete />
                     </button>
