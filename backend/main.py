@@ -21,6 +21,7 @@ import requests
 import sqlalchemy
 import bcrypt
 from jose import jwt
+import io
 
 from dotenv import load_dotenv
 from six.moves.urllib.request import urlopen
@@ -225,11 +226,11 @@ def create_table(db: sqlalchemy.engine.base.Engine) -> None:
                 CREATE TABLE IF NOT EXISTS favorites (
                     id BIGINT AUTO_INCREMENT NOT NULL,
                     favorited_at DATETIME NOT NULL,
-                    pet_id BIGINT NOT NULL,
+                    pet_id BIGINT,
                     user_id BIGINT NOT NULL,
                     PRIMARY KEY (id),
-                    FOREIGN KEY (user_id) REFERENCES users(user_id),
-                    FOREIGN KEY (pet_id) REFERENCES pets(pet_id)
+                    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+                    FOREIGN KEY (pet_id) REFERENCES pets(pet_id) ON DELETE SET NULL
                 );
                 '''
             )
@@ -336,7 +337,6 @@ def get_all_users():
         _, status_code = e.args
         return get_error_message(status_code), status_code
 
-
 @app.route('/'+USERS+'/<int:user_id>', methods = ['GET'])
 def get_user(user_id):
     """Gets a user provided the id of the user"""
@@ -344,7 +344,6 @@ def get_user(user_id):
         payload = verify_jwt(request)
         if not payload:
             raise ValueError(401)
-
 
         with db.connect() as conn:
             stmt =sqlalchemy.text(
@@ -401,7 +400,6 @@ def add_pet():
 
         #check required fields
         if not content or not all(key in content for key in ["name", "type", "gender", "age", "breed","description", "availability", "shelter_id"]):
-            print('gey')
             raise ValueError(400)
 
         with db.connect() as conn:
@@ -429,7 +427,6 @@ def add_pet():
             )
             stmt2 = sqlalchemy.text('SELECT last_insert_id()')
             pet_id = conn.execute(stmt2).scalar()
-            print(f"new petid: ${pet_id}")
 
             conn.commit()
 
@@ -455,6 +452,311 @@ def add_pet():
         _, status_code = e.args
         return get_error_message(status_code), status_code
 
+@app.route('/' + PETS, methods=['GET'])
+def get_all_pets():
+    """Returns a list of all pets or a filtered list based on shelter_id."""
+    try:
+        # Get shelter_id from query parameters (e.g., /pets?shelter_id=123)
+
+        shelter_id = request.args.get('shelter_id')
+
+        with db.connect() as conn:
+            if shelter_id is not None:
+                shelter_check_stmt = sqlalchemy.text(
+                    'SELECT COUNT(*) FROM shelters WHERE shelter_id = :shelter_id'
+                )
+                shelter_exists = conn.execute(shelter_check_stmt, {'shelter_id': shelter_id}).scalar()
+
+                if shelter_exists == 0:
+                    return {'Error': 'Shelter not found'}, 404  # Shelter does not exist
+
+                stmt = sqlalchemy.text('SELECT * FROM pets WHERE shelter_id = :shelter_id')
+                pet_result = conn.execute(stmt, {'shelter_id': shelter_id})
+            else:
+                stmt = sqlalchemy.text('SELECT * FROM pets')
+                pet_result = conn.execute(stmt)
+
+
+            pets = [row._asdict() for row in pet_result]
+
+            if not pets:
+                return {'message': 'No pets found'}, 204
+
+            for pet in pets:
+                pet['self'] = f"{request.host_url.rstrip('/')}/{PETS}/{pet['pet_id']}"
+
+            return {'pets': pets}, 200
+
+    except ValueError as e:
+        status_code = int(str(e))
+        return get_error_message(status_code), status_code
+    except AuthError as e:
+        _, status_code = e.args
+        return get_error_message(status_code), status_code
+
+@app.route('/'+PETS+'/<int:pet_id>', methods = ['GET'])
+def get_pet(pet_id):
+    """Gets a pet provided the id of the pet"""
+    try:
+
+        with db.connect() as conn:
+
+            stmt = sqlalchemy.text (
+                'SELECT * FROM pets where pet_id = :pet_id'
+            )
+            pet_result = conn.execute(stmt, parameters={'pet_id': pet_id}).one_or_none()
+            if pet_result is None:
+                raise ValueError(404)
+
+
+            pet = pet_result._asdict()
+
+            return pet,200
+
+
+    except ValueError as e:
+        status_code = int(str(e))
+        return get_error_message(status_code), status_code
+    except AuthError as e:
+        _, status_code = e.args
+        return get_error_message(status_code), status_code
+
+@app.route('/'+PETS+'/<int:pet_id>/avatar', methods = ['POST'])
+def upload_pet_avatar(pet_id):
+    """Upload a picture for the pet"""
+    try:
+       if 'file' not in request.files:
+            raise ValueError(400)
+
+       with db.connect() as conn:
+
+            stmt = sqlalchemy.text (
+                'SELECT * FROM pets where pet_id = :pet_id'
+            )
+            pet_result = conn.execute(stmt, parameters={'pet_id': pet_id}).one_or_none()
+            if pet_result is None:
+                raise ValueError(404)
+       pet = pet_result._asdict()
+
+
+       file_obj = request.files['file']
+       storage_client = storage.Client()
+       bucket = storage_client.get_bucket(PET_PIC_BUCKET)
+        # Create a blob object for the bucket with the name of the file
+       blob = bucket.blob(file_obj.filename)
+        # Position the file_obj to its beginning
+       file_obj.seek(0)
+        # Upload the file into Cloud Storage
+       blob.upload_from_file(file_obj)
+
+       with db.connect() as conn:
+
+            stmt = sqlalchemy.text (
+                'UPDATE pets SET picture_url = :picture_url WHERE pet_id = :pet_id'
+            )
+            conn.execute(stmt, parameters={'picture_url':file_obj.filename,
+                                                        'pet_id': pet_id})
+            conn.commit()
+
+       pet['picture_url'] = file_obj.filename
+
+       return ({'picture_url':f"{request.host_url.rstrip('/')}/pets/{pet_id}/avatar"},200)
+
+    except ValueError as e:
+        status_code = int(str(e))
+        return get_error_message(status_code), status_code
+    except AuthError as e:
+        _, status_code = e.args
+        return get_error_message(status_code), status_code
+
+@app.route('/'+PETS+'/<int:pet_id>/avatar', methods = ['GET'])
+def get_pet_avatar(pet_id):
+    try:
+        with db.connect() as conn:
+
+            stmt = sqlalchemy.text (
+                'SELECT * FROM pets where pet_id = :pet_id'
+            )
+            pet_result = conn.execute(stmt, parameters={'pet_id': pet_id}).one_or_none()
+            if pet_result is None:
+                raise ValueError(404)
+        pet = pet_result._asdict()
+        file_name = pet['picture_url']
+        if not file_name:
+            raise ValueError(404)
+
+        storage_client = storage.Client()
+        bucket = storage_client.get_bucket(PET_PIC_BUCKET)
+        # Create a blob with the given file name
+        blob = bucket.blob(file_name)
+        # Create a file object in memory using Python io package
+        file_obj = io.BytesIO()
+        # Download the file from Cloud Storage to the file_obj variable
+        blob.download_to_file(file_obj)
+        # Position the file_obj to its beginning
+        file_obj.seek(0)
+        # Send the object as a file in the response with the correct MIME type and file
+        # name
+        return send_file(file_obj, mimetype='image/png', download_name=file_name)
+
+    except ValueError as e:
+        status_code = int(str(e))
+        return get_error_message(status_code), status_code
+    except AuthError as e:
+        _, status_code = e.args
+        return get_error_message(status_code), status_code
+
+@app.route('/'+SHELTERS, methods = ['GET'])
+def get_all_shelters():
+    """Returns a list of all shelters"""
+    try:
+        payload = verify_jwt(request)
+        if not payload:  # Handle missing or invalid JWT
+            raise ValueError(401)
+
+        with db.connect() as conn:
+
+            stmt = sqlalchemy.text (
+                'SELECT * FROM shelters'
+            )
+            result = conn.execute(stmt)
+            shelters = [row._asdict() for row in result]
+
+            for shelter in shelters:
+                shelter['self'] = f"{request.host_url.rstrip('/')}/{SHELTERS}/{shelter['shelter_id']}"
+
+            response = {
+                'shelters':shelters
+            }
+
+            return response, 200
+    except ValueError as e:
+        status_code = int(str(e))
+        return get_error_message(status_code), status_code
+    except AuthError as e:
+        _, status_code = e.args
+        return get_error_message(status_code), status_code
+
+@app.route('/'+SHELTERS+'/<int:shelter_id>', methods = ['GET'])
+def get_shelter(shelter_id):
+    """Gets a shelter provided the id of the shelter"""
+    try:
+        payload = verify_jwt(request)
+        if not payload:
+            raise ValueError(401)
+
+        with db.connect() as conn:
+            stmt =sqlalchemy.text(
+                '''SELECT * FROM shelters WHERE shelter_id = :shelter_id'''
+            )
+            result = conn.execute(stmt, parameters={'shelter_id':shelter_id}).one_or_none()
+        if result is None:
+            raise ValueError(404)
+
+        shelter = result._asdict()
+
+        shelter = {
+            'shelter_id':shelter['shelter_id'],
+            'name':shelter['name'],
+            'user_id':shelter['user_id'],
+            'zip_code':shelter['zip_code']
+            }
+
+        return shelter
+    except ValueError as e:
+        status_code = int(str(e))
+        return get_error_message(status_code), status_code
+    except AuthError as e:
+        _, status_code = e.args
+        return get_error_message(status_code), status_code
+
+@app.route('/'+FAVORITES+'/<int:user_id>', methods = ['GET'])
+def get_user_favorites(user_id):
+    try:
+        payload = verify_jwt(request)
+        if not payload:
+            raise ValueError(401)
+
+        with db.connect() as conn:
+            stmt =sqlalchemy.text(
+                '''SELECT * FROM favorites WHERE user_id = :user_id'''
+            )
+            result = conn.execute(stmt, parameters={'user_id':user_id}).fetchall()
+        if not result:
+            return {"Error":"No favorites found for given user ID"},404
+
+        favorites = [row._asdict() for row in result]
+#
+        response = {
+                'favorites':favorites
+            }
+
+        return response, 200
+
+    except ValueError as e:
+        status_code = int(str(e))
+        return get_error_message(status_code), status_code
+    except AuthError as e:
+        _, status_code = e.args
+        return get_error_message(status_code), status_code
+
+@app.route('/favorites', methods=['POST'])
+def add_favorite():
+    try:
+        payload = verify_jwt(request)
+        if not payload:
+            raise ValueError(401)
+
+        content = request.get_json()
+
+        if not content or not all(key in content for key in ["user_id", "pet_id"]):
+            raise ValueError(400)
+
+        user_id = request.json.get('user_id')
+        pet_id = request.json.get('pet_id')
+
+        if not user_id or not pet_id:
+            return jsonify({"Error": "User ID and Pet ID are required"}), 400
+
+        # Check if user exists
+        with db.connect() as conn:
+            stmt = sqlalchemy.text('SELECT * FROM users WHERE user_id = :user_id')
+            user_result = conn.execute(stmt, {'user_id': user_id}).fetchone()
+
+        if user_result is None:
+            return jsonify({"Error": "User not found"}), 404
+
+        # Check if pet exists
+        with db.connect() as conn:
+            stmt = sqlalchemy.text('SELECT * FROM pets WHERE pet_id = :pet_id')
+            pet_result = conn.execute(stmt, {'pet_id': pet_id}).fetchone()
+
+        if pet_result is None:
+            return jsonify({"Error": "Pet not found"}), 404
+
+        # Add pet to favorites
+        with db.connect() as conn:
+            stmt = sqlalchemy.text('''
+                INSERT INTO favorites (user_id, pet_id, favorited_at)
+                VALUES (:user_id, :pet_id, NOW())
+            ''')
+            conn.execute(stmt, {'user_id': user_id, 'pet_id': pet_id})
+            new_favorite_id = conn.execute(sqlalchemy.text('SELECT LAST_INSERT_ID()')).scalar()
+
+        return jsonify(
+            {
+                "id": new_favorite_id,
+                "user_id": user_id,
+                "pet_id": pet_id,
+            }
+        ), 201
+
+    except ValueError as e:
+        status_code = int(str(e))
+        return get_error_message(status_code), status_code
+    except AuthError as e:
+        _, status_code = e.args
+        return get_error_message(status_code), status_code
 
 if __name__ == '__main__':
     init_db()
