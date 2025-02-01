@@ -15,7 +15,11 @@ interface HeaderProps {
 const Header = ({ user, path, loginStatus }: HeaderProps) => {
     const navigate = useNavigate();
     const [menuOpen, setMenuOpen] = useState(false);
-    const subMenuClassName = "w-full text-left py-4 px-4 font-serif font-semibold text-xl hover:border-espresso hover:bg-transparent-clay";
+    const subMenuClassName = "w-full text-left py-4 px-4 font-serif font-semibold text-xl hover:bg-transparent-clay";
+    const svgButtonClassName = `bg-mustard text-espresso font-header font-semibold border-tawny-brown 
+                                border-4 rounded-3xl px-6 py-2 hover:border-espresso mt-4 mb-2 w-auto 
+                                hover:bg-transparent-clay`;
+    const subHeaderClassName = "h-10 flex items-center justify-start sm:px-6 lg:px-8 font-serif text-lg font-semibold rounded-xl hover:bg-transparent-clay";
 
     const toggleMenu = () => {
         setMenuOpen(!menuOpen);
@@ -23,11 +27,11 @@ const Header = ({ user, path, loginStatus }: HeaderProps) => {
 
     const renderButton = () => {
         if (loginStatus) {
-            return <Button onClick={toggleMenu} svgIcon={BiUser} />;
+            return <Button onClick={toggleMenu} svgIcon={BiUser} className={svgButtonClassName}/>;
         } else if (path === '/' && !loginStatus) {
             return <Button onClick={() => navigate('/sign-page')} text="Sign In" />;
         } else {
-            return <Button onClick={() => navigate('/')} svgIcon={FaHome} />;
+            return <Button onClick={() => navigate('/')} svgIcon={FaHome} className={svgButtonClassName}/>;
         }
     };
 
@@ -64,8 +68,10 @@ const Header = ({ user, path, loginStatus }: HeaderProps) => {
                             className={subMenuClassName} />
                 </div>
             )}
-            <div className="bg-mustard w-full h-10 flex items-center justify-between px-4 sm:px-6 lg:px-8 border-solid border-t-2 border-b-2 border-tawny-brown">
-                {/* Additional content can go here */}
+            <div className="bg-mustard w-full h-12 flex items-center justify-start px-4 sm:px-6 lg:px-8 border-solid border-t-2 border-b-2 border-tawny-brown">
+                <Button onClick={() => navigate('/')} text="Success Stories" className={subHeaderClassName} />
+                <Button onClick={() => navigate('/')} text="FAQ" className={subHeaderClassName} />
+                <Button onClick={() => navigate('/')} text="Contact Us" className={subHeaderClassName} />
             </div>
         </>
     );
