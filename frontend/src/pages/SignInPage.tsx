@@ -19,7 +19,7 @@ export const SignInPage = () => {
     return (
         <>
             <Header path={location.pathname} loginStatus={false} />
-            <div className="flex flex-col items-center mx-auto mt-20">
+            <div className="flex flex-col items-center mx-auto mt-20 ">
                 <Form
                     title="Sign in to continue"
                     description="Welcome back!"
