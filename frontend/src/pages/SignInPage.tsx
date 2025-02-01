@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Button from "../components/Button";
 import TextInput from "../components/TextInput";
 import Form from "../components/Form";
+import Header from "../components/Header";
 
 export const SignInPage = () => {
     const navigate = useNavigate();
@@ -17,7 +18,8 @@ export const SignInPage = () => {
 
     return (
         <>
-            <div style={{ width: "550px" }}>
+            <Header path={location.pathname} loginStatus={false} />
+            <div className="flex flex-col items-center mx-auto mt-20">
                 <Form
                     title="Sign in to continue"
                     description="Welcome back!"

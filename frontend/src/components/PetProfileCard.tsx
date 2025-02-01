@@ -34,7 +34,7 @@ interface PetProfileCardProps {
                 )}
             </div>
                 <div className="mt-2 text-espresso">
-                    <h2 className="text-lg font-semibold">{pet.name}</h2>
+                    <h2 className="flex justify-center text-lg font-semibold">{pet.name}</h2>
                     <div className="flex justify-center text-sm">
                         <span className="mr-4">{pet.breed}</span>
                         <span>|</span>

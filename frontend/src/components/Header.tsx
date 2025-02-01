@@ -19,7 +19,7 @@ const Header = ({ user, path, loginStatus }: HeaderProps) => {
     const svgButtonClassName = `bg-mustard text-espresso font-header font-semibold border-tawny-brown 
                                 border-4 rounded-3xl px-6 py-2 hover:border-espresso mt-4 mb-2 w-auto 
                                 hover:bg-transparent-clay`;
-    const subHeaderClassName = "h-10 flex items-center justify-start sm:px-6 lg:px-8 font-serif text-lg font-semibold rounded-xl hover:bg-transparent-clay";
+    const subHeaderClassName = "h-10 flex items-center justify-start px-4 sm:px-6 lg:px-8 font-serif lg:text-xl sm:text-md font-semibold rounded-xl hover:bg-transparent-clay";
 
     const toggleMenu = () => {
         setMenuOpen(!menuOpen);
@@ -59,6 +59,11 @@ const Header = ({ user, path, loginStatus }: HeaderProps) => {
             </div>
             {menuOpen && (
                 <div className="flex flex-col absolute top-20 right-4 bg-mustard border-solid border-4 border-tawny-brown shadow-md rounded-lg z-50 w-48 sm:w-56 lg:w-64">
+                    { (path !== "/" && loginStatus) ? (
+                        <Button onClick={() => navigate('/')} 
+                                text="Home" 
+                                className={`${subMenuClassName} border-solid border-b-4 border-tawny-brown`} />
+                    ): null}
                     <Button onClick={() => navigate('/my-account-page')}
                             text="My Account" 
                             className={`${subMenuClassName} border-solid border-b-4 border-tawny-brown`} />
