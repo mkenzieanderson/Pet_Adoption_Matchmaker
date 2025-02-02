@@ -1,11 +1,11 @@
-import  { MouseEvent } from 'react';
+import  { MouseEvent, ElementType } from 'react';
 import { defaultButtonStyle, errorButtonStyle } from '../styles/ButtonStyles.tsx'
 
-
 type ButtonProps = {
-    text: string;
+    text?: string;
     className?: string;
     onClick: (event: MouseEvent<HTMLButtonElement>) => void;
+    svgIcon?: ElementType;
 }
 
 function Button (props: ButtonProps) {
@@ -14,9 +14,14 @@ function Button (props: ButtonProps) {
             className={ props.className ? props.className : defaultButtonStyle }
             onClick={props.onClick}
         >
-            {props.text}
+        {props.svgIcon ? (
+            <props.svgIcon className="text-4xl"/>
+        ) : (
+            props.text
+        )}
         </button>
     );
 }
+
 
 export default Button;

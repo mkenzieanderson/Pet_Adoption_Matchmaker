@@ -7,7 +7,7 @@ export default {
         'espresso': '#3d2c04',                /* all other text */ 
         'dark-cherry': '#47000e',             /* error text, error button outline */
         'beige': '#f8f3e6',                   /* website whitespace */ 
-        'mustard': '#bd912987',               /* navigation bar, buttons, etc. */ 
+        'mustard': '#d9bc77',                 /* navigation bar, buttons, etc. */ 
         'tawny-brown': '#755509',             /* container and button outlines */
         'cream': '#fffdf7',                   /* forms */ 
         'light-rose': '#d775895e',            /* error and buttons */ 
