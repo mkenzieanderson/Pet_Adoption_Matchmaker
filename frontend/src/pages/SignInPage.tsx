@@ -20,7 +20,7 @@ export const SignInPage = () => {
         <>
             <Header path={location.pathname} loginStatus={false} />
             <div className="place-items-center">
-                <div className="w-1/2">
+                <div className="w-2/5 mt-16">
                     <Form
                         title="Sign in to continue"
                         description="Welcome back!"
@@ -28,7 +28,7 @@ export const SignInPage = () => {
                         <TextInput
                             type="email"
                             title="Email"
-                            width="w-4/6"
+                            width="w-3/5"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                         >
@@ -37,7 +37,7 @@ export const SignInPage = () => {
                         <TextInput
                             type="password"
                             title="Password"
-                            width="w-4/6"
+                            width="w-3/5"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         >
