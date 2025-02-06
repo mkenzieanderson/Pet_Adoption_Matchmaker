@@ -30,6 +30,7 @@ from authlib.integrations.flask_client import OAuth
 from flask import Flask, request, jsonify, send_file
 from connect_connector import connect_with_connector
 from google.cloud import storage
+from flask_cors import CORS
 
 
 load_dotenv()
@@ -52,6 +53,7 @@ ERROR_NOT_FOUND = {'Error' : 'Not Found'}
 
 app = Flask(__name__)
 logger = logging.getLogger()
+CORS(app)
 
 ALGORITHMS = ["RS256"]
 oauth = OAuth(app)

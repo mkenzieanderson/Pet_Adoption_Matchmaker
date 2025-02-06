@@ -1,4 +1,5 @@
 import  { MouseEvent, ElementType } from 'react';
+import { defaultButtonStyle, errorButtonStyle } from './ButtonStyles.tsx'
 
 type ButtonProps = {
     text?: string;
@@ -10,14 +11,7 @@ type ButtonProps = {
 function Button (props: ButtonProps) {
     return (
         <button 
-            className={
-                props.className 
-                ? props.className 
-                : `bg-mustard text-espresso font-header 
-                  font-semibold border-tawny-brown border-4
-                  rounded-lg px-6 py-2 hover:border-espresso
-                  mt-4 mb-2 w-auto hover:bg-transparent-clay`
-            }
+            className={ props.className ? props.className : defaultButtonStyle }
             onClick={props.onClick}
         >
         {props.svgIcon ? (
