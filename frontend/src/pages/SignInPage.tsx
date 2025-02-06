@@ -10,6 +10,7 @@ export const SignInPage = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showError, setShowError] = useState(false);
+    const [token, setToken] = useState(null);
 
     const errorMessage = "Email and/or password are incorrect. Please try again.";
     
@@ -18,7 +19,7 @@ export const SignInPage = () => {
         setPassword("");
     }
     
-    function handleValidLogin (token: string) {
+    function handleValidLogin () {
         clearDataFields();
         setShowError(false);
         navigate('/');
@@ -27,6 +28,7 @@ export const SignInPage = () => {
     function handleInvalidLogin () {
         clearDataFields();
         setShowError(true);
+        setToken(null);
     }
     
     const handleSubmit = async (event: React.FormEvent) => {
@@ -49,7 +51,8 @@ export const SignInPage = () => {
 
             if (response.ok) {
                 const data = await response.json();
-                handleValidLogin(data.token);
+                setToken(data.token);
+                handleValidLogin();
             } else {
                 handleInvalidLogin();
             }
