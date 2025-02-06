@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { User } from "../state/User.types";
 import FetchLogo from "../assets/fetch-logo.svg";
-import Button from "./Button";
+import Button from "./Buttons/Button";
 import { BiUser } from "react-icons/bi";
 import { FaHome } from "react-icons/fa";
 
