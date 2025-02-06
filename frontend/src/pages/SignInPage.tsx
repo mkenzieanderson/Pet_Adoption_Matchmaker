@@ -9,21 +9,24 @@ export const SignInPage = () => {
     const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showError, setShowError] = useState(false);
 
+    const errorMessage = "Email and/or password are incorrect. Please try again.";
+    
     function clearDataFields () {
         setEmail("");
         setPassword("");
     }
     
     function handleValidLogin (token: string) {
-        console.log("Handling valid login...");
         clearDataFields();
+        setShowError(false);
         navigate('/');
     }
 
     function handleInvalidLogin () {
-        console.log("Handling invalid login...");
         clearDataFields();
+        setShowError(true);
     }
     
     const handleSubmit = async (event: React.FormEvent) => {
@@ -64,6 +67,7 @@ export const SignInPage = () => {
                     <Form
                         title="Sign in to continue"
                         description="Welcome back!"
+                        error_msg={showError ? errorMessage : ""}
                     >
                         <TextInput
                             type="email"
