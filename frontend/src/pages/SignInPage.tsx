@@ -49,7 +49,6 @@ export const SignInPage = () => {
 
             if (response.ok) {
                 const data = await response.json();
-                console.log('Login successful:', data);
                 handleValidLogin(data.token);
             } else {
                 handleInvalidLogin();
