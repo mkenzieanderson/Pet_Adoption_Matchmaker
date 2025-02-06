@@ -10,10 +10,50 @@ export const SignInPage = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    const handleSubmit = () => {
+    function clearDataFields () {
         setEmail("");
         setPassword("");
+    }
+    
+    function handleValidLogin (token: string) {
+        console.log("Handling valid login...");
+        clearDataFields();
         navigate('/');
+    }
+
+    function handleInvalidLogin () {
+        console.log("Handling invalid login...");
+        clearDataFields();
+    }
+    
+    const handleSubmit = async (event: React.FormEvent) => {
+        event.preventDefault();
+        await authenticateLogin();
+    }
+
+    const authenticateLogin = async () => {
+        try {
+            const response = await fetch('http://localhost:8080/users/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password,
+                }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Login successful:', data);
+                handleValidLogin(data.token);
+            } else {
+                handleInvalidLogin();
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
     }
 
     return (
