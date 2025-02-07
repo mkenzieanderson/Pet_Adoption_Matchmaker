@@ -293,7 +293,14 @@ def login_user():
         if r.status_code != 200:
             raise ValueError(401)
         token = r.json().get('id_token')
-        return jsonify({"token": token}), 200
+
+        # Extract user_id for the response
+        with db.connect() as conn:
+            stmt = sqlalchemy.text('SELECT user_id FROM users WHERE email = :email')
+            result = conn.execute(stmt, {'email': email}).fetchone()
+            user_id = result[0] if result else None
+
+        return jsonify({"token": token, "user_id": user_id}), 200
 
     except ValueError as e:
         status_code = int(str(e))

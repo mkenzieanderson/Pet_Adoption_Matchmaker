@@ -10,7 +10,8 @@ export const SignInPage = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showError, setShowError] = useState(false);
-    const [token, setToken] = useState(null);
+    const [token, setToken] = useState<string | undefined>(undefined);
+    const [userID, setUserID] = useState<bigint | undefined>(undefined);
 
     const errorMessage = "Email and/or password are incorrect. Please try again.";
     
@@ -18,8 +19,10 @@ export const SignInPage = () => {
         setEmail("");
         setPassword("");
     }
-    
-    function handleValidLogin () {
+
+    function handleValidLogin (res_token: string, res_user_id: bigint) {
+        setToken(res_token);
+        setUserID(res_user_id);
         clearDataFields();
         setShowError(false);
         navigate('/');
@@ -28,7 +31,6 @@ export const SignInPage = () => {
     function handleInvalidLogin () {
         clearDataFields();
         setShowError(true);
-        setToken(null);
     }
     
     const handleSubmit = async (event: React.FormEvent) => {
@@ -51,8 +53,7 @@ export const SignInPage = () => {
 
             if (response.ok) {
                 const data = await response.json();
-                setToken(data.token);
-                handleValidLogin();
+                handleValidLogin(data.token, data.user_id);
             } else {
                 handleInvalidLogin();
             }
