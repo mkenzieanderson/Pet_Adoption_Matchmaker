@@ -1,10 +1,9 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/Buttons/Button";
 import TextInput from "../components/TextInput";
 import Form from "../components/Form";
 import Header from "../components/Header";
-import AuthContext from "../state/AuthContext";
 
 
 export const SignInPage = () => {
@@ -12,12 +11,7 @@ export const SignInPage = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showError, setShowError] = useState(false);
-
-    const authContext = useContext(AuthContext);
-    if (!authContext) {
-        throw new Error("Some component must be used within an AuthProvider");
-    }
-    const { setAuth } = authContext;
+    const [token, setToken] = useState();
 
     const errorMessage = "Email and/or password are incorrect. Please try again.";
     
@@ -57,7 +51,7 @@ export const SignInPage = () => {
 
             if (response.ok) {
                 const data = await response.json();
-                setAuth({ token: data.token});
+                setToken(data.token);
                 handleValidLogin();
             } else {
                 handleInvalidLogin();
