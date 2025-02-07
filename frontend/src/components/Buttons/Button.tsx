@@ -6,6 +6,7 @@ type ButtonProps = {
     className?: string;
     onClick: (event: MouseEvent<HTMLButtonElement>) => void;
     svgIcon?: ElementType;
+    svgClassName?: string;
 }
 
 function Button (props: ButtonProps) {
@@ -15,7 +16,7 @@ function Button (props: ButtonProps) {
             onClick={props.onClick}
         >
         {props.svgIcon ? (
-            <props.svgIcon className="text-4xl"/>
+            <props.svgIcon className={props.svgClassName ? `${props.svgClassName}` : `text-4xl` }/>
         ) : (
             props.text
         )}
