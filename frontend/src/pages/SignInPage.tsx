@@ -5,7 +5,6 @@ import TextInput from "../components/TextInput/TextInput";
 import Form from "../components/Form/Form";
 import Header from "../components/Header/Header";
 
-
 export const SignInPage = () => {
     const navigate = useNavigate();
     const [email, setEmail] = useState("");

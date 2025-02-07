@@ -3,7 +3,6 @@ import { dummyUser } from "../state/User.types";
 import HomePagePetCard from "../components/HomePagePetCard/HomePagePetCard";
 import pitbull from "../assets/pitbull.png";
 
-
 export const HomePage = () => {
 
     return (

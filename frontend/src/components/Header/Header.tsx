@@ -15,7 +15,6 @@ interface HeaderProps {
 const Header = ({ user, path, loginStatus }: HeaderProps) => {
     const navigate = useNavigate();
     const [menuOpen, setMenuOpen] = useState(false);
-
     const subMenuClassName = "w-full text-left py-4 px-4 font-serif font-semibold text-xl hover:bg-transparent-clay";
     const svgButtonClassName = `bg-mustard text-espresso font-header font-semibold border-tawny-brown 
                                 border-4 rounded-3xl px-6 py-2 hover:border-espresso mt-4 mb-2 w-auto 
