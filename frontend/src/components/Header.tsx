@@ -1,10 +1,11 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { User } from "../state/User.types";
 import FetchLogo from "../assets/fetch-logo.svg";
 import Button from "./Buttons/Button";
 import { BiUser } from "react-icons/bi";
 import { FaHome } from "react-icons/fa";
+import AuthContext from "../state/AuthContext";
 
 interface HeaderProps {
     user?: User;
@@ -15,6 +16,13 @@ interface HeaderProps {
 const Header = ({ user, path, loginStatus }: HeaderProps) => {
     const navigate = useNavigate();
     const [menuOpen, setMenuOpen] = useState(false);
+
+    const authContext = useContext(AuthContext);
+    if (!authContext) {
+        throw new Error("Some component must be used within an AuthProvider");
+    }
+    const { setAuth } = authContext;
+
     const subMenuClassName = "w-full text-left py-4 px-4 font-serif font-semibold text-xl hover:bg-transparent-clay";
     const svgButtonClassName = `bg-mustard text-espresso font-header font-semibold border-tawny-brown 
                                 border-4 rounded-3xl px-6 py-2 hover:border-espresso mt-4 mb-2 w-auto 
@@ -47,6 +55,10 @@ const Header = ({ user, path, loginStatus }: HeaderProps) => {
         }
     };
 
+    function handleSignOut() {
+        setAuth({ token: undefined});
+        navigate('/sign-page')
+    }
 
     return (
         <>
@@ -68,7 +80,7 @@ const Header = ({ user, path, loginStatus }: HeaderProps) => {
                             text="My Account" 
                             className={`${subMenuClassName} border-solid border-b-4 border-tawny-brown`} />
                     {renderSubMenuButton()}
-                    <Button onClick={() => navigate('/sign-page')} 
+                    <Button onClick={() => handleSignOut()} 
                             text="Sign Out" 
                             className={subMenuClassName} />
                 </div>
