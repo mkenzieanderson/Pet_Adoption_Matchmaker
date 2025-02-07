@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/Buttons/Button";
-import TextInput from "../components/TextInput";
-import Form from "../components/Form";
-import Header from "../components/Header";
+import TextInput from "../components/TextInput/TextInput";
+import Form from "../components/Form/Form";
+import Header from "../components/Header/Header";
 
 export const SignInPage = () => {
     const navigate = useNavigate();

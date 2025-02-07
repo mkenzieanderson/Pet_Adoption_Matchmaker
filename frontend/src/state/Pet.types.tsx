@@ -1,4 +1,4 @@
-type availability = 'Available' | 'Unavailable';
+type availability = 'available' | 'not available' | 'pending' | 'adopted';
 type gender = 'Male' | 'Female';
 
 export type Pet = {
@@ -8,6 +8,6 @@ export type Pet = {
     age: number;
     availability: availability;
     gender: gender;
-    disposition: string;
+    disposition: string[];
     shelter: string;
 }

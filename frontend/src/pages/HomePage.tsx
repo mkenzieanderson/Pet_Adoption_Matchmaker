@@ -1,6 +1,6 @@
-import Header from "../components/Header";
+import Header from "../components/Header/Header";
 import { dummyUser } from "../state/User.types";
-import HomePagePetCard from "../components/HomePagePetCard";
+import HomePagePetCard from "../components/HomePagePetCard/HomePagePetCard";
 import pitbull from "../assets/pitbull.png";
 
 export const HomePage = () => {
@@ -14,9 +14,9 @@ export const HomePage = () => {
                     breed: 'Pitbull', 
                     image: pitbull, 
                     age: 4, 
-                    availability: "Available",
+                    availability: "available",
                     gender: "Male",
-                    disposition: "Good with kids, good with other animals.",
+                    disposition: ["Good with kids", "good with other animals."],
                     shelter: "Sunshine Shelter"
                     }} />
         </>

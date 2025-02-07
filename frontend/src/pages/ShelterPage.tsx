@@ -1,5 +1,5 @@
 import { dummyUser } from "../state/User.types";
-import Header from "../components/Header";
+import Header from "../components/Header/Header";
 
 export const ShelterPage = () => {
 
