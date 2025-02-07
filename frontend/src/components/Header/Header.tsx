@@ -47,6 +47,7 @@ const Header = ({ user, path, loginStatus }: HeaderProps) => {
         }
     };
 
+    
     return (
         <>
             <div className="bg-beige w-full h-20 flex flex-row items-center justify-between px-4 sm:px-6 lg:px-8">
