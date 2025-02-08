@@ -1,5 +1,4 @@
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
-import { ShelterPage } from './pages/ShelterPage'
 import { SignInPage } from './pages/SignInPage'
 import { HomePage } from './pages/HomePage'
 import { MyAccountPage } from './pages/MyAccountPage'
@@ -10,7 +9,7 @@ import './App.css'
 
 const routes = createBrowserRouter([
   {path: '/', element: <HomePage />},
-  {path: 'shelter-page', element: <ShelterPage />},
+  {path: 'pets-page', element: <PetsPage />},
   {path: 'sign-page', element: <SignInPage />},
   {path: 'my-account-page', element: <MyAccountPage />},
   {path: 'pets-page', element: <PetsPage />},
