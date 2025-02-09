@@ -6,6 +6,7 @@ type TextInputProps = {
     value: string;
     width: string;
     onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+    disabled?: boolean;
 }
 
 function TextInput (props: TextInputProps) {
@@ -19,6 +20,7 @@ function TextInput (props: TextInputProps) {
                 className={`bg-white border-tawny-brown border-4 
                             rounded-lg focus:border-clay focus:outline-clay
                             ${props.width} h-12 p-3`}
+                disabled={props.disabled}
             />
         </div>
     );
