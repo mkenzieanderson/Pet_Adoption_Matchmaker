@@ -11,5 +11,5 @@ export const dummyUser: User = {
     id: 1,
     name: 'John Doe',
     email: 'myemail@gmail.com',
-    type: 'user'
+    type: 'admin'
 }

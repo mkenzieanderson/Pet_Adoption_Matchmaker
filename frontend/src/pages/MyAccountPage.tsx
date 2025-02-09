@@ -10,7 +10,7 @@ export const MyAccountPage = () => {
                 <button onClick={() => navigate('/')} className="m-4">
                     HomePage
                 </button>
-                <button onClick={() => navigate('/shelter-page')} className="m-4">
+                <button onClick={() => navigate('/pets-page')} className="m-4">
                     ShelterPage
                 </button>
                 <button onClick={() => navigate('/pets-page')} className="m-4">

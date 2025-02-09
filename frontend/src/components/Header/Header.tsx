@@ -37,7 +37,7 @@ const Header = ({ user, path, loginStatus }: HeaderProps) => {
 
     const renderSubMenuButton = () => {
         if (user?.type === "admin") {
-            return <Button onClick={() => navigate('/shelter-page')} 
+            return <Button onClick={() => navigate('/pets-page')} 
                             text="My Shelter" 
                             className={`${subMenuClassName} border-solid border-b-4 border-tawny-brown`} />;
         } else {
