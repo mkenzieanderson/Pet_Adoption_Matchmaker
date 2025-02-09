@@ -25,11 +25,11 @@ interface PetProfileCardProps {
                     />
                     <div className="absolute top-2 right-1">
                     {user.type === 'user' ? (
-                        <button className="w-6 h-6" onClick={() => navigate('/edit-pet-page')}>
+                        <button className="w-6 h-6 mx-4 my-4" onClick={() => navigate('/edit-pet-page')}>
                             <Delete />
                         </button>
                     ) : (
-                        <button className="w-6 h-6" onClick={() => navigate('/edit-pet-page')}>
+                        <button className="w-6 h-6 mx-4 my-4" onClick={() => navigate('/edit-pet-page')}>
                             <Edit />
                         </button>
                     )}

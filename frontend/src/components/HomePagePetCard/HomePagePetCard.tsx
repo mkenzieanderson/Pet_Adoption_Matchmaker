@@ -19,12 +19,12 @@ const HomePagePetCard = ({ pet }: HomePagePetCardProps) => {
             <div className="relative w-full h-full">
                 <img src={pet.image} alt={pet.name} className="w-full h-full object-cover rounded-t-lg" />
                 <Button 
-                    svgIcon={ toggleMoreInfo ? FaInfo: FaChevronDown } 
-                    className={toggleMoreInfo ? `${buttonStyles} right-4 bottom-[105px]` : `${buttonStyles} right-4 top-48`}
+                    svgIcon={ !toggleMoreInfo ? FaInfo: FaChevronDown } 
+                    className={!toggleMoreInfo ? `${buttonStyles} right-4 bottom-[105px]` : `${buttonStyles} right-4 top-48`}
                     onClick={() => setToggleMoreInfo(!toggleMoreInfo)}
                     svgClassName="text-2xl"
                 />
-                   {toggleMoreInfo ? ( <InfoCard pet={pet} /> ) : ( <ExpandedInfoCard pet={pet} /> )}
+                   {!toggleMoreInfo ? ( <InfoCard pet={pet} /> ) : ( <ExpandedInfoCard pet={pet} /> )}
                      <div className="flex flex-row justify-center absolute bottom-[-60px] left-0 w-full ">
                         <button className="bg-red-200 border-solid border-2 border-red-400 hover:border-red-600 rounded-xl p-3 mx-2">
                             {<IoMdClose className="text-6xl text-gray-600 hover:text-black"/>}
