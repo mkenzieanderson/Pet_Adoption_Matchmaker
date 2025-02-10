@@ -354,7 +354,21 @@ def get_user(user_id):
         if not payload:
             raise ValueError(401)
 
+        owner_sub = payload['sub']
         with db.connect() as conn:
+            stmt = sqlalchemy.text(
+                'SELECT * FROM users WHERE sub = :sub'
+            )
+            result = conn.execute(stmt, parameters={'sub': owner_sub}).one_or_none()
+            user = result._asdict()
+            if result is None:
+                raise ValueError(404)
+
+            role = user['role']
+            owner_user_id = user['user_id']
+            if role != 'admin' and owner_user_id != user_id:
+                raise ValueError(403)
+
             stmt =sqlalchemy.text(
                 '''SELECT email, name, phone_number, role, user_id
                 FROM users WHERE user_id = :user_id'''
@@ -364,8 +378,6 @@ def get_user(user_id):
             raise ValueError(404)
 
         user = result._asdict()
-        if user['user_id'] != user_id and user['role'] != "admin":
-            raise ValueError(403)
 
         user = {
             'user_id':user['user_id'],
@@ -376,6 +388,46 @@ def get_user(user_id):
         }
 
         return user
+    except ValueError as e:
+        status_code = int(str(e))
+        return get_error_message(status_code), status_code
+    except AuthError as e:
+        _, status_code = e.args
+        return get_error_message(status_code), status_code
+
+@app.route('/' + USERS + '/<int:user_id>', methods = ['PATCH'])
+def update_user(user_id):
+    """Updates the given user and returns the updated fields"""
+    try:
+        payload = verify_jwt(request)
+        if not payload:  # Handle missing or invalid JWT
+            raise ValueError(401)
+
+        owner_sub = payload['sub']
+        with db.connect() as conn:
+            stmt = sqlalchemy.text(
+                'SELECT role, email FROM users WHERE sub = :sub'
+            )
+            result = conn.execute(stmt, parameters={'sub': owner_sub}).one_or_none()
+            user = result._asdict()
+            role = user['role']
+            if role != 'admin':
+                raise ValueError(403)
+
+            users_stmt = sqlalchemy.text (
+                'SELECT user_id, email, name, role, sub from users'
+            )
+            users_result = conn.execute(users_stmt)
+            users = [row._asdict() for row in users_result]
+
+            for user in users:
+                user['self'] = f"{request.host_url.rstrip('/')}/{USERS}/{user['user_id']}"
+
+            response = {
+                'users':users
+            }
+
+            return response, 200
     except ValueError as e:
         status_code = int(str(e))
         return get_error_message(status_code), status_code
