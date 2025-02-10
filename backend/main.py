@@ -245,7 +245,7 @@ def create_table(db: sqlalchemy.engine.base.Engine) -> None:
                 CREATE TABLE IF NOT EXISTS pet_dispositions (
                     disposition VARCHAR(255) NOT NULL,
                     pet_id BIGINT NOT NULL,
-                    FOREIGN KEY (pet_id) REFERENCES pets(pet_id)
+                    FOREIGN KEY (pet_id) REFERENCES pets(pet_id) ON DELETE CASCADE
                 );
                 '''
             )
@@ -821,6 +821,57 @@ def update_pet(pet_id):
             conn.commit()
 
         return pet
+
+    except ValueError as e:
+        status_code = int(str(e))
+        return get_error_message(status_code), status_code
+    except AuthError as e:
+        _, status_code = e.args
+        return get_error_message(status_code), status_code
+
+@app.route('/' + PETS + '/<int:pet_id>', methods = ['DELETE'])
+def delete_pet(pet_id):
+    """Deletes the given pet and returns a confirmation message."""
+    try:
+        # Verify JWT token and get user info
+        payload = verify_jwt(request)
+        if not payload:  # Handle missing or invalid JWT
+            raise ValueError(401)
+
+        # Check if the user is an admin
+        owner_sub = payload['sub']
+        with db.connect() as conn:
+            stmt = sqlalchemy.text(
+                'SELECT * FROM users WHERE sub = :sub'
+            )
+            result = conn.execute(stmt, parameters={'sub': owner_sub}).one_or_none()
+            user = result._asdict() if result else None
+            if user is None:
+                raise ValueError(404)
+
+            role = user['role']
+            if role != 'admin':
+                raise ValueError(403)
+
+        # Check if the pet exists
+        with db.connect() as conn:
+            stmt = sqlalchemy.text(
+                'SELECT * FROM pets WHERE pet_id = :pet_id'
+            )
+            result = conn.execute(stmt, parameters={'pet_id': pet_id}).one_or_none()
+
+            if result is None:
+                raise ValueError(404)  # Pet not found
+
+            # Delete the pet
+            stmt = sqlalchemy.text(
+                'DELETE FROM pets WHERE pet_id = :pet_id'
+            )
+            conn.execute(stmt, parameters={'pet_id': pet_id})
+            conn.commit()
+
+        # Return a confirmation message
+        return {'message': f'Pet with ID {pet_id} deleted successfully'}, 200
 
     except ValueError as e:
         status_code = int(str(e))
