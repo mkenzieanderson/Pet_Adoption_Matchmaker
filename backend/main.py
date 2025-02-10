@@ -58,6 +58,8 @@ CORS(app)
 ALGORITHMS = ["RS256"]
 oauth = OAuth(app)
 
+#   domain =  'YOUR_DOMAIN'
+
 auth0 = oauth.register(
     'auth0',
     client_id=CLIENT_ID,
@@ -703,6 +705,122 @@ def get_pet_avatar(pet_id):
         # Send the object as a file in the response with the correct MIME type and file
         # name
         return send_file(file_obj, mimetype='image/png', download_name=file_name)
+
+    except ValueError as e:
+        status_code = int(str(e))
+        return get_error_message(status_code), status_code
+    except AuthError as e:
+        _, status_code = e.args
+        return get_error_message(status_code), status_code
+
+@app.route('/' + PETS + '/<int:pet_id>', methods = ['PATCH'])
+def update_pet(pet_id):
+    """Updates the given pet and returns the updated fields. If no values are
+    specified to be updated, the pet info is simply returned"""
+    try:
+        payload = verify_jwt(request)
+        if not payload:  # Handle missing or invalid JWT
+            raise ValueError(401)
+
+        #check the modifier is an admin
+        owner_sub = payload['sub']
+        with db.connect() as conn:
+            stmt = sqlalchemy.text(
+                'SELECT * FROM users WHERE sub = :sub'
+            )
+            result = conn.execute(stmt, parameters={'sub': owner_sub}).one_or_none()
+            user = result._asdict()
+            if result is None:
+                raise ValueError(404)
+
+            role = user['role']
+            if role != 'admin':
+                raise ValueError(403)
+
+        #check for optional fields
+        content = request.get_json()
+
+        valid_types = ['dog', 'cat', 'other']
+        valid_genders = ['male', 'female', 'unknown']
+        valid_availabilities = ['available', 'not available', 'adopted', 'pending']
+
+        expected_types = {
+            "age": int,
+            "availability": str,
+            "breed": str,
+            "description": str,
+            "gender": str,
+            "name": str,
+            "news_item": str,
+            "type": str,
+        }
+        for key, value in content.items():
+            if key not in expected_types:
+                raise ValueError(400)
+            if not isinstance(value, expected_types[key]):
+                raise ValueError(400)
+
+        if 'type' in content and content['type'] not in valid_types:
+            raise ValueError(400)  # Invalid pet type
+        if 'gender' in content and content['gender'] not in valid_genders:
+            raise ValueError(400)  # Invalid gender
+        if 'availability' in content and content['availability'] not in valid_availabilities:
+            raise ValueError(400)  # Invalid availability
+
+
+         # Get the values to update, if any
+        age = content.get("age")
+        name = content.get("name")
+        breed = content.get("breed")
+        description = content.get("description")
+        gender = content.get("gender")
+        availability = content.get("availability")
+        type_ = content.get("type")
+        news_item = content.get("news_item")
+
+        # Update the pet and get the new details
+        with db.connect() as conn:
+            stmt = sqlalchemy.text(
+                '''UPDATE pets
+                SET
+                    age = COALESCE(:age, age),
+                    name = COALESCE(:name, name),
+                    breed = COALESCE(:breed, breed),
+                    description = COALESCE(:description, description),
+                    gender = COALESCE(:gender, gender),
+                    availability = COALESCE(:availability, availability),
+                    type = COALESCE(:type, type),
+                    news_item = COALESCE(:news_item, news_item)
+                WHERE pet_id = :pet_id;
+                '''
+            )
+            conn.execute(stmt, {
+                "age": age,
+                "name": name,
+                "breed": breed,
+                "description": description,
+                "gender": gender,
+                "availability": availability,
+                "type": type_,
+                "news_item": news_item,
+                "pet_id": pet_id
+            })
+
+            # Fetch the updated pet details
+            stmt = sqlalchemy.text(
+                '''SELECT pet_id, name, age, breed, description, gender, availability, type, news_item
+                FROM pets WHERE pet_id = :pet_id
+                '''
+            )
+            result = conn.execute(stmt, parameters={'pet_id': pet_id}).one_or_none()
+
+            if result is None:
+                raise ValueError(404)
+
+            pet = result._asdict()
+            conn.commit()
+
+        return pet
 
     except ValueError as e:
         status_code = int(str(e))
