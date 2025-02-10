@@ -348,7 +348,7 @@ def get_all_users():
 
 @app.route('/'+USERS+'/<int:user_id>', methods = ['GET'])
 def get_user(user_id):
-    """Gets a user provided the id of the user"""
+    """Gets a user provided the id of the user. JWT must match the user_id or be and admin"""
     try:
         payload = verify_jwt(request)
         if not payload:
@@ -397,37 +397,81 @@ def get_user(user_id):
 
 @app.route('/' + USERS + '/<int:user_id>', methods = ['PATCH'])
 def update_user(user_id):
-    """Updates the given user and returns the updated fields"""
+    """Updates the given user and returns the updated fields. If no values are
+    specified to be updated, the user info is simply returned"""
     try:
         payload = verify_jwt(request)
         if not payload:  # Handle missing or invalid JWT
             raise ValueError(401)
 
+        #check the modifier is an admin or the user
         owner_sub = payload['sub']
         with db.connect() as conn:
             stmt = sqlalchemy.text(
-                'SELECT role, email FROM users WHERE sub = :sub'
+                'SELECT * FROM users WHERE sub = :sub'
             )
             result = conn.execute(stmt, parameters={'sub': owner_sub}).one_or_none()
             user = result._asdict()
+            if result is None:
+                raise ValueError(404)
+
             role = user['role']
-            if role != 'admin':
+            owner_user_id = user['user_id']
+            if role != 'admin' and owner_user_id != user_id:
                 raise ValueError(403)
 
-            users_stmt = sqlalchemy.text (
-                'SELECT user_id, email, name, role, sub from users'
+        #check for optional fields
+        content = request.get_json()
+
+        expected_types = {
+            "email": str,
+            "name": str,
+            "phone_number": str,
+        }
+        for key, value in content.items():
+            if key not in expected_types:
+                raise ValueError(400)
+            if not isinstance(value, expected_types[key]):
+                raise ValueError(400)
+
+        #get the values to update, if any
+        phone_number = content.get("phone_number")
+        name = content.get("name")
+
+        #update and get new user details
+        with db.connect() as conn:
+            stmt = sqlalchemy.text(
+                '''UPDATE users
+                SET
+                    name = COALESCE(:name, name),
+                    phone_number = COALESCE(:phone_number, phone_number)
+                WHERE user_id = :user_id;
+                '''
             )
-            users_result = conn.execute(users_stmt)
-            users = [row._asdict() for row in users_result]
+            conn.execute(stmt, {"name": name, "phone_number": phone_number, "user_id": user_id})
 
-            for user in users:
-                user['self'] = f"{request.host_url.rstrip('/')}/{USERS}/{user['user_id']}"
+            stmt =sqlalchemy.text(
+                '''SELECT email, name, phone_number, role, user_id
+                FROM users WHERE user_id = :user_id'''
+            )
+            result = conn.execute(stmt, parameters={'user_id':user_id}).one_or_none()
+            conn.commit()
 
-            response = {
-                'users':users
-            }
+        if result is None:
+            raise ValueError(404)
 
-            return response, 200
+        user = result._asdict()
+
+        user = {
+            'user_id':user['user_id'],
+            'email':user['email'],
+            'name':user['name'],
+            'phone_number':user['phone_number'],
+            'role':user['role']
+        }
+
+        return user
+
     except ValueError as e:
         status_code = int(str(e))
         return get_error_message(status_code), status_code
