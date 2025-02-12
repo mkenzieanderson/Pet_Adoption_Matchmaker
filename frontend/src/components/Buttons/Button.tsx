@@ -13,7 +13,10 @@ function Button (props: ButtonProps) {
     return (
         <button 
             className={ props.className ? props.className : defaultButtonStyle }
-            onClick={props.onClick}
+            onClick={(e) => {
+                e.preventDefault();
+                props.onClick(e);
+            }}
         >
         {props.svgIcon ? (
             <props.svgIcon className={props.svgClassName ? `${props.svgClassName}` : `text-4xl` }/>
