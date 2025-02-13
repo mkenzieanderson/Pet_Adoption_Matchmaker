@@ -1032,6 +1032,45 @@ def add_favorite():
         _, status_code = e.args
         return get_error_message(status_code), status_code
 
+@app.route('/favorites/<int:favorite_id>', methods=['DELETE'])
+def delete_favorite(favorite_id):
+    """Deletes a favorite from a user's list if they are the owner."""
+    try:
+        payload = verify_jwt(request)
+        if not payload:
+            raise ValueError(401)
+
+        user_sub = payload['sub']
+
+        with db.connect() as conn:
+            stmt = sqlalchemy.text('SELECT user_id FROM users WHERE sub = :sub')
+            result = conn.execute(stmt, {'sub': user_sub}).one_or_none()
+
+            if result is None:
+                raise ValueError(404)
+
+            user_id = result.user_id
+
+            # Check if the favorite exists and belongs to the user
+            stmt = sqlalchemy.text('SELECT id FROM favorites WHERE id = :favorite_id AND user_id = :user_id')
+            result = conn.execute(stmt, {'favorite_id': favorite_id, 'user_id': user_id}).one_or_none()
+
+            if result is None:
+                raise ValueError(403)
+
+            stmt = sqlalchemy.text('DELETE FROM favorites WHERE id = :favorite_id')
+            conn.execute(stmt, {'favorite_id': favorite_id})
+            conn.commit()
+
+        return {"message": "Favorite successfully deleted"}, 200
+
+    except ValueError as e:
+        status_code = int(str(e))
+        return get_error_message(status_code), status_code
+    except AuthError as e:
+        _, status_code = e.args
+        return get_error_message(status_code), status_code
+
 if __name__ == '__main__':
     init_db()
     create_table(db)
