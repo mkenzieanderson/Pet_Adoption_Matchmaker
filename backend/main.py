@@ -974,7 +974,7 @@ def get_user_favorites(user_id):
         _, status_code = e.args
         return get_error_message(status_code), status_code
 
-@app.route('/favorites', methods=['POST'])
+@app.route('/'+FAVORITES, methods=['POST'])
 def add_favorite():
     try:
         payload = verify_jwt(request)
@@ -1031,6 +1031,164 @@ def add_favorite():
     except AuthError as e:
         _, status_code = e.args
         return get_error_message(status_code), status_code
+
+@app.route('/'+ FAVORITES + '/<int:favorite_id>', methods=['DELETE'])
+def delete_favorite(favorite_id):
+    """Deletes a favorite from a user's list if they are the owner."""
+    try:
+        payload = verify_jwt(request)
+        if not payload:
+            raise ValueError(401)
+
+        user_sub = payload['sub']
+
+        with db.connect() as conn:
+            stmt = sqlalchemy.text('SELECT user_id FROM users WHERE sub = :sub')
+            result = conn.execute(stmt, {'sub': user_sub}).one_or_none()
+
+            if result is None:
+                raise ValueError(404)
+
+            user_id = result.user_id
+
+            # Check if the favorite exists and belongs to the user
+            stmt = sqlalchemy.text('SELECT id FROM favorites WHERE id = :favorite_id AND user_id = :user_id')
+            result = conn.execute(stmt, {'favorite_id': favorite_id, 'user_id': user_id}).one_or_none()
+
+            if result is None:
+                raise ValueError(403)
+
+            stmt = sqlalchemy.text('DELETE FROM favorites WHERE id = :favorite_id')
+            conn.execute(stmt, {'favorite_id': favorite_id})
+            conn.commit()
+
+        return {"message": "Favorite successfully deleted"}, 200
+
+    except ValueError as e:
+        status_code = int(str(e))
+        return get_error_message(status_code), status_code
+    except AuthError as e:
+        _, status_code = e.args
+        return get_error_message(status_code), status_code
+
+@app.route('/'+ PET_DISPOSITIONS +'/<int:pet_id>', methods=['GET'])
+def get_pet_dispositions(pet_id):
+    """Retrieve all dispositions for a given pet."""
+
+    try:
+        payload = verify_jwt(request)
+        if not payload:
+            raise ValueError(401)
+
+        with db.connect() as conn:
+            stmt = sqlalchemy.text(
+                '''SELECT disposition FROM pet_dispositions WHERE pet_id = :pet_id'''
+            )
+            result = conn.execute(stmt, {'pet_id': pet_id})
+
+            rows = result.fetchall()  # Fetch all rows
+
+            if not rows:
+                raise ValueError(404)
+
+            # Extract only the 'disposition' values correctly
+            dispositions = [row._mapping["disposition"] for row in rows]  # Correct way to access named columns
+
+            return {"pet_id": pet_id, "dispositions": dispositions}, 200
+
+    except ValueError as e:
+        status_code = int(str(e))
+        return get_error_message(status_code), status_code
+    except AuthError as e:
+        _, status_code = e.args
+        return get_error_message(status_code), status_code
+
+
+@app.route('/' + PET_DISPOSITIONS + '/<int:pet_id>', methods=['POST'])
+def add_pet_disposition(pet_id):
+    """Adds a disposition to a pet."""
+    try:
+        payload = verify_jwt(request)
+        if not payload:
+            raise ValueError(401)
+
+        owner_sub = payload['sub']
+        with db.connect() as conn:
+            stmt = sqlalchemy.text('SELECT role FROM users WHERE sub = :sub')
+            result = conn.execute(stmt, {'sub': owner_sub}).one_or_none()
+            user = result._asdict()
+
+            if user is None or user['role'] != 'admin':
+                raise ValueError(403)
+
+            # Check if pet exists
+            stmt = sqlalchemy.text('SELECT pet_id FROM pets WHERE pet_id = :pet_id')
+            pet_result = conn.execute(stmt, {'pet_id': pet_id}).one_or_none()
+            if pet_result is None:
+                raise ValueError(404)
+
+            content = request.get_json()
+            disposition = content.get("disposition")
+            if not disposition:
+                raise ValueError(400)
+
+            # Insert disposition
+            stmt = sqlalchemy.text(
+                'INSERT INTO pet_dispositions (disposition, pet_id) VALUES (:disposition, :pet_id)'
+            )
+            conn.execute(stmt, {'disposition': disposition, 'pet_id': pet_id})
+            conn.commit()
+
+        return {"message": "Disposition added successfully."}, 201
+
+    except ValueError as e:
+        status_code = int(str(e))
+        return get_error_message(status_code), status_code
+    except AuthError as e:
+        _, status_code = e.args
+        return get_error_message(status_code), status_code
+
+@app.route('/' + PET_DISPOSITIONS + '/<int:pet_id>', methods=['DELETE'])
+def delete_pet_disposition(pet_id):
+    """Delete a specific disposition for a given pet."""
+    try:
+        payload = verify_jwt(request)
+        if not payload:
+            raise ValueError(401)
+
+        content = request.get_json()
+        if "disposition" not in content:
+            raise ValueError(400)
+
+        disposition = content["disposition"]
+
+        with db.connect() as conn:
+            # Check if the disposition exists
+            stmt_check = sqlalchemy.text(
+                '''SELECT * FROM pet_dispositions WHERE pet_id = :pet_id AND disposition = :disposition'''
+            )
+            result = conn.execute(stmt_check, {'pet_id': pet_id, 'disposition': disposition}).fetchone()
+
+            if result is None:
+                return {"message": "Disposition not found"}, 404
+
+            # Delete the disposition
+            stmt_delete = sqlalchemy.text(
+                '''DELETE FROM pet_dispositions WHERE pet_id = :pet_id AND disposition = :disposition'''
+            )
+            conn.execute(stmt_delete, {'pet_id': pet_id, 'disposition': disposition})
+            conn.commit()
+
+        return {"message": f"Disposition '{disposition}' deleted successfully"}, 200
+
+    except ValueError as e:
+        status_code = int(str(e))
+        return get_error_message(status_code), status_code
+    except AuthError as e:
+        _, status_code = e.args
+        return get_error_message(status_code), status_code
+
+
 
 if __name__ == '__main__':
     init_db()
