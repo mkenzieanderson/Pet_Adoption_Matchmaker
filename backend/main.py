@@ -191,8 +191,9 @@ def create_table(db: sqlalchemy.engine.base.Engine) -> None:
                 '''
                 CREATE TABLE IF NOT EXISTS shelters (
                     shelter_id BIGINT AUTO_INCREMENT NOT NULL,
-                    name VARCHAR(100) NOT NULL,
+                    name VARCHAR(255) NOT NULL,
                     zip_code VARCHAR(10),
+                    address VARCHAR(255),
                     user_id BIGINT NOT NULL,
                     PRIMARY KEY (shelter_id),
                     FOREIGN KEY (user_id) REFERENCES users(user_id)
@@ -570,48 +571,6 @@ def add_pet():
         _, status_code = e.args
         return get_error_message(status_code), status_code
 
-# @app.route('/' + PETS, methods=['GET'])
-# def get_all_pets():
-#     """Returns a list of all pets or a filtered list based on shelter_id."""
-#     try:
-#         # Get shelter_id from query parameters (e.g., /pets?shelter_id=123)
-
-#         shelter_id = request.args.get('shelter_id')
-
-#         with db.connect() as conn:
-#             if shelter_id is not None:
-#                 shelter_check_stmt = sqlalchemy.text(
-#                     'SELECT COUNT(*) FROM shelters WHERE shelter_id = :shelter_id'
-#                 )
-#                 shelter_exists = conn.execute(shelter_check_stmt, {'shelter_id': shelter_id}).scalar()
-
-#                 if shelter_exists == 0:
-#                     return {'Error': 'Shelter not found'}, 404  # Shelter does not exist
-
-#                 stmt = sqlalchemy.text('SELECT * FROM pets WHERE shelter_id = :shelter_id')
-#                 pet_result = conn.execute(stmt, {'shelter_id': shelter_id})
-#             else:
-#                 stmt = sqlalchemy.text('SELECT * FROM pets')
-#                 pet_result = conn.execute(stmt)
-
-
-#             pets = [row._asdict() for row in pet_result]
-
-#             if not pets:
-#                 return {'message': 'No pets found'}, 204
-
-#             for pet in pets:
-#                 pet['self'] = f"{request.host_url.rstrip('/')}/{PETS}/{pet['pet_id']}"
-
-#             return {'pets': pets}, 200
-
-#     except ValueError as e:
-#         status_code = int(str(e))
-#         return get_error_message(status_code), status_code
-#     except AuthError as e:
-#         _, status_code = e.args
-#         return get_error_message(status_code), status_code
-
 @app.route('/'+PETS+'/<int:pet_id>', methods = ['GET'])
 def get_pet(pet_id):
     """Gets a pet provided the id of the pet"""
@@ -708,46 +667,6 @@ def get_pets():
     except AuthError as e:
         _, status_code = e.args
         return get_error_message(status_code), status_code
-
-# @app.route('/' + PETS + '/shelter/<int:shelter_id>', methods=['GET'])
-# def get_pets_by_shelter(shelter_id):
-#     """Returns all pets that belong to the specified shelter_id"""
-#     try:
-#         payload = verify_jwt(request)
-#         if not payload:
-#             raise ValueError(401)
-#         # Get the shelter's pets
-#         with db.connect() as conn:
-#             stmt = sqlalchemy.text(
-#                 '''
-#                 SELECT pet_id, name, type, gender, news_item, date_created, age, breed,
-#                        description, availability, picture_url, shelter_id
-#                 FROM pets
-#                 WHERE shelter_id = :shelter_id
-#                 '''
-#             )
-#             result = conn.execute(stmt, {'shelter_id': shelter_id}).fetchall()
-
-#         if not result:
-#             raise ValueError(404)
-
-#         pets = [row._asdict() for row in result]
-
-#         for pet in pets:
-#             pet['self'] = f"{request.host_url.rstrip('/')}/pets/{pet['pet_id']}"
-
-#         response = {
-#             'pets': pets
-#         }
-
-#         return jsonify(response), 200
-
-#     except ValueError as e:
-#         status_code = int(str(e))
-#         return get_error_message(status_code), status_code
-#     except AuthError as e:
-#         _, status_code = e.args
-#         return get_error_message(status_code), status_code
 
 @app.route('/'+PETS+'/<int:pet_id>/avatar', methods = ['POST'])
 def upload_pet_avatar(pet_id):
@@ -1110,6 +1029,69 @@ def delete_shelter(shelter_id):
     except Exception as e:
         return get_error_message(500), 500  # Internal server error
 
+@app.route('/' + SHELTERS, methods=['POST'])
+def add_shelter():
+    """Adds a new shelter to the database"""
+    try:
+        # Verify that the user is an admin
+        payload = verify_jwt(request)
+        if not payload:
+            raise ValueError(401)
+
+        owner_sub = payload['sub']
+
+        with db.connect() as conn:
+            stmt = sqlalchemy.text('SELECT role, user_id FROM users WHERE sub = :sub')
+            result = conn.execute(stmt, parameters={'sub': owner_sub}).one_or_none()
+
+        user = result._asdict()
+        role = user['role']
+        user_id = user['user_id']
+        print(user_id)
+        if role != 'admin':
+            raise ValueError(403)
+
+        content = request.get_json()
+
+        if not content or not all(key in content for key in ["name", "address", "zip_code"]):
+            raise ValueError(400)
+
+        with db.connect() as conn:
+            stmt = sqlalchemy.text('''
+                INSERT INTO shelters (name, address, zip_code, user_id)
+                VALUES (:name, :address, :zip_code, :user_id)
+            ''')
+            conn.execute(
+                stmt,
+                {
+                    'name': content['name'],
+                    'address': content['address'],
+                    'zip_code': content['zip_code'],
+                    'user_id': user_id,
+                }
+            )
+            stmt2 = sqlalchemy.text('SELECT last_insert_id()')
+            shelter_id = conn.execute(stmt2).scalar()
+
+            conn.commit()
+
+        # Prepare the response
+        response = {
+            'shelter_id': shelter_id,
+            'name': content['name'],
+            'address': content['address'],
+            'zip_code': content['zip_code'],
+            'user_id': user_id
+        }
+
+        return jsonify(response), 201
+
+    except ValueError as e:
+        status_code = int(str(e))
+        return get_error_message(status_code), status_code
+    except AuthError as e:
+        _, status_code = e.args
+        return get_error_message(status_code), status_code
 
 @app.route('/'+FAVORITES+'/<int:user_id>', methods = ['GET'])
 def get_user_favorites(user_id):
@@ -1269,7 +1251,6 @@ def get_pet_dispositions(pet_id):
     except AuthError as e:
         _, status_code = e.args
         return get_error_message(status_code), status_code
-
 
 @app.route('/' + PET_DISPOSITIONS + '/<int:pet_id>', methods=['POST'])
 def add_pet_disposition(pet_id):

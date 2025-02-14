@@ -120,16 +120,19 @@ shelters_data = [
     {
         'name': 'Happy Tails Shelter',
         'zip_code': '98101',
+        'address' : '1246 8th Ave NE',
         'user_id': 1
     },
     {
         'name': 'Paws and Claws Rescue',
         'zip_code': '98102',
+        'address' : '888 NW Pl',
         'user_id': 2
     },
     {
         'name': 'Furry Friends Haven',
         'zip_code': '98103',
+        'address' : '1840 41st Ave W',
         'user_id': 1
     }
 ]
@@ -218,13 +221,14 @@ def insert_seed_data(db: sqlalchemy.engine.base.Engine) -> None:
             conn.execute(
                 sqlalchemy.text(
                     '''
-                    INSERT INTO shelters (name, zip_code, user_id)
-                    VALUES (:name, :zip_code, :user_id);
+                    INSERT INTO shelters (name, zip_code, address, user_id)
+                    VALUES (:name, :zip_code, :address, :user_id);
                     '''
                 ),
                 {
                     "name": shelter_data['name'],
                     "zip_code": shelter_data['zip_code'],
+                    "address" : shelter_data['address'],
                     "user_id": shelter_data['user_id']
                 }
             )
