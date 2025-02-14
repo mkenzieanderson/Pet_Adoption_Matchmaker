@@ -910,7 +910,6 @@ def delete_pet(pet_id):
             conn.execute(stmt, parameters={'pet_id': pet_id})
             conn.commit()
 
-        # Return a confirmation message
         return {'message': f'Pet with ID {pet_id} deleted successfully'}, 200
 
     except ValueError as e:
@@ -1047,7 +1046,6 @@ def add_shelter():
         user = result._asdict()
         role = user['role']
         user_id = user['user_id']
-        print(user_id)
         if role != 'admin':
             raise ValueError(403)
 
@@ -1085,6 +1083,103 @@ def add_shelter():
         }
 
         return jsonify(response), 201
+
+    except ValueError as e:
+        status_code = int(str(e))
+        return get_error_message(status_code), status_code
+    except AuthError as e:
+        _, status_code = e.args
+        return get_error_message(status_code), status_code
+
+@app.route('/' + SHELTERS + '/<int:shelter_id>', methods = ['PATCH'])
+def update_shelter(shelter_id):
+    """Updates the given shelter and returns the updated fields. If no values are
+    specified to be updated, the shelter info is simply returned"""
+    try:
+        payload = verify_jwt(request)
+        if not payload:
+            raise ValueError(401)
+
+        #check the modifier is an admin
+        owner_sub = payload['sub']
+        with db.connect() as conn:
+            stmt = sqlalchemy.text(
+                'SELECT * FROM users WHERE sub = :sub'
+            )
+            result = conn.execute(stmt, parameters={'sub': owner_sub}).one_or_none()
+            user = result._asdict()
+            if result is None:
+                raise ValueError(404)
+
+            role = user['role']
+            if role != 'admin':
+                raise ValueError(403)
+
+        #check for optional fields
+        content = request.get_json()
+
+        expected_types = {
+            "name" : str,
+            "user_id" : int,
+            "zip_code" : str
+        }
+        for key, value in content.items():
+            if key not in expected_types:
+                raise ValueError(400)
+            if not isinstance(value, expected_types[key]):
+                raise ValueError(400)
+
+         # Get the values to update, if any
+        name = content.get("name")
+        user_id = content.get("user_id")
+        zip_code = content.get("zip_code")
+
+        with db.connect() as conn:
+            #check that a given user id exists and belongs to an admin
+            if user_id:
+                stmt = sqlalchemy.text(
+                    'SELECT role FROM users WHERE user_id = :user_id'
+                )
+                result = conn.execute(stmt, parameters={'user_id': user_id}).one_or_none()
+                if result is None:
+                    return {"Error" : "user_id does not match to existing user"}, 404
+
+                user = result._asdict()
+                role = user['role']
+                if role != 'admin':
+                    return {"Error" : "user_id for a Shelter must have role admin"}
+
+            stmt = sqlalchemy.text(
+                '''UPDATE shelters
+                SET
+                    name = COALESCE(:name, name),
+                    user_id = COALESCE(:user_id, user_id),
+                    zip_code = COALESCE(:zip_code, zip_code)
+                WHERE shelter_id = :shelter_id
+                '''
+            )
+            conn.execute(stmt, {
+                "name": name,
+                "user_id": user_id,
+                "zip_code": zip_code,
+                "shelter_id" : shelter_id
+            })
+
+            # Fetch the updated pet details
+            stmt = sqlalchemy.text(
+                '''SELECT *
+                FROM shelters WHERE shelter_id = :shelter_id
+                '''
+            )
+            result = conn.execute(stmt, parameters={'shelter_id': shelter_id}).one_or_none()
+
+            if result is None:
+                raise ValueError(404)
+
+            shelter = result._asdict()
+            conn.commit()
+
+        return shelter
 
     except ValueError as e:
         status_code = int(str(e))
