@@ -1148,6 +1148,47 @@ def add_pet_disposition(pet_id):
         _, status_code = e.args
         return get_error_message(status_code), status_code
 
+@app.route('/' + PET_DISPOSITIONS + '/<int:pet_id>', methods=['DELETE'])
+def delete_pet_disposition(pet_id):
+    """Delete a specific disposition for a given pet."""
+    try:
+        payload = verify_jwt(request)
+        if not payload:
+            raise ValueError(401)
+
+        content = request.get_json()
+        if "disposition" not in content:
+            raise ValueError(400)
+
+        disposition = content["disposition"]
+
+        with db.connect() as conn:
+            # Check if the disposition exists
+            stmt_check = sqlalchemy.text(
+                '''SELECT * FROM pet_dispositions WHERE pet_id = :pet_id AND disposition = :disposition'''
+            )
+            result = conn.execute(stmt_check, {'pet_id': pet_id, 'disposition': disposition}).fetchone()
+
+            if result is None:
+                return {"message": "Disposition not found"}, 404
+
+            # Delete the disposition
+            stmt_delete = sqlalchemy.text(
+                '''DELETE FROM pet_dispositions WHERE pet_id = :pet_id AND disposition = :disposition'''
+            )
+            conn.execute(stmt_delete, {'pet_id': pet_id, 'disposition': disposition})
+            conn.commit()
+
+        return {"message": f"Disposition '{disposition}' deleted successfully"}, 200
+
+    except ValueError as e:
+        status_code = int(str(e))
+        return get_error_message(status_code), status_code
+    except AuthError as e:
+        _, status_code = e.args
+        return get_error_message(status_code), status_code
+
+
 
 if __name__ == '__main__':
     init_db()
