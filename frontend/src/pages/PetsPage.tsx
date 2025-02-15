@@ -1,4 +1,4 @@
-import { dummyUser } from "../state/User.types";
+import { dummyUser } from "../state/User/User.types";
 import Header from "../components/Header/Header";
 import PetCardGrid from "../components/PetCardGrid/PetCardGrid";
 

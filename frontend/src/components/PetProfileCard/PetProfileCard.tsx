@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import Edit from "../../assets/edit.svg";
 import Delete from "../../assets/delete.svg";
-import { Pet } from "../../state/Pet.types";
-import { User} from "../../state/User.types";
+import { Pet } from "../../state/Pets/Pet.types";
+import { User} from "../../state/User/User.types";
 
 
 interface PetProfileCardProps {

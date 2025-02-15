@@ -1,3 +1,5 @@
+// TODO: Delete when global state complete and fully integrated 
+
 type availability = 'available' | 'not available' | 'pending' | 'adopted';
 type gender = 'Male' | 'Female';
 
@@ -11,3 +13,4 @@ export type Pet = {
     disposition: string[];
     shelter: string;
 }
+

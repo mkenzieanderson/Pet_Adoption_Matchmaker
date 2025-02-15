@@ -1,9 +1,9 @@
 import PetProfileCard from "../PetProfileCard/PetProfileCard";
 import Button from "../Buttons/Button";
 import { pets } from "./TempData";
-import { dummyUser } from "../../state/User.types";
-import { Pet } from "../../state/Pet.types";
-import { User } from "../../state/User.types";
+import { dummyUser } from "../../state/User/User.types";
+import { Pet } from "../../state/Pets/Pet.types";
+import { User } from "../../state/User/User.types";
 
 interface PetCardGridProps {
     pet?: Pet;

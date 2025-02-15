@@ -4,6 +4,7 @@ import Button from "../components/Buttons/Button";
 import TextInput from "../components/TextInput/TextInput";
 import Form from "../components/Form/Form";
 import Header from "../components/Header/Header";
+import usePetStore from "../state/Pets/Pet.store";
 
 export const SignInPage = () => {
     const navigate = useNavigate();
@@ -13,8 +14,9 @@ export const SignInPage = () => {
     const [token, setToken] = useState<string | undefined>(undefined);
     const [userID, setUserID] = useState<bigint | undefined>(undefined);
 
+    const fetchPets = usePetStore((state) => state.fetchPets);
     const errorMessage = "Email and/or password are incorrect. Please try again.";
-    
+
     function clearDataFields () {
         setEmail("");
         setPassword("");
@@ -25,6 +27,7 @@ export const SignInPage = () => {
         setUserID(res_user_id);
         clearDataFields();
         setShowError(false);
+        fetchPets(res_token);
         navigate('/');
     }
 
