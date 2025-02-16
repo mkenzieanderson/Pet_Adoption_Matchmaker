@@ -1,23 +1,21 @@
 import { create } from 'zustand';
 
 interface AuthStore {
-    name: string;
-    role: string;
+    userId: bigint | null;
     token: string;
     setToken: (token: string) => void;
+    setUserID: (userId: bigint) => void;
 }
 
 const useAuthStore = create<AuthStore>((set) => ({
     /** 
-     * @type {string} name - The name of the user
-     * @type {string} role - The role of the user
      * @type {string} token - The token of the user
      * @type {function} setToken - A function that sets the token of the user
      */
-    name: '',
-    role: '',
     token: '',
+    userId: null,
     setToken: (token: string) => set({ token }),
+    setUserID: (userId: bigint) => set({ userId }),
 }));
 
 export default useAuthStore;
