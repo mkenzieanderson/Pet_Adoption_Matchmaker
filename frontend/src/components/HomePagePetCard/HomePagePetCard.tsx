@@ -1,4 +1,4 @@
-import { Pet } from "../../state/Pet.types.tsx";
+import { Pet } from "../../state/Pets/Pet.types.tsx";
 import Button from "../Buttons/Button.tsx";
 import { useState } from "react";
 import { FaInfo, FaHeart, FaChevronDown } from "react-icons/fa";

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Header from "../components/Header/Header";
-import { dummyUser } from "../state/User.types";
+import { dummyUser } from "../state/User/User.types";
 import Button from "../components/Buttons/Button";
 import TextInput from "../components/TextInput/TextInput";
 import Form from "../components/Form/Form";

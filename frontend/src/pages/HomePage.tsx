@@ -1,5 +1,5 @@
 import Header from "../components/Header/Header";
-import { dummyUser } from "../state/User.types";
+import { dummyUser } from "../state/User/User.types";
 import HomePagePetCard from "../components/HomePagePetCard/HomePagePetCard";
 import pitbull from "../assets/pitbull.png";
 

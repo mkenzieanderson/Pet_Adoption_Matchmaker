@@ -1,4 +1,4 @@
-import { Pet } from "../../state/Pet.types";
+import { Pet } from "../../state/Pets/Pet.types";
 
 export const pets: Pet[] = [
     {
