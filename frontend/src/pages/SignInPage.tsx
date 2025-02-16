@@ -6,6 +6,7 @@ import Form from "../components/Form/Form";
 import Header from "../components/Header/Header";
 import usePetStore from "../state/Pets/Pet.store";
 import useAuthStore from "../state/Auth/Auth.state";
+import useUserStore from "../state/User/User.store";
 
 export const SignInPage = () => {
     const navigate = useNavigate();
@@ -20,6 +21,7 @@ export const SignInPage = () => {
     */
 
     const authStore = useAuthStore((state) => state);
+    const fetchUser = useUserStore((state) => state.fetchUser);
     const fetchPets = usePetStore((state) => state.fetchPets);
     const errorMessage = "Email and/or password are incorrect. Please try again.";
 
@@ -32,8 +34,15 @@ export const SignInPage = () => {
     function handleValidLogin (res_token: string, res_user_id: bigint) {
         clearDataFields();
         setShowError(false);
+
+        // Set auth global state
         authStore.setToken(res_token);
         authStore.setUserID(res_user_id);
+        
+        // Fetch user and set global state
+        fetchUser(res_user_id, res_token);
+
+        // Fetch pets and set global state
         fetchPets(authStore.token);
         navigate('/');
     }
