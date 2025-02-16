@@ -52,8 +52,18 @@ const Header = ({ user, path, loginStatus }: HeaderProps) => {
         <>
             <div className="bg-beige w-full h-20 flex flex-row items-center justify-between px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-row items-center space-x-4 sm:space-x-6">
-                    <FetchLogo  />
-                    <span className="font-serif font-bold text-xl sm:text-2xl lg:text-3xl text-espresso">Fetch!</span>
+                    <span 
+                        className="cursor-pointer"
+                        onClick={() => navigate('/')}
+                    >
+                        <FetchLogo  />
+                    </span>
+                    <span 
+                        className="font-serif font-bold text-xl sm:text-2xl lg:text-3xl text-espresso cursor-pointer"
+                        onClick={() => navigate('/')}
+                    >
+                        Fetch!
+                    </span>
                 </div>
                 {renderButton()}
             </div>
