@@ -5,6 +5,7 @@ import Button from "../components/Buttons/Button";
 import TextInput from "../components/TextInput/TextInput";
 import Form from "../components/Form/Form";
 import { errorButtonStyle } from "../components/Buttons/ButtonStyles";
+import DeleteAccountPopUp from "../components/PopUp/DeleteAccountPopUp";
 
 export const MyAccountPage = () => {
     const [firstName, setFirstName] = useState("Jane");
@@ -14,6 +15,7 @@ export const MyAccountPage = () => {
     const [password, setPassword] = useState("");
     const [confirmPwd, setConfirmPwd] = useState("");
     const [editMode, setEditMode] = useState(false);
+    const [showDeleteWarning, setShowDeleteWarning] = useState(false);
 
     function handleEditAccount() {
         setEditMode(true);
@@ -21,6 +23,10 @@ export const MyAccountPage = () => {
     
     function handleSaveChanges() {
         setEditMode(false);
+    }
+
+    function openDeleteWarning () {
+        setShowDeleteWarning(true);
     }
 
     return (
@@ -102,10 +108,15 @@ export const MyAccountPage = () => {
                     <Button 
                         text="DELETE ACCOUNT"
                         className={errorButtonStyle}
-                        onClick={handleSaveChanges}
+                        onClick={openDeleteWarning}
                     >
                     </Button>
                 </div>
+                {showDeleteWarning && (
+                    <div className="fixed inset-0 bg-espresso bg-opacity-50 flex items-center justify-center z-50">
+                        <DeleteAccountPopUp onClose={() => setShowDeleteWarning(false)} />
+                    </div>
+)}
             </div>
         </>
     )

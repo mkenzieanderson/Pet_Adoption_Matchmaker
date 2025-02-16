@@ -1,17 +1,17 @@
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 
 type PopUpProps = {
-    heading?: string;
+    header?: string;
     description?: string;
     children: ReactNode;
     width?: string;
 }
 
-function PopUp ({ heading, description, children, width }: PopUpProps) {
+function PopUp ({ header, description, children, width }: PopUpProps) {
     return (
         <div className={`font-header text-espresso bg-cream border-tawny-brown 
-                        border-2 rounded-lg p-14 pt-10 pb-12 ${width}`}>
-            {heading && <h2 className="font-bold text-3xl mb-1 text-center">{heading}</h2>}
+                        border-4 rounded-lg p-14 pt-10 pb-12 ${width} z-50 shadow-2xl`}>
+            {header && <h2 className="font-bold text-3xl mb-2 text-center">{header}</h2>}
             {description && <p className="mb-8 text-center">{description}</p>}
             <form className="flex flex-col gap-6">
                 {children}
