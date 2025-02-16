@@ -5,17 +5,24 @@ import TextInput from "../components/TextInput/TextInput";
 import Form from "../components/Form/Form";
 import Header from "../components/Header/Header";
 import usePetStore from "../state/Pets/Pet.store";
+import useAuthStore from "../state/Auth/Auth.state";
 
 export const SignInPage = () => {
     const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showError, setShowError] = useState(false);
+    
+    
+    /* NOTE: Did not want to fully remove this yet without consulting Mackenzie
     const [token, setToken] = useState<string | undefined>(undefined);
     const [userID, setUserID] = useState<bigint | undefined>(undefined);
+    */
 
+    const authStore = useAuthStore((state) => state);
     const fetchPets = usePetStore((state) => state.fetchPets);
     const errorMessage = "Email and/or password are incorrect. Please try again.";
+
 
     function clearDataFields () {
         setEmail("");
@@ -23,11 +30,11 @@ export const SignInPage = () => {
     }
 
     function handleValidLogin (res_token: string, res_user_id: bigint) {
-        setToken(res_token);
-        setUserID(res_user_id);
         clearDataFields();
         setShowError(false);
-        fetchPets(res_token);
+        authStore.setToken(res_token);
+        authStore.setUserID(res_user_id);
+        fetchPets(authStore.token);
         navigate('/');
     }
 
