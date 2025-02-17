@@ -51,7 +51,10 @@ const Header = ({ user, path, loginStatus }: HeaderProps) => {
     return (
         <>
             <div className="bg-beige w-full h-20 flex flex-row items-center justify-between px-4 sm:px-6 lg:px-8">
-                <div className="flex flex-row items-center space-x-4 sm:space-x-6">
+                <div 
+                    className="flex flex-row items-center space-x-4 sm:space-x-6 cursor-pointer" 
+                    onClick={() => navigate('/')}
+                >
                     <FetchLogo  />
                     <span className="font-serif font-bold text-xl sm:text-2xl lg:text-3xl text-espresso">Fetch!</span>
                 </div>

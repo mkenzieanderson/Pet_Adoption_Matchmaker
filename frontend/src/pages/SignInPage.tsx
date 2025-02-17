@@ -13,12 +13,6 @@ export const SignInPage = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showError, setShowError] = useState(false);
-    
-    
-    /* NOTE: Did not want to fully remove this yet without consulting Mackenzie
-    const [token, setToken] = useState<string | undefined>(undefined);
-    const [userID, setUserID] = useState<bigint | undefined>(undefined);
-    */
 
     const authStore = useAuthStore((state) => state);
     const fetchUser = useUserStore((state) => state.fetchUser);
