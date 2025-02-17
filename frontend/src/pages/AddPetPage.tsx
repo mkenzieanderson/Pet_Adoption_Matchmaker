@@ -6,6 +6,7 @@ import Button from "../components/Buttons/Button";
 import TextInput from "../components/TextInput/TextInput";
 import Form from "../components/Form/Form";
 import Dropdown from "../components/Dropdown/Dropdown";
+import { TypeOptions } from "../components/Dropdown/PetOptions";
 
 export const AddPetPage = () => {
     const navigate = useNavigate();
@@ -31,14 +32,12 @@ export const AddPetPage = () => {
                                 onChange={(e) => setName(e.target.value)}
                             >
                             </TextInput>
-                            <TextInput
-                                type="text"
+                            <Dropdown
                                 title="Type"
                                 width="w-full"
-                                value={type}
-                                onChange={(e) => setType(e.target.value)}
+                                options={TypeOptions}
                             >
-                            </TextInput>
+                            </Dropdown>
                             <TextInput
                                 type="text"
                                 title="Breed"
