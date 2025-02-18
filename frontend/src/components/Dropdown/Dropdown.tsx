@@ -3,7 +3,7 @@ import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 
 type DropdownOptions = {
     label: string;
-    value: string;
+    value: string | number;
 }
 
 type DropdownProps = {
@@ -30,7 +30,7 @@ function Dropdown ({ title, width, options }: DropdownProps) {
             >
                 { selectedOption ?
                     <span>{selectedOption.label}</span> : 
-                    <span className="font-light">Select Type</span>
+                    <span className="font-light">Select {title}</span>
                 }
                 <span>{open ? <FaChevronUp/> : <FaChevronDown/>}</span>
             </button>
