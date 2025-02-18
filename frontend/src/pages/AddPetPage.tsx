@@ -6,7 +6,16 @@ import Button from "../components/Buttons/Button";
 import TextInput from "../components/TextInput/TextInput";
 import Form from "../components/Form/Form";
 import Dropdown from "../components/Dropdown/Dropdown";
-import { TypeOptions, DogBreedOptions, CatBreedOptions, } from "../components/Dropdown/PetOptions";
+import { 
+    TypeOptions, 
+    DogBreedOptions, 
+    CatBreedOptions,
+    AgeOptions,
+    GenderOptions,
+    DispositionOptions,
+    AvailabilityOptions
+ } from "../components/Dropdown/PetOptions";
+
 
 export const AddPetPage = () => {
     const navigate = useNavigate();
@@ -14,6 +23,23 @@ export const AddPetPage = () => {
     const [name, setName] = useState("");
     const [type, setType] = useState("");
     const [breed, setBreed] = useState("");
+    const [age, setAge] = useState<number | null>(null);
+    const [gender, setGender] = useState("");
+    const [availability, setAvailability] = useState("");
+
+    function clearFields() {
+        setName("");
+        setType("");
+        setBreed("");
+        setAge(null);
+        setGender("");
+        setAvailability("");
+    }
+    
+    function handleSubmit() {
+        clearFields();
+        navigate('/pets-page');
+    }
 
     return (
         <>
@@ -34,18 +60,50 @@ export const AddPetPage = () => {
                             </TextInput>
                             <Dropdown
                                 title="Type"
-                                width="w-full"
+                                width="min-w-[150px]"
                                 options={TypeOptions}
+                                onChange={(option) => setType(option.value.toString())}
+                            >
+                            </Dropdown>
+                            { (type === "cat" || type === "dog") && <Dropdown
+                                title="Breed"
+                                width="min-w-[250px]"
+                                options={type === "cat" ? CatBreedOptions : DogBreedOptions}
+                                onChange={(option) => setBreed(option.value.toString())}
+                            >
+                            </Dropdown>}
+                        </div>
+
+                        <div className="flex space-x-20">
+                            <Dropdown
+                                title="Age"
+                                width="min-w-[150px]"
+                                options={AgeOptions}
+                                onChange={(option) => setAge(Number(option.value))}
                             >
                             </Dropdown>
                             <Dropdown
-                                title="Breed"
-                                width="w-full"
-                                options={DogBreedOptions}
+                                title="Gender"
+                                width="min-w-[175px]"
+                                options={GenderOptions}
+                                onChange={(option) => setGender(option.value.toString())}
+                            >
+                            </Dropdown>
+                            <Dropdown
+                                title="Availability"
+                                width="min-w-[225px]"
+                                options={AvailabilityOptions}
+                                onChange={(option) => setAvailability(option.value.toString())}
                             >
                             </Dropdown>
                         </div>
-
+                        <div className="text-center mt-4">
+                            <Button 
+                                text="ADD PET"
+                                onClick={() => navigate('/pets-page')}
+                            >
+                            </Button>
+                        </div>
                     </Form>
                 </div>
             </div>
