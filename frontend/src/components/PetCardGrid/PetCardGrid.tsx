@@ -4,6 +4,7 @@ import { pets } from "./TempData";
 import { dummyUser } from "../../state/User/User.types";
 import { Pet } from "../../state/Pets/Pet.types";
 import { User } from "../../state/User/User.types";
+import { useNavigate } from "react-router-dom";
 
 interface PetCardGridProps {
     pet?: Pet;
@@ -11,16 +12,17 @@ interface PetCardGridProps {
 }
 
 const PetCardGrid = ({user}: PetCardGridProps) => {
+    const navigate = useNavigate();
     const title = user.type === 'user' ? 'My Saved Pets' : 'My Shelter';
 
     return (
         <>
             <div className="flex flex-col items-center">
                 <div className="flex flex-row">
-                    <h1 className="text-3xl font-semibold text-espresso mx-auto my-6">{title}</h1>
+                    <h1 className="text-3xl font-header font-semibold text-espresso mx-auto my-6">{title}</h1>
                     {user.type === 'admin' ? (
                          <div className="absolute right-[230px]">
-                         <Button text="ADD PET" onClick={() => console.log('Add Pet')} />
+                         <Button text="ADD PET" onClick={() => navigate('/add-pet-page')} />
                      </div>
                     ) : (
                         null
