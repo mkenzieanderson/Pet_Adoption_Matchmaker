@@ -6,6 +6,7 @@ import Button from "../components/Buttons/Button";
 import TextInput from "../components/TextInput/TextInput";
 import Form from "../components/Form/Form";
 import Dropdown from "../components/Dropdown/Dropdown";
+import ImgUpload from "../components/ImgUpload/ImgUpload";
 import { 
     TypeOptions, 
     DogBreedOptions, 
@@ -49,6 +50,9 @@ export const AddPetPage = () => {
                     <Form
                         title="Add New Pet" 
                     >
+                        <div className="place-items-center mt-8">
+                            <ImgUpload />
+                        </div>
                         <div className="flex space-x-24 mt-6">
                             <TextInput
                                 type="text"

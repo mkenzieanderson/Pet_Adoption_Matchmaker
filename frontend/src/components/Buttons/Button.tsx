@@ -1,5 +1,5 @@
 import  { MouseEvent, ElementType } from 'react';
-import { defaultButtonStyle, errorButtonStyle } from './ButtonStyles.tsx'
+import { defaultButtonStyle } from './ButtonStyles.tsx'
 
 type ButtonProps = {
     text?: string;
