@@ -46,14 +46,14 @@ export const AddPetPage = () => {
         <>
             <Header user={dummyUser} path={location.pathname} loginStatus={true} />
             <div className="place-items-center">
-                <div className="w-3/5 mt-10 mb-2">
+                <div className="w-3/5 mt-10 mb-16">
                     <Form
                         title="Add New Pet" 
                     >
                         <div className="place-items-center mt-8">
                             <ImgUpload />
                         </div>
-                        <div className="flex space-x-24 mt-6">
+                        <div className="flex space-x-24 mt-3">
                             <TextInput
                                 type="text"
                                 title="Name"
