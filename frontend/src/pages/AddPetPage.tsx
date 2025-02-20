@@ -7,6 +7,7 @@ import TextInput from "../components/TextInput/TextInput";
 import Form from "../components/Form/Form";
 import Dropdown from "../components/Dropdown/Dropdown";
 import ImgUpload from "../components/ImgUpload/ImgUpload";
+import Checklist from "../components/Checklist/Checklist";
 import { 
     TypeOptions, 
     DogBreedOptions, 
@@ -100,6 +101,13 @@ export const AddPetPage = () => {
                                 onChange={(option) => setAvailability(option.value.toString())}
                             >
                             </Dropdown>
+                        </div>
+                        <div>
+                            <Checklist
+                                title="Disposition"
+                                options={DispositionOptions}
+                            >
+                            </Checklist>
                         </div>
                         <div className="text-center mt-4">
                             <Button 
