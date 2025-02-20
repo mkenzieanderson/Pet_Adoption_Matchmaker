@@ -1,16 +1,25 @@
-import { useState } from 'react';
-import { useNavigate } from "react-router-dom";
+import { useState, useRef } from 'react';
 import UploadIcon from "../../assets/upload_icon.png";
-import pitbull from "../../assets/pitbull.png";
 
-
-// type ImgUploadProps = {
-
-// }
 
 function ImgUpload () {
-    const navigate = useNavigate();
     const [imageURL, setImageURL] = useState<string | null>(null)
+    const imgUploadRef = useRef<HTMLInputElement>(null);
+
+    const handleImgUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const imgFile = event.target.files?.[0];
+        if (imgFile) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImageURL(reader.result as string);
+            }
+            reader.readAsDataURL(imgFile)
+        }
+    };
+
+    const handleClick = () => {
+        imgUploadRef.current?.click();
+    }
 
     return (
         <div className="w-[275px] h-[250px] border-mustard border-[15px] bg-beige flex flex-col items-center justify-center">
@@ -19,17 +28,24 @@ function ImgUpload () {
                     <img
                         src={imageURL}
                         className="w-full h-full"
-                        onClick={() => setImageURL(null)}
                     />
                 </div>)
                 :
                 (<div 
                     className="text-espresso font-header font-semibold text-lg text-center cursor-pointer"
-                    onClick={() => setImageURL(pitbull)}
+                    onClick={handleClick}
                 >
                     <p className="mt-10">UPLOAD IMAGE</p>
                     <p>HERE</p>
                     <img src={UploadIcon} className="mt-5 mx-auto"/>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        ref={imgUploadRef}
+                        onChange={handleImgUpload}
+                    >
+                    </input>
                 </div>)
             }
         </div>
