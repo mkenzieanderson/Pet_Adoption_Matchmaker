@@ -21,6 +21,7 @@ import {
 
 export const AddPetPage = () => {
     const navigate = useNavigate();
+    const errorMsg = "One or more fields are missing. Please fill in all fields before submitting."
 
     const [name, setName] = useState("");
     const [type, setType] = useState("");
@@ -30,6 +31,7 @@ export const AddPetPage = () => {
     const [availability, setAvailability] = useState("");
     const [selectedOptions, setSelectedOptions] = useState<(string | number)[]>([]);
     const [imageURL, setImageURL] = useState<string | null>(null);
+    const [showError, setShowError] = useState(false);
 
     function clearFields() {
         setName("");
@@ -43,6 +45,12 @@ export const AddPetPage = () => {
     }
     
     function handleSubmit() {
+        if (!name || (!type || (type !== "other" && !breed)) || !age || !gender || !availability || !imageURL) {
+            setShowError(true);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+            return;
+        }
+        setShowError(false);
         clearFields();
         navigate('/pets-page');
     }
@@ -53,7 +61,8 @@ export const AddPetPage = () => {
             <div className="place-items-center">
                 <div className="w-3/5 mt-10 mb-16">
                     <Form
-                        title="Add New Pet" 
+                        title="Add New Pet"
+                        error_msg={showError ? errorMsg : ""} 
                     >
                         <div className="place-items-center mt-8">
                             <ImgUpload
