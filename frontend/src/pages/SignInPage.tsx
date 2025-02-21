@@ -5,7 +5,7 @@ import TextInput from "../components/TextInput/TextInput";
 import Form from "../components/Form/Form";
 import Header from "../components/Header/Header";
 import usePetStore from "../state/Pets/Pet.store";
-import useAuthStore from "../state/Auth/Auth.state";
+import useAuthStore from "../state/Auth/Auth.store";
 import useUserStore from "../state/User/User.store";
 
 export const SignInPage = () => {
