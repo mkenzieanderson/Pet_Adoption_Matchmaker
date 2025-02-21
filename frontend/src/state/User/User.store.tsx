@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { Pet } from '../Pets/Pet.store';
 
-interface User {
+export interface User {
     user_id: bigint;
     name: string;
     email: string;
@@ -14,6 +14,7 @@ interface UserStore {
     fetchUser: (userID: bigint, token: string) => void;
     updateUser: (userID: bigint, token: string, updatedData: Partial<User>) => void;
     addFavoritePet: (petID: number, userID: bigint) => void;
+    deleteFavoritePet: (petID: number, userID: bigint, token: string) => void;
     fetchFavoritePets: (userID: bigint, token: string) => void;
 }
 

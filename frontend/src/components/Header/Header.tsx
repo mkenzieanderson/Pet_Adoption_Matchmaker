@@ -1,19 +1,21 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { User } from "../../state/User/User.types";
+import { User } from "../../state/User/User.store";
 import FetchLogo from "../../assets/fetch-logo.svg";
 import Button from "../Buttons/Button";
 import { BiUser } from "react-icons/bi";
 import { FaHome } from "react-icons/fa";
+import useAuthStore from "../../state/Auth/Auth.store";
 
 interface HeaderProps {
-    user?: User;
+    user?: User | null;
     path?: string;
     loginStatus?: boolean;
 }
 
 const Header = ({ user, path, loginStatus }: HeaderProps) => {
     const navigate = useNavigate();
+    const auth = useAuthStore((state) => state);
     const [menuOpen, setMenuOpen] = useState(false);
     const subMenuClassName = "w-full text-left py-4 px-4 font-serif font-semibold text-xl hover:bg-transparent-clay";
     const svgButtonClassName = `bg-mustard text-espresso font-header font-semibold border-tawny-brown 
@@ -26,9 +28,9 @@ const Header = ({ user, path, loginStatus }: HeaderProps) => {
     };
 
     const renderButton = () => {
-        if (loginStatus) {
+        if (auth.status) {
             return <Button onClick={toggleMenu} svgIcon={BiUser} className={svgButtonClassName}/>;
-        } else if (path === '/' && !loginStatus) {
+        } else if (path === '/' && !auth.status) {
             return <Button onClick={() => navigate('/sign-page')} text="Sign In" />;
         } else {
             return <Button onClick={() => navigate('/')} svgIcon={FaHome} className={svgButtonClassName}/>;
@@ -36,7 +38,7 @@ const Header = ({ user, path, loginStatus }: HeaderProps) => {
     };
 
     const renderSubMenuButton = () => {
-        if (user?.type === "admin") {
+        if (user?.role === "admin") {
             return <Button onClick={() => navigate('/pets-page')} 
                             text="My Shelter" 
                             className={`${subMenuClassName} border-solid border-b-4 border-tawny-brown`} />;
@@ -71,7 +73,7 @@ const Header = ({ user, path, loginStatus }: HeaderProps) => {
                             text="My Account" 
                             className={`${subMenuClassName} border-solid border-b-4 border-tawny-brown`} />
                     {renderSubMenuButton()}
-                    <Button onClick={() => navigate('/sign-page')} 
+                    <Button onClick={() => {navigate('/sign-page'), auth.clearAuth()} } 
                             text="Sign Out" 
                             className={subMenuClassName} />
                 </div>

@@ -15,9 +15,7 @@ interface PetProfileCardProps {
     
         return (
             <>
-                <div 
-                    className="bg-mustard w-full sm:w-[264px] h-auto sm:h-[278px] p-4 rounded-lg shadow-md cursor-pointer relative" 
-                >
+                <div className="bg-mustard w-full h-auto p-4 rounded-lg shadow-md cursor-pointer relative" >
                     <img 
                         src={pet.image} 
                         alt={pet.name} 
@@ -39,7 +37,7 @@ interface PetProfileCardProps {
                         <div className="flex justify-center text-sm">
                             <span className="mr-4">{pet.breed}</span>
                             <span>|</span>
-                            <span className="ml-4">{pet.age}</span>
+                            <span className="ml-4">{pet.age} years old</span>
                         </div>
                     </div>
                 </div>

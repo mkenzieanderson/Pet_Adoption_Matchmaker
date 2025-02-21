@@ -32,10 +32,10 @@ export const SignInPage = () => {
         // Set auth global state
         authStore.setToken(res_token);
         authStore.setUserID(res_user_id);
+        authStore.setStatus(true);
         
         // Fetch user and set global state
         fetchUser(res_user_id, res_token);
-
         // Fetch pets and set global state
         fetchPets(authStore.token);
         navigate('/');
@@ -77,7 +77,7 @@ export const SignInPage = () => {
 
     return (
         <>
-            <Header path={location.pathname} loginStatus={false} />
+            <Header path={location.pathname} loginStatus={authStore.status} />
             <div className="place-items-center">
                 <div className="w-2/5 mt-16">
                     <Form

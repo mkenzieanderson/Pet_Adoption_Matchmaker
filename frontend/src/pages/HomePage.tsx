@@ -1,13 +1,16 @@
 import Header from "../components/Header/Header";
-import { dummyUser } from "../state/User/User.types";
 import HomePagePetCard from "../components/HomePagePetCard/HomePagePetCard";
 import pitbull from "../assets/pitbull.png";
+import useAuthStore from "../state/Auth/Auth.store";
+import useUserStore from "../state/User/User.store";
 
 export const HomePage = () => {
+    const auth = useAuthStore((state) => state);
+    const user = useUserStore((state) => state.user);
 
     return (
         <>
-            <Header user={dummyUser} path={location.pathname} loginStatus={true} />
+            <Header user={user} path={location.pathname} loginStatus={auth.status} />
             <HomePagePetCard  
                 pet={{ 
                     name: 'Buddy', 
