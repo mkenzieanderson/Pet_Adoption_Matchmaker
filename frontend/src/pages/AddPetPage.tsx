@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header/Header";
-import { dummyUser } from "../state/User/User.types";
 import Button from "../components/Buttons/Button";
 import TextInput from "../components/TextInput/TextInput";
 import Form from "../components/Form/Form";
 import Dropdown from "../components/Dropdown/Dropdown";
+import useAuthStore from "../state/Auth/Auth.store";
+import useUserStore from "../state/User/User.store";
+
 import { 
     TypeOptions, 
     DogBreedOptions, 
@@ -19,6 +21,8 @@ import {
 
 export const AddPetPage = () => {
     const navigate = useNavigate();
+    const user = useUserStore((state) => state.user);
+    const auth = useAuthStore((state) => state);
 
     const [name, setName] = useState("");
     const [type, setType] = useState("");
@@ -43,7 +47,7 @@ export const AddPetPage = () => {
 
     return (
         <>
-            <Header user={dummyUser} path={location.pathname} loginStatus={true} />
+            <Header user={user} path={location.pathname} loginStatus={auth.status} />
             <div className="place-items-center">
                 <div className="w-3/5 mt-10 mb-2">
                     <Form

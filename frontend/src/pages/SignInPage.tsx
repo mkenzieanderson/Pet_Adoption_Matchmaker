@@ -37,7 +37,7 @@ export const SignInPage = () => {
         // Fetch user and set global state
         fetchUser(res_user_id, res_token);
         // Fetch pets and set global state
-        fetchPets(authStore.token);
+        fetchPets();
         navigate('/');
     }
 

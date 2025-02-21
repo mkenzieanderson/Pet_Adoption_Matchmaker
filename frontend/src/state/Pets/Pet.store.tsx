@@ -15,7 +15,7 @@ export interface Pet {
 interface PetStore {
     pets: Pet[];                       
     currentPet: Pet | null;          // For cases where we need to track one pet in state
-    fetchPets: (token: string) => void;
+    fetchPets: () => void;
     fetchPet: (petID: number) => void;
     addPet: (token: string, newPet: Partial<Pet>) => void;
     updatePet: (petID: number, updatedData: Partial<Pet>) => void;
@@ -27,13 +27,10 @@ interface PetStore {
 const usePetStore = create<PetStore>((set) => ({
     pets: [],
     currentPet: null,
-    fetchPets: async (token: string) => {
+    fetchPets: async () => {
         try {
             const response = await fetch('http://localhost:8080/pets', {
                 method: 'GET',
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
             });
             if (!response.ok) {
                 throw new Error('Failed to fetch pets');

@@ -22,7 +22,7 @@ const PetCardGrid = ({user}: PetCardGridProps) => {
                     <h1 className="text-3xl font-semibold text-espresso my-6 mx-auto">{title}</h1>
                     {user.type === 'admin' ? (
                         <div className="my-auto mb-6">
-                            <Button text="ADD PET" onClick={() => console.log('Add Pet')} />
+                            <Button text="ADD PET" onClick={() => navigate("/add-pet-page")} />
                         </div>
                     ) : null}
                 </div>
