@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-interface Pet {
+export interface Pet {
     pet_id: number;
     name: string;
     breed: string;
@@ -13,35 +13,129 @@ interface Pet {
 }
 
 interface PetStore {
-    pets: Pet[];
+    pets: Pet[];                       
+    currentPet: Pet | null;          // For cases where we need to track one pet in state
     fetchPets: (token: string) => void;
+    fetchPet: (petID: number) => void;
+    addPet: (token: string, newPet: Partial<Pet>) => void;
+    updatePet: (petID: number, updatedData: Partial<Pet>) => void;
+    deletePet: (petID: number, token: string) => void;
+    uploadAvatar: (petID: number, avatar: File) => void;
 }
 
 
 const usePetStore = create<PetStore>((set) => ({
-    /** 
-     * @type {Pet[]} pets - An array of pets
-     * @type {function} fetchPets - A function that fetches pets from the backend
-     * Note: The param @type {token} is temporary and will be replaced with global
-     * auth state management
-    */
     pets: [],
+    currentPet: null,
     fetchPets: async (token: string) => {
         try {
             const response = await fetch('http://localhost:8080/pets', {
                 method: 'GET',
                 headers: {
                     Authorization: `Bearer ${token}`,
-                    },
-                }); 
+                },
+            });
             if (!response.ok) {
                 throw new Error('Failed to fetch pets');
             }
             const data = await response.json();
-            //console.log(data.pets); // For debugging, will be removed
             set({ pets: data.pets });
         } catch (error) {
             console.error('Failed to fetch pets:', error);
+        }
+    },
+    fetchPet: async (petID: number) => {
+        try {
+            const response = await fetch(`http://localhost:8080/pets/${petID}`, {
+                method: 'GET',
+            });
+            if (!response.ok) {
+                throw new Error('Failed to fetch pet');
+            }
+            const data = await response.json();
+            set({ currentPet: data.pet });
+        } catch (error) {
+            console.error('Failed to fetch pet:', error);
+        }
+    },
+    addPet: async (token: string, newPet: Partial<Pet>) => {
+        try {
+            const response = await fetch('http://localhost:8080/pets', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(newPet),
+            });
+            if (!response.ok) {
+                throw new Error('Failed to add pet');
+            }
+            const data = await response.json();
+            set((state) => ({ pets: [...state.pets, data.pet] }));
+        } catch (error) {
+            console.error('Failed to add pet:', error);
+        }
+    },
+    updatePet: async (petID: number, updatedData: Partial<Pet>) => {
+        try {
+            const response = await fetch(`http://localhost:8080/pets/${petID}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updatedData),
+            });
+            if (!response.ok) {
+                throw new Error('Failed to update pet');
+            }
+            const data = await response.json();
+            set((state) => ({
+                pets: state.pets.map((pet) =>
+                    pet.pet_id === petID ? data.pet : pet
+                ),
+            }));
+        } catch (error) {
+            console.error('Failed to update pet:', error);
+        }
+    },
+    deletePet: async (petID: number, token: string) => {
+        try {
+            const response = await fetch(`http://localhost:8080/pets/${petID}`, {
+                method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (!response.ok) {
+                throw new Error('Failed to delete pet');
+            }
+            set((state) => ({
+                pets: state.pets.filter((pet) => pet.pet_id !== petID),
+            }));
+        } catch (error) {
+            console.error('Failed to delete pet:', error);
+        }
+    },
+    uploadAvatar: async (petID: number, avatar: File) => {
+        try {
+            const formData = new FormData();
+            formData.append('avatar', avatar);
+            const response = await fetch(`http://localhost:8080/pets/${petID}/avatar`, {
+                method: 'POST',
+                body: formData,
+            });
+            if (!response.ok) {
+                throw new Error('Failed to upload avatar');
+            }
+            const data = await response.json();
+            set((state) => ({
+                pets: state.pets.map((pet) =>
+                    pet.pet_id === petID ? { ...pet, image: data.image } : pet
+                ),
+            }));
+        } catch (error) {
+            console.error('Failed to upload avatar:', error);
         }
     },
 }));
