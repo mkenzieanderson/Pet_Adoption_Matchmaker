@@ -11,4 +11,3 @@ export const errorButtonStyle =    `bg-light-rose text-dark-cherry font-header
                                     hover:border-dark-cherry hover:bg-dark-rose
                                     focus:border-dark-cherry focus:bg-dark-rose
                                     focus:outline-dark-cherry`;
-                                    
