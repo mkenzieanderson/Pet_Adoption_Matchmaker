@@ -5,13 +5,13 @@ interface ExpandedInfoCardProps {
 }
 
 const ExpandedInfoCard = ({ pet }: ExpandedInfoCardProps) => {
-    const titleStyles = "my-1 mx-4 text-xl font-bold"
-    const contentStyles = "font-normal mx-4"
+    const titleStyles = "my-1 mx-4 text-xl font-bold font-body"
+    const contentStyles = "font-normal font-body mx-4"
 
     return (
         <>
-            <div className="absolute bottom-0 left-0 bg-beige bg-opacity-95 text-black p-2 w-full h-3/5 rounded-sm">
-                <h2 className="flex justify-center text-4xl font-semibold">{pet.name}</h2>
+            <div className="absolute bottom-0 left-0 bg-beige bg-opacity-95 text-espresso p-2 w-full h-3/5 rounded-sm">
+                <h2 className="flex justify-center text-4xl font-semibold font-body">{pet.name}</h2>
                 <div className="flex flex-col justify-start my-2 mx-6">
                     <span className={titleStyles}>
                         Breed:
