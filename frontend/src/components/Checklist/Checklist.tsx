@@ -1,4 +1,3 @@
-import { useState } from "react";
 import X from "../../assets/x_icon.png"
 
 type ChecklistOptions = {
@@ -9,10 +8,11 @@ type ChecklistOptions = {
 type ChecklistProps = {
     title?: string;
     options: ChecklistOptions[];
+    selectedOptions: ( string | number )[];
+    setSelectedOptions: React.Dispatch<React.SetStateAction<(string | number)[]>>;
 }
 
-function Checklist ({ title, options }: ChecklistProps) {
-    const [selectedOptions, setSelectedOptions] = useState<(string | number)[]>([]);
+function Checklist ({ title, options, selectedOptions, setSelectedOptions }: ChecklistProps) {
 
     const toggleOption = (value: string | number) => {
         setSelectedOptions(prev =>

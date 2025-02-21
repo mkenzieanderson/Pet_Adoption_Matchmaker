@@ -1,9 +1,13 @@
-import { useState, useRef } from 'react';
+import { useRef } from 'react';
 import UploadIcon from "../../assets/upload_icon.png";
 
+type ImgUploadProps = {
+    imageURL: string | null;
+    setImageURL: React.Dispatch<React.SetStateAction<string | null>>;
+}
 
-function ImgUpload () {
-    const [imageURL, setImageURL] = useState<string | null>(null)
+
+function ImgUpload ({ imageURL, setImageURL }: ImgUploadProps) {
     const imgUploadRef = useRef<HTMLInputElement>(null);
 
     const handleImgUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -22,22 +26,25 @@ function ImgUpload () {
     }
 
     return (
-        <div className="w-[275px] h-[250px] border-mustard border-[15px] bg-beige flex flex-col items-center justify-center">
-            { imageURL ? 
-                (<div className="w-[245px] h-[220px] overflow-hidden">
-                    <img
-                        src={imageURL}
-                        className="w-full h-full"
-                    />
-                </div>)
-                :
-                (<div 
+        <div className="w-[275px] h-[250px] border-mustard border-[15px] bg-beige flex flex-col items-center justify-center">           
+                <div 
                     className="text-espresso font-header font-semibold text-lg text-center cursor-pointer"
                     onClick={handleClick}
                 >
-                    <p className="mt-10">UPLOAD IMAGE</p>
-                    <p>HERE</p>
-                    <img src={UploadIcon} className="mt-5 mx-auto"/>
+                    { imageURL ?
+                        (<div className="w-[245px] h-[220px] overflow-hidden">
+                            <img
+                                src={imageURL}
+                                className="w-full h-full"
+                            />
+                        </div>) 
+                    :
+                        (<>
+                            <p className="mt-10">UPLOAD IMAGE</p>
+                            <p>HERE</p>
+                            <img src={UploadIcon} className="mt-5 mx-auto"/>
+                        </>)
+                    }
                     <input
                         type="file"
                         accept="image/*"
@@ -46,11 +53,9 @@ function ImgUpload () {
                         onChange={handleImgUpload}
                     >
                     </input>
-                </div>)
-            }
+                </div>
         </div>
     )
-
 }
 
 export default ImgUpload

@@ -28,6 +28,8 @@ export const AddPetPage = () => {
     const [age, setAge] = useState<number | null>(null);
     const [gender, setGender] = useState("");
     const [availability, setAvailability] = useState("");
+    const [selectedOptions, setSelectedOptions] = useState<(string | number)[]>([]);
+    const [imageURL, setImageURL] = useState<string | null>(null);
 
     function clearFields() {
         setName("");
@@ -36,6 +38,8 @@ export const AddPetPage = () => {
         setAge(null);
         setGender("");
         setAvailability("");
+        setSelectedOptions([]);
+        setImageURL(null);
     }
     
     function handleSubmit() {
@@ -52,7 +56,12 @@ export const AddPetPage = () => {
                         title="Add New Pet" 
                     >
                         <div className="place-items-center mt-8">
-                            <ImgUpload />
+                            <ImgUpload
+                                imageURL={imageURL}
+                                setImageURL={setImageURL}
+                            >
+                            </ImgUpload>
+
                         </div>
                         <div className="flex space-x-24 mt-3">
                             <TextInput
@@ -106,13 +115,15 @@ export const AddPetPage = () => {
                             <Checklist
                                 title="Disposition"
                                 options={DispositionOptions}
+                                selectedOptions={selectedOptions}
+                                setSelectedOptions={setSelectedOptions}
                             >
                             </Checklist>
                         </div>
                         <div className="text-center mt-4">
                             <Button 
                                 text="ADD PET"
-                                onClick={() => navigate('/pets-page')}
+                                onClick={handleSubmit}
                             >
                             </Button>
                         </div>
