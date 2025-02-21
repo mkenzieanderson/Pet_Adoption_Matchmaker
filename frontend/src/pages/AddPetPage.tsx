@@ -6,6 +6,8 @@ import Button from "../components/Buttons/Button";
 import TextInput from "../components/TextInput/TextInput";
 import Form from "../components/Form/Form";
 import Dropdown from "../components/Dropdown/Dropdown";
+import ImgUpload from "../components/ImgUpload/ImgUpload";
+import Checklist from "../components/Checklist/Checklist";
 import { 
     TypeOptions, 
     DogBreedOptions, 
@@ -19,6 +21,7 @@ import {
 
 export const AddPetPage = () => {
     const navigate = useNavigate();
+    const errorMsg = "One or more fields are missing. Please fill in all fields before submitting."
 
     const [name, setName] = useState("");
     const [type, setType] = useState("");
@@ -26,6 +29,9 @@ export const AddPetPage = () => {
     const [age, setAge] = useState<number | null>(null);
     const [gender, setGender] = useState("");
     const [availability, setAvailability] = useState("");
+    const [selectedOptions, setSelectedOptions] = useState<(string | number)[]>([]);
+    const [imageURL, setImageURL] = useState<string | null>(null);
+    const [showError, setShowError] = useState(false);
 
     function clearFields() {
         setName("");
@@ -34,9 +40,17 @@ export const AddPetPage = () => {
         setAge(null);
         setGender("");
         setAvailability("");
+        setSelectedOptions([]);
+        setImageURL(null);
     }
     
     function handleSubmit() {
+        if (!name || (!type || (type !== "other" && !breed)) || !age || !gender || !availability || !imageURL) {
+            setShowError(true);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+            return;
+        }
+        setShowError(false);
         clearFields();
         navigate('/pets-page');
     }
@@ -45,11 +59,20 @@ export const AddPetPage = () => {
         <>
             <Header user={dummyUser} path={location.pathname} loginStatus={true} />
             <div className="place-items-center">
-                <div className="w-3/5 mt-10 mb-2">
+                <div className="w-3/5 mt-10 mb-16">
                     <Form
-                        title="Add New Pet" 
+                        title="Add New Pet"
+                        error_msg={showError ? errorMsg : ""} 
                     >
-                        <div className="flex space-x-24 mt-6">
+                        <div className="place-items-center mt-8">
+                            <ImgUpload
+                                imageURL={imageURL}
+                                setImageURL={setImageURL}
+                            >
+                            </ImgUpload>
+
+                        </div>
+                        <div className="flex space-x-24 mt-3">
                             <TextInput
                                 type="text"
                                 title="Name"
@@ -97,10 +120,19 @@ export const AddPetPage = () => {
                             >
                             </Dropdown>
                         </div>
+                        <div>
+                            <Checklist
+                                title="Disposition"
+                                options={DispositionOptions}
+                                selectedOptions={selectedOptions}
+                                setSelectedOptions={setSelectedOptions}
+                            >
+                            </Checklist>
+                        </div>
                         <div className="text-center mt-4">
                             <Button 
                                 text="ADD PET"
-                                onClick={() => navigate('/pets-page')}
+                                onClick={handleSubmit}
                             >
                             </Button>
                         </div>
