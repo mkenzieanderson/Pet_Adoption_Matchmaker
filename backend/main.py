@@ -602,9 +602,6 @@ def get_pet(pet_id):
 def get_pets():
     """Returns a list of pets based on filtered attributes"""
     try:
-        payload = verify_jwt(request)
-        if not payload:
-            raise ValueError(401)
 
         age = request.args.get('age', type=int)
         gender = request.args.get('gender', type=str)
