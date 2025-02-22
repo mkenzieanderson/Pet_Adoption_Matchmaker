@@ -72,8 +72,6 @@ auth0 = oauth.register(
     },
 )
 
-# This code is adapted from https://auth0.com/docs/quickstart/backend/python/01-authorization?_ga=2.46956069.349333901.1589042886-466012638.1589042885#create-the-jwt-validation-decorator
-
 class AuthError(Exception):
     def __init__(self, error, status_code):
         self.error = error
@@ -916,36 +914,71 @@ def delete_pet(pet_id):
         _, status_code = e.args
         return get_error_message(status_code), status_code
 
-@app.route('/'+SHELTERS, methods = ['GET'])
+@app.route('/' + SHELTERS, methods=['GET'])
 def get_all_shelters():
-    """Returns a list of all shelters"""
+    """Returns a list of all shelters, optionally filtered by user_id"""
     try:
         payload = verify_jwt(request)
         if not payload:  # Handle missing or invalid JWT
             raise ValueError(401)
 
-        with db.connect() as conn:
+        user_id = request.args.get('user_id')  # Get user_id from query parameters (optional)
 
-            stmt = sqlalchemy.text (
-                'SELECT * FROM shelters'
-            )
-            result = conn.execute(stmt)
+        with db.connect() as conn:
+            if user_id:
+                stmt = sqlalchemy.text('SELECT * FROM shelters WHERE user_id = :user_id')
+                result = conn.execute(stmt, {'user_id': user_id})
+            else:
+                stmt = sqlalchemy.text('SELECT * FROM shelters')
+                result = conn.execute(stmt)
+
             shelters = [row._asdict() for row in result]
 
             for shelter in shelters:
                 shelter['self'] = f"{request.host_url.rstrip('/')}/{SHELTERS}/{shelter['shelter_id']}"
 
-            response = {
-                'shelters':shelters
-            }
+            response = {'shelters': shelters}
 
             return response, 200
+
     except ValueError as e:
         status_code = int(str(e))
         return get_error_message(status_code), status_code
     except AuthError as e:
         _, status_code = e.args
         return get_error_message(status_code), status_code
+
+
+# @app.route('/'+SHELTERS, methods = ['GET'])
+# def get_all_shelters():
+#     """Returns a list of all shelters"""
+#     try:
+#         payload = verify_jwt(request)
+#         if not payload:  # Handle missing or invalid JWT
+#             raise ValueError(401)
+
+#         with db.connect() as conn:
+
+#             stmt = sqlalchemy.text (
+#                 'SELECT * FROM shelters'
+#             )
+#             result = conn.execute(stmt)
+#             shelters = [row._asdict() for row in result]
+
+#             for shelter in shelters:
+#                 shelter['self'] = f"{request.host_url.rstrip('/')}/{SHELTERS}/{shelter['shelter_id']}"
+
+#             response = {
+#                 'shelters':shelters
+#             }
+
+#             return response, 200
+#     except ValueError as e:
+#         status_code = int(str(e))
+#         return get_error_message(status_code), status_code
+#     except AuthError as e:
+#         _, status_code = e.args
+#         return get_error_message(status_code), status_code
 
 @app.route('/'+SHELTERS+'/<int:shelter_id>', methods = ['GET'])
 def get_shelter(shelter_id):
@@ -1430,7 +1463,8 @@ def delete_pet_disposition(pet_id):
 
 
 
-
+init_db()
+create_table(db)
 
 if __name__ == '__main__':
     init_db()
