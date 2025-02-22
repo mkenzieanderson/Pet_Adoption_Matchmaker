@@ -15,15 +15,12 @@
 from __future__ import annotations
 
 import http.client
-from datetime import datetime, timedelta
 import json
 import logging
 import os
 import io
 import time
-
-from auth0_token import Auth0Token
-from utils import access_secret_version
+from datetime import datetime, timedelta
 
 import requests
 import sqlalchemy
@@ -35,9 +32,12 @@ from authlib.integrations.flask_client import OAuth
 from google.cloud import storage, secretmanager
 from six.moves.urllib.request import urlopen
 
+from auth0_token import Auth0Token
 from connect_connector import connect_with_connector
+from utils import access_secret_version
 
 load_dotenv()
+
 
 # Global endpoint names
 PETS = "pets"
