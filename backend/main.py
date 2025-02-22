@@ -14,26 +14,30 @@
 
 from __future__ import annotations
 
+import http.client
+import json
 import logging
 import os
-import json
+import io
+import time
+from datetime import datetime, timedelta
+
 import requests
 import sqlalchemy
-import bcrypt
 from jose import jwt
-import io
-
 from dotenv import load_dotenv
-from six.moves.urllib.request import urlopen
-from jose import jwt
-from authlib.integrations.flask_client import OAuth
 from flask import Flask, request, jsonify, send_file
-from connect_connector import connect_with_connector
-from google.cloud import storage
 from flask_cors import CORS
+from authlib.integrations.flask_client import OAuth
+from google.cloud import storage, secretmanager
+from six.moves.urllib.request import urlopen
 
+from auth0_token import Auth0Token
+from connect_connector import connect_with_connector
+from utils import access_secret_version
 
 load_dotenv()
+
 
 # Global endpoint names
 PETS = "pets"
@@ -43,11 +47,7 @@ FAVORITES = "favorites"
 USERS = "users"
 
 PET_PIC_BUCKET = "cap_pet_photos"
-
-#global secrets for auth
-CLIENT_ID = os.getenv("CLIENT_ID")
-CLIENT_SECRET = os.getenv("CLIENT_SECRET")
-DOMAIN = os.getenv("DOMAIN")
+PROJECT_ID = 'pet-adoption-448417'
 
 ERROR_NOT_FOUND = {'Error' : 'Not Found'}
 
@@ -58,7 +58,11 @@ CORS(app)
 ALGORITHMS = ["RS256"]
 oauth = OAuth(app)
 
-#   domain =  'YOUR_DOMAIN'
+
+CLIENT_ID = access_secret_version("CLIENT_ID")
+CLIENT_SECRET = access_secret_version("CLIENT_SECRET")
+DOMAIN = access_secret_version("DOMAIN")
+
 
 auth0 = oauth.register(
     'auth0',
@@ -72,7 +76,9 @@ auth0 = oauth.register(
     },
 )
 
-# This code is adapted from https://auth0.com/docs/quickstart/backend/python/01-authorization?_ga=2.46956069.349333901.1589042886-466012638.1589042885#create-the-jwt-validation-decorator
+
+auth0_token = Auth0Token(DOMAIN, CLIENT_ID, CLIENT_SECRET)
+access_token = auth0_token.get_access_token()
 
 class AuthError(Exception):
     def __init__(self, error, status_code):
@@ -916,36 +922,71 @@ def delete_pet(pet_id):
         _, status_code = e.args
         return get_error_message(status_code), status_code
 
-@app.route('/'+SHELTERS, methods = ['GET'])
+@app.route('/' + SHELTERS, methods=['GET'])
 def get_all_shelters():
-    """Returns a list of all shelters"""
+    """Returns a list of all shelters, optionally filtered by user_id"""
     try:
         payload = verify_jwt(request)
         if not payload:  # Handle missing or invalid JWT
             raise ValueError(401)
 
-        with db.connect() as conn:
+        user_id = request.args.get('user_id')  # Get user_id from query parameters (optional)
 
-            stmt = sqlalchemy.text (
-                'SELECT * FROM shelters'
-            )
-            result = conn.execute(stmt)
+        with db.connect() as conn:
+            if user_id:
+                stmt = sqlalchemy.text('SELECT * FROM shelters WHERE user_id = :user_id')
+                result = conn.execute(stmt, {'user_id': user_id})
+            else:
+                stmt = sqlalchemy.text('SELECT * FROM shelters')
+                result = conn.execute(stmt)
+
             shelters = [row._asdict() for row in result]
 
             for shelter in shelters:
                 shelter['self'] = f"{request.host_url.rstrip('/')}/{SHELTERS}/{shelter['shelter_id']}"
 
-            response = {
-                'shelters':shelters
-            }
+            response = {'shelters': shelters}
 
             return response, 200
+
     except ValueError as e:
         status_code = int(str(e))
         return get_error_message(status_code), status_code
     except AuthError as e:
         _, status_code = e.args
         return get_error_message(status_code), status_code
+
+
+# @app.route('/'+SHELTERS, methods = ['GET'])
+# def get_all_shelters():
+#     """Returns a list of all shelters"""
+#     try:
+#         payload = verify_jwt(request)
+#         if not payload:  # Handle missing or invalid JWT
+#             raise ValueError(401)
+
+#         with db.connect() as conn:
+
+#             stmt = sqlalchemy.text (
+#                 'SELECT * FROM shelters'
+#             )
+#             result = conn.execute(stmt)
+#             shelters = [row._asdict() for row in result]
+
+#             for shelter in shelters:
+#                 shelter['self'] = f"{request.host_url.rstrip('/')}/{SHELTERS}/{shelter['shelter_id']}"
+
+#             response = {
+#                 'shelters':shelters
+#             }
+
+#             return response, 200
+#     except ValueError as e:
+#         status_code = int(str(e))
+#         return get_error_message(status_code), status_code
+#     except AuthError as e:
+#         _, status_code = e.args
+#         return get_error_message(status_code), status_code
 
 @app.route('/'+SHELTERS+'/<int:shelter_id>', methods = ['GET'])
 def get_shelter(shelter_id):
@@ -1430,7 +1471,8 @@ def delete_pet_disposition(pet_id):
 
 
 
-
+init_db()
+create_table(db)
 
 if __name__ == '__main__':
     init_db()
