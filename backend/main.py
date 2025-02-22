@@ -14,26 +14,30 @@
 
 from __future__ import annotations
 
+import http.client
+import json
 import logging
 import os
-import json
+import io
+import time
+from datetime import datetime, timedelta
+
 import requests
 import sqlalchemy
-import bcrypt
 from jose import jwt
-import io
-
 from dotenv import load_dotenv
-from six.moves.urllib.request import urlopen
-from jose import jwt
-from authlib.integrations.flask_client import OAuth
 from flask import Flask, request, jsonify, send_file
-from connect_connector import connect_with_connector
-from google.cloud import storage
 from flask_cors import CORS
+from authlib.integrations.flask_client import OAuth
+from google.cloud import storage, secretmanager
+from six.moves.urllib.request import urlopen
 
+from auth0_token import Auth0Token
+from connect_connector import connect_with_connector
+from utils import access_secret_version
 
 load_dotenv()
+
 
 # Global endpoint names
 PETS = "pets"
@@ -43,11 +47,7 @@ FAVORITES = "favorites"
 USERS = "users"
 
 PET_PIC_BUCKET = "cap_pet_photos"
-
-#global secrets for auth
-CLIENT_ID = os.getenv("CLIENT_ID")
-CLIENT_SECRET = os.getenv("CLIENT_SECRET")
-DOMAIN = os.getenv("DOMAIN")
+PROJECT_ID = 'pet-adoption-448417'
 
 ERROR_NOT_FOUND = {'Error' : 'Not Found'}
 
@@ -58,7 +58,11 @@ CORS(app)
 ALGORITHMS = ["RS256"]
 oauth = OAuth(app)
 
-#   domain =  'YOUR_DOMAIN'
+
+CLIENT_ID = access_secret_version("CLIENT_ID")
+CLIENT_SECRET = access_secret_version("CLIENT_SECRET")
+DOMAIN = access_secret_version("DOMAIN")
+
 
 auth0 = oauth.register(
     'auth0',
@@ -71,6 +75,10 @@ auth0 = oauth.register(
         'scope': 'openid profile email',
     },
 )
+
+
+auth0_token = Auth0Token(DOMAIN, CLIENT_ID, CLIENT_SECRET)
+access_token = auth0_token.get_access_token()
 
 class AuthError(Exception):
     def __init__(self, error, status_code):
