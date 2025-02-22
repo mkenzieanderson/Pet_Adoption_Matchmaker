@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Button from "../components/Buttons/Button";
-import TextInput from "../components/TextInput/TextInput";
-import Form from "../components/Form/Form";
-import Header from "../components/Header/Header";
-import usePetStore from "../state/Pets/Pet.store";
-import useAuthStore from "../state/Auth/Auth.store";
-import useUserStore from "../state/User/User.store";
+import Button from "../../components/Buttons/Button";
+import TextInput from "../../components/TextInput/TextInput";
+import Form from "../../components/Form/Form";
+import Header from "../../components/Header/Header";
+import usePetStore from "../../state/Pets/Pet.store";
+import useAuthStore from "../../state/Auth/Auth.store";
+import useUserStore from "../../state/User/User.store";
+import useShelterStore from "../../state/Shelter/Shelter.store";
 
 export const SignInPage = () => {
     const navigate = useNavigate();
@@ -15,6 +16,9 @@ export const SignInPage = () => {
     const [showError, setShowError] = useState(false);
 
     const authStore = useAuthStore((state) => state);
+    const shelter = useShelterStore((state) => state);
+    const fetchShelterPets = useShelterStore((state) => state.fetchShelterPets);
+    const user = useUserStore((state) => state.user);
     const fetchUser = useUserStore((state) => state.fetchUser);
     const fetchPets = usePetStore((state) => state.fetchPets);
     const errorMessage = "Email and/or password are incorrect. Please try again.";
@@ -25,19 +29,25 @@ export const SignInPage = () => {
         setPassword("");
     }
 
-    function handleValidLogin (res_token: string, res_user_id: bigint) {
+    async function handleValidLogin(res_token: string, res_user_id: bigint) {
         clearDataFields();
         setShowError(false);
-
-        // Set auth global state
+    
         authStore.setToken(res_token);
         authStore.setUserID(res_user_id);
         authStore.setStatus(true);
-        
-        // Fetch user and set global state
-        fetchUser(res_user_id, res_token);
-        // Fetch pets and set global state
-        fetchPets();
+    
+        await fetchUser(res_user_id, res_token);
+    
+        if (user?.role === "admin") {
+            await shelter.fetchShelter(user.user_id);
+    
+            if (shelter.currentShelter?.shelter_id) {
+                await fetchShelterPets(shelter.currentShelter.shelter_id);
+            }
+        } else {
+            await fetchPets();
+        }
         navigate('/');
     }
 

@@ -15,12 +15,12 @@ export interface Pet {
 interface PetStore {
     pets: Pet[];                       
     currentPet: Pet | null;          // For cases where we need to track one pet in state
-    fetchPets: () => void;
-    fetchPet: (petID: number) => void;
-    addPet: (token: string, newPet: Partial<Pet>) => void;
-    updatePet: (petID: number, updatedData: Partial<Pet>) => void;
-    deletePet: (petID: number, token: string) => void;
-    uploadAvatar: (petID: number, avatar: File) => void;
+    fetchPets: () => Promise<void>; 
+    fetchPet: (petID: number) => Promise<void>;
+    addPet: (token: string, newPet: Partial<Pet>) => Promise<void>;
+    updatePet: (petID: number, updatedData: Partial<Pet>) => Promise<void>;
+    deletePet: (petID: number, token: string) => Promise<void>;
+    uploadAvatar: (petID: number, avatar: File) => Promise<void>;
 }
 
 

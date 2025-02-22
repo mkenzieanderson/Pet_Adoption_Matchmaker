@@ -11,11 +11,11 @@ export interface User {
 
 interface UserStore {
     user: User | null;
-    fetchUser: (userID: bigint, token: string) => void;
-    updateUser: (userID: bigint, token: string, updatedData: Partial<User>) => void;
-    addFavoritePet: (petID: number, userID: bigint) => void;
-    deleteFavoritePet: (petID: number, userID: bigint, token: string) => void;
-    fetchFavoritePets: (userID: bigint, token: string) => void;
+    fetchUser: (userID: bigint, token: string) => Promise<void>;
+    updateUser: (userID: bigint, token: string, updatedData: Partial<User>) => Promise<void>;
+    addFavoritePet: (petID: number, userID: bigint) => Promise<void>;
+    deleteFavoritePet: (petID: number, userID: bigint, token: string) => Promise<void>;
+    fetchFavoritePets: (userID: bigint, token: string) => Promise<void>;
 }
 
 const useUserStore = create<UserStore>((set) => ({
