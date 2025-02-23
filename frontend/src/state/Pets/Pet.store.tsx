@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { URL } from '../../App';
 
 export interface Pet {
     pet_id: number;
@@ -29,7 +30,7 @@ const usePetStore = create<PetStore>((set) => ({
     currentPet: null,
     fetchPets: async () => {
         try {
-            const response = await fetch('http://localhost:8080/pets', {
+            const response = await fetch(`${URL}pets`, {
                 method: 'GET',
             });
             if (!response.ok) {
@@ -43,7 +44,7 @@ const usePetStore = create<PetStore>((set) => ({
     },
     fetchPet: async (petID: number) => {
         try {
-            const response = await fetch(`http://localhost:8080/pets/${petID}`, {
+            const response = await fetch(`${URL}pets/${petID}`, {
                 method: 'GET',
             });
             if (!response.ok) {
@@ -57,7 +58,7 @@ const usePetStore = create<PetStore>((set) => ({
     },
     addPet: async (token: string, newPet: Partial<Pet>) => {
         try {
-            const response = await fetch('http://localhost:8080/pets', {
+            const response = await fetch(`${URL}/pets`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -76,7 +77,7 @@ const usePetStore = create<PetStore>((set) => ({
     },
     updatePet: async (petID: number, updatedData: Partial<Pet>) => {
         try {
-            const response = await fetch(`http://localhost:8080/pets/${petID}`, {
+            const response = await fetch(`${URL}pets/${petID}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -98,7 +99,7 @@ const usePetStore = create<PetStore>((set) => ({
     },
     deletePet: async (petID: number, token: string) => {
         try {
-            const response = await fetch(`http://localhost:8080/pets/${petID}`, {
+            const response = await fetch(`${URL}pets/${petID}`, {
                 method: 'DELETE',
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -118,7 +119,7 @@ const usePetStore = create<PetStore>((set) => ({
         try {
             const formData = new FormData();
             formData.append('avatar', avatar);
-            const response = await fetch(`http://localhost:8080/pets/${petID}/avatar`, {
+            const response = await fetch(`${URL}pets/${petID}/avatar`, {
                 method: 'POST',
                 body: formData,
             });

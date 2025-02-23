@@ -8,6 +8,7 @@ import usePetStore from "../../state/Pets/Pet.store";
 import useAuthStore from "../../state/Auth/Auth.store";
 import useUserStore from "../../state/User/User.store";
 import useShelterStore from "../../state/Shelter/Shelter.store";
+import { URL } from "../../App";
 
 export const SignInPage = () => {
     const navigate = useNavigate();
@@ -45,9 +46,8 @@ export const SignInPage = () => {
             if (shelter.currentShelter?.shelter_id) {
                 await fetchShelterPets(shelter.currentShelter.shelter_id);
             }
-        } else {
-            await fetchPets();
-        }
+        } 
+        fetchPets();
         navigate('/');
     }
 
@@ -63,7 +63,8 @@ export const SignInPage = () => {
 
     const authenticateLogin = async () => {
         try {
-            const response = await fetch('http://localhost:8080/users/login', {
+            console.log('URL:', URL);
+            const response = await fetch(`${URL}users/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

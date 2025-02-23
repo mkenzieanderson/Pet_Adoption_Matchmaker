@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { Pet } from '../Pets/Pet.types';
+import { URL } from '../../App';  
 
 interface Shelter {
     shelter_id: number;
@@ -27,7 +28,7 @@ const useShelterStore = create<ShelterStore>((set) => ({
     shelterPets: [],
     fetchShelters: async (token: string) => {
         try {
-            const response = await fetch('http://localhost:8080/shelters', {
+            const response = await fetch(`${URL}shelters`, {
                 method: 'GET',
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -44,7 +45,7 @@ const useShelterStore = create<ShelterStore>((set) => ({
     },
     fetchShelter: async (shelterID: bigint) => {
         try {
-            const response = await fetch(`http://localhost:8080/shelters/${shelterID}`, {
+            const response = await fetch(`${URL}shelters/${shelterID}`, {
                 method: 'GET',
                 }); 
             if (!response.ok) {
@@ -58,7 +59,7 @@ const useShelterStore = create<ShelterStore>((set) => ({
     },
     addShelter: async (token: string, newShelter: Partial<Shelter>) => {
         try {
-            const response = await fetch('http://localhost:8080/shelters', {
+            const response = await fetch(`${URL}shelters`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -77,7 +78,7 @@ const useShelterStore = create<ShelterStore>((set) => ({
     },
     updateShelter: async (shelterID: number, updatedData: Partial<Shelter>, token) => {
         try {
-            const response = await fetch(`http://localhost:8080/shelters/${shelterID}`, {
+            const response = await fetch(`${URL}${shelterID}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -100,7 +101,7 @@ const useShelterStore = create<ShelterStore>((set) => ({
     },
     deleteShelter: async (shelterID: number, token: string) => {
         try {
-            const response = await fetch(`http://localhost:8080/shelters/${shelterID}`, {
+            const response = await fetch(`${URL}shelters/${shelterID}`, {
                 method: 'DELETE',
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -118,7 +119,7 @@ const useShelterStore = create<ShelterStore>((set) => ({
     },
     fetchShelterPets: async (shelterID: number) => {
         try {
-            const response = await fetch(`http://localhost:8080/shelters/${shelterID}/pets`, {
+            const response = await fetch(`${URL}pets/${shelterID}`, {
                 method: 'GET',
             });
             if (!response.ok) {
@@ -126,7 +127,6 @@ const useShelterStore = create<ShelterStore>((set) => ({
             }
             const data = await response.json();
             set({ shelterPets: data.pets });
-            console.log("Pet data in shelter:", data.pets);
         } catch (error) {
             console.error('Failed to fetch shelter pets:', error);
         }

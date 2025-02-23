@@ -7,6 +7,8 @@ import { EditPetPage } from './pages/EditPetPage'
 import { AddPetPage } from './pages/AddPetPage'
 import './App.css'
 
+export const URL = import.meta.env.VITE_BASE_URL
+
 const routes = createBrowserRouter([
   {path: '/', element: <HomePage />},
   {path: 'pets-page', element: <PetsPage />},
