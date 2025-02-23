@@ -2,12 +2,12 @@ import { useNavigate } from "react-router-dom";
 import Edit from "../../assets/edit.svg";
 import Delete from "../../assets/delete.svg";
 import { Pet } from "../../state/Pets/Pet.types";
-import { User} from "../../state/User/User.types";
+import { User} from "../../state/User/User.store";
 
 
 interface PetProfileCardProps {
     pet: Pet;
-    user: User;
+    user: User | null;
     }
 
     const PetProfileCard = ({ pet, user }: PetProfileCardProps) => {
@@ -22,7 +22,7 @@ interface PetProfileCardProps {
                         className="w-full h-[150px] sm:h-[200px] object-cover rounded-t-lg" 
                     />
                     <div className="absolute top-2 right-1">
-                    {user.type === 'user' ? (
+                    {user?.role === 'user' ? (
                         <button className="w-6 h-6 mx-4 my-4" onClick={() => navigate('/edit-pet-page')}>
                             <Delete />
                         </button>

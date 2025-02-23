@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Button from "../../components/Buttons/Button";
-import TextInput from "../../components/TextInput/TextInput";
-import Form from "../../components/Form/Form";
-import Header from "../../components/Header/Header";
-import usePetStore from "../../state/Pets/Pet.store";
-import useAuthStore from "../../state/Auth/Auth.store";
-import useUserStore from "../../state/User/User.store";
-import useShelterStore from "../../state/Shelter/Shelter.store";
-import { URL } from "../../App";
+import Button from "../components/Buttons/Button";
+import TextInput from "../components/TextInput/TextInput";
+import Form from "../components/Form/Form";
+import Header from "../components/Header/Header";
+import usePetStore from "../state/Pets/Pet.store";
+import useAuthStore from "../state/Auth/Auth.store";
+import useUserStore from "../state/User/User.store";
+import useShelterStore from "../state/Shelter/Shelter.store";
+import { URL } from "../App";
 
 export const SignInPage = () => {
     const navigate = useNavigate();
@@ -47,6 +47,7 @@ export const SignInPage = () => {
                 await fetchShelterPets(shelter.currentShelter.shelter_id);
             }
         } 
+        console.log("User role: ", user?.role);
         fetchPets();
         navigate('/');
     }
@@ -63,7 +64,6 @@ export const SignInPage = () => {
 
     const authenticateLogin = async () => {
         try {
-            console.log('URL:', URL);
             const response = await fetch(`${URL}users/login`, {
                 method: 'POST',
                 headers: {

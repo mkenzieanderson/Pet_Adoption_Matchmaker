@@ -1,4 +1,3 @@
-import { dummyUser } from "../state/User/User.types";
 import Header from "../components/Header/Header";
 import PetCardGrid from "../components/PetCardGrid/PetCardGrid";
 import useUserStore from "../state/User/User.store";
@@ -12,7 +11,7 @@ export const PetsPage = () => {
                 <Header user={user} path={location.pathname} loginStatus={true}/>
             </div>
             <div className=" rounded-lg p-4">
-               <PetCardGrid user={dummyUser}/>
+               <PetCardGrid user={user}/>
             </div>
         </>
     )

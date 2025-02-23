@@ -1,5 +1,5 @@
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
-import { SignInPage } from './pages/SignInPage/SignInPage'
+import { SignInPage } from './pages/SignInPage'
 import { HomePage } from './pages/HomePage'
 import { MyAccountPage } from './pages/MyAccountPage'
 import { PetsPage } from './pages/PetsPage'
