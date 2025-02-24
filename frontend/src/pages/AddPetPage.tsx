@@ -15,7 +15,9 @@ export const AddPetPage = () => {
     return (
         <>
             <Header user={user} path={location.pathname} loginStatus={auth.status} />
-            <PetFormPage mode="add" submitHandler={submitHandler}/>
+            <div className="mb-16">
+                <PetFormPage mode="add" submitHandler={submitHandler}/>
+            </div>
         </>
     )
 }

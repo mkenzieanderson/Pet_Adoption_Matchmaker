@@ -77,7 +77,7 @@ export const PetFormPage: React.FC<PetFormProps> = ({ mode, initialData, submitH
     return (
         <>
             <div className="place-items-center">
-                <div className="w-3/5 mt-10 mb-16">
+                <div className="w-3/5 mt-10 mb-2">
                     <Form
                         title={mode === "add" ? "Add New Pet" : "Edit Pet"}
                         error_msg={showError ? errorMsg : ""} 
