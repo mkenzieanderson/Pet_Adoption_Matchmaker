@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { Pet } from '../Pets/Pet.types';
+import { URL } from '../../App';  
 
 interface Shelter {
     shelter_id: number;
@@ -11,19 +13,22 @@ interface Shelter {
 interface ShelterStore {
     shelters: Shelter[];
     currentShelter: Shelter | null;
-    fetchShelters: (token: string) => void;
-    fetchShelter: (shelterID: number) => void;
-    addShelter: (token: string, newShelter: Partial<Shelter>) => void;
-    updateShelter: (shelterID: number, updatedData: Partial<Shelter>, token: string) => void;
-    deleteShelter: (shelterID: number, token: string) => void;
+    shelterPets: Pet[];
+    fetchShelters: (token: string) => Promise<void>;
+    fetchShelter: (shelterID: bigint) => Promise<void>;
+    addShelter: (token: string, newShelter: Partial<Shelter>) => Promise<void>;
+    updateShelter: (shelterID: number, updatedData: Partial<Shelter>, token: string) => Promise<void>;
+    deleteShelter: (shelterID: number, token: string) => Promise<void>;
+    fetchShelterPets: (shelterID: number) => Promise<void>;
 }
 
 const useShelterStore = create<ShelterStore>((set) => ({
     shelters: [],
     currentShelter: null,
+    shelterPets: [],
     fetchShelters: async (token: string) => {
         try {
-            const response = await fetch('http://localhost:8080/shelters', {
+            const response = await fetch(`${URL}shelters`, {
                 method: 'GET',
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -38,9 +43,9 @@ const useShelterStore = create<ShelterStore>((set) => ({
             console.error('Failed to fetch shelters:', error);
         }
     },
-    fetchShelter: async (shelterID: number) => {
+    fetchShelter: async (shelterID: bigint) => {
         try {
-            const response = await fetch(`http://localhost:8080/shelters/${shelterID}`, {
+            const response = await fetch(`${URL}shelters/${shelterID}`, {
                 method: 'GET',
                 }); 
             if (!response.ok) {
@@ -54,7 +59,7 @@ const useShelterStore = create<ShelterStore>((set) => ({
     },
     addShelter: async (token: string, newShelter: Partial<Shelter>) => {
         try {
-            const response = await fetch('http://localhost:8080/shelters', {
+            const response = await fetch(`${URL}shelters`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -73,7 +78,7 @@ const useShelterStore = create<ShelterStore>((set) => ({
     },
     updateShelter: async (shelterID: number, updatedData: Partial<Shelter>, token) => {
         try {
-            const response = await fetch(`http://localhost:8080/shelters/${shelterID}`, {
+            const response = await fetch(`${URL}${shelterID}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -96,7 +101,7 @@ const useShelterStore = create<ShelterStore>((set) => ({
     },
     deleteShelter: async (shelterID: number, token: string) => {
         try {
-            const response = await fetch(`http://localhost:8080/shelters/${shelterID}`, {
+            const response = await fetch(`${URL}shelters/${shelterID}`, {
                 method: 'DELETE',
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -111,7 +116,21 @@ const useShelterStore = create<ShelterStore>((set) => ({
         } catch (error) {
             console.error('Failed to delete shelter:', error);
         }
-    }
+    },
+    fetchShelterPets: async (shelterID: number) => {
+        try {
+            const response = await fetch(`${URL}pets/${shelterID}`, {
+                method: 'GET',
+            });
+            if (!response.ok) {
+                throw new Error('Failed to fetch shelter pets');
+            }
+            const data = await response.json();
+            set({ shelterPets: data.pets });
+        } catch (error) {
+            console.error('Failed to fetch shelter pets:', error);
+        }
+    },
 }));
 
 export default useShelterStore;

@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { URL } from '../../App';
 
 export interface Pet {
     pet_id: number;
@@ -15,25 +16,22 @@ export interface Pet {
 interface PetStore {
     pets: Pet[];                       
     currentPet: Pet | null;          // For cases where we need to track one pet in state
-    fetchPets: (token: string) => void;
-    fetchPet: (petID: number) => void;
-    addPet: (token: string, newPet: Partial<Pet>) => void;
-    updatePet: (petID: number, updatedData: Partial<Pet>) => void;
-    deletePet: (petID: number, token: string) => void;
-    uploadAvatar: (petID: number, avatar: File) => void;
+    fetchPets: () => Promise<void>; 
+    fetchPet: (petID: number) => Promise<void>;
+    addPet: (token: string, newPet: Partial<Pet>) => Promise<void>;
+    updatePet: (petID: number, updatedData: Partial<Pet>) => Promise<void>;
+    deletePet: (petID: number, token: string) => Promise<void>;
+    uploadAvatar: (petID: number, avatar: File) => Promise<void>;
 }
 
 
 const usePetStore = create<PetStore>((set) => ({
     pets: [],
     currentPet: null,
-    fetchPets: async (token: string) => {
+    fetchPets: async () => {
         try {
-            const response = await fetch('http://localhost:8080/pets', {
+            const response = await fetch(`${URL}pets`, {
                 method: 'GET',
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
             });
             if (!response.ok) {
                 throw new Error('Failed to fetch pets');
@@ -46,7 +44,7 @@ const usePetStore = create<PetStore>((set) => ({
     },
     fetchPet: async (petID: number) => {
         try {
-            const response = await fetch(`http://localhost:8080/pets/${petID}`, {
+            const response = await fetch(`${URL}pets/${petID}`, {
                 method: 'GET',
             });
             if (!response.ok) {
@@ -60,7 +58,7 @@ const usePetStore = create<PetStore>((set) => ({
     },
     addPet: async (token: string, newPet: Partial<Pet>) => {
         try {
-            const response = await fetch('http://localhost:8080/pets', {
+            const response = await fetch(`${URL}/pets`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -79,7 +77,7 @@ const usePetStore = create<PetStore>((set) => ({
     },
     updatePet: async (petID: number, updatedData: Partial<Pet>) => {
         try {
-            const response = await fetch(`http://localhost:8080/pets/${petID}`, {
+            const response = await fetch(`${URL}pets/${petID}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -101,7 +99,7 @@ const usePetStore = create<PetStore>((set) => ({
     },
     deletePet: async (petID: number, token: string) => {
         try {
-            const response = await fetch(`http://localhost:8080/pets/${petID}`, {
+            const response = await fetch(`${URL}pets/${petID}`, {
                 method: 'DELETE',
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -121,7 +119,7 @@ const usePetStore = create<PetStore>((set) => ({
         try {
             const formData = new FormData();
             formData.append('avatar', avatar);
-            const response = await fetch(`http://localhost:8080/pets/${petID}/avatar`, {
+            const response = await fetch(`${URL}pets/${petID}/avatar`, {
                 method: 'POST',
                 body: formData,
             });

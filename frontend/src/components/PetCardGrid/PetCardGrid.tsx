@@ -1,37 +1,33 @@
 import PetProfileCard from "../PetProfileCard/PetProfileCard";
 import Button from "../Buttons/Button";
 import { pets } from "./TempData";
-import { dummyUser } from "../../state/User/User.types";
 import { Pet } from "../../state/Pets/Pet.types";
-import { User } from "../../state/User/User.types";
+import { User } from "../../state/User/User.store";
 import { useNavigate } from "react-router-dom";
 
 interface PetCardGridProps {
     pet?: Pet;
-    user: User;
+    user: User | null;
 }
 
 const PetCardGrid = ({user}: PetCardGridProps) => {
     const navigate = useNavigate();
-    const title = user.type === 'user' ? 'My Saved Pets' : 'My Shelter';
+    const title = user?.role === 'user' ? 'My Saved Pets' : 'My Shelter';
 
     return (
         <>
-            <div className="flex flex-col items-center">
-                <div className="flex flex-row">
-                    <h1 className="text-3xl font-header font-semibold text-espresso mx-auto my-6">{title}</h1>
-                    {user.type === 'admin' ? (
-                         <div className="absolute right-[230px]">
-                         <Button text="ADD PET" onClick={() => navigate('/add-pet-page')} />
-                     </div>
-                    ) : (
-                        null
-                    )
-                }
+            <div className="flex flex-col items-center w-full">
+                <div className="flex flex-col sm:flex-row items-center justify-between w-full px-4">
+                    <h1 className="text-3xl font-semibold text-espresso my-6 mx-auto">{title}</h1>
+                    {user?.role === 'admin' ? (
+                        <div className="my-auto mb-6">
+                            <Button text="ADD PET" onClick={() => navigate("/add-pet-page")} />
+                        </div>
+                    ) : null}
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-32 gap-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-x-40 gap-y-6">
                     {pets.map((pet, index) => (
-                        <PetProfileCard key={index} pet={pet} user={dummyUser} />
+                        <PetProfileCard key={index} pet={pet} user={user} />
                     ))}
                 </div>
             </div>

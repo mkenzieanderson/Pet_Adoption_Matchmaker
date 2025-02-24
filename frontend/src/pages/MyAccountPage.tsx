@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import Header from "../components/Header/Header";
-import { dummyUser } from "../state/User/User.types";
 import Button from "../components/Buttons/Button";
 import TextInput from "../components/TextInput/TextInput";
 import Form from "../components/Form/Form";
 import { errorButtonStyle } from "../components/Buttons/ButtonStyles";
 import DeleteAccountPopUp from "../components/PopUp/DeleteAccountPopUp";
+import useAuthStore from "../state/Auth/Auth.store";
+import useUserStore from "../state/User/User.store";
 
 export const MyAccountPage = () => {
     const [firstName, setFirstName] = useState("Jane");
@@ -16,6 +17,8 @@ export const MyAccountPage = () => {
     const [confirmPwd, setConfirmPwd] = useState("");
     const [editMode, setEditMode] = useState(false);
     const [showDeleteWarning, setShowDeleteWarning] = useState(false);
+    const user = useUserStore((state) => state.user);
+    const auth = useAuthStore((state) => state);
 
     function handleEditAccount() {
         setEditMode(true);
@@ -31,7 +34,7 @@ export const MyAccountPage = () => {
 
     return (
         <>
-            <Header user={dummyUser} path={location.pathname} loginStatus={true} />
+            <Header user={user} path={location.pathname} loginStatus={auth.status} />
             <div className="place-items-center">
                 <div className="w-3/5 mt-10 mb-2">
                     <Form
