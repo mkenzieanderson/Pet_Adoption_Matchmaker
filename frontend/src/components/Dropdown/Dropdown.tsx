@@ -11,6 +11,7 @@ type DropdownProps = {
     width: string;
     options: DropdownOptions[];
     onChange: (option: DropdownOptions) => void;
+    value?: string | number;
 }
 
 function Dropdown ({ title, width, options, onChange }: DropdownProps) {
