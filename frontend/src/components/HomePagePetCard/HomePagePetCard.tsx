@@ -15,7 +15,7 @@ const HomePagePetCard = ({ pet }: HomePagePetCardProps) => {
     const buttonStyles = "absolute z-40 rounded-3xl bg-white px-2 py-2 border-solid border-4 border-espresso text-espresso hover:bg-clay"
 
     return (
-        <div className="bg-mustard w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-[684px] h-[560px] p-4 rounded-lg shadow-md relative">
+        <div className="bg-mustard w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-[780px] xl:h-[650px] p-4 rounded-lg shadow-md relative">
             <div className="relative w-full h-full">
                 <img src={pet.image} alt={pet.name} className="w-full h-full object-cover rounded-t-lg" />
                 <Button 
