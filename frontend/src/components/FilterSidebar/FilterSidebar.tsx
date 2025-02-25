@@ -42,7 +42,8 @@ const FilterSidebar = () => {
                             onChange={(option) => setType(option.value.toString())}
                         />
                     </div>
-                    <div className="my-4">
+                    {type === "other" ? null : 
+                        <div className="my-4">
                         <Dropdown 
                             title="Breed" 
                             width="w-[210px]" 
@@ -50,6 +51,7 @@ const FilterSidebar = () => {
                             onChange={(option) => setBreed(option.value.toString())}
                         />
                     </div>
+                    }
                     <div className="my-4">
                         <Dropdown 
                             title="Age" 

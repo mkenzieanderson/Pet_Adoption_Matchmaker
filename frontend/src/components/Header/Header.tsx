@@ -6,6 +6,7 @@ import Button from "../Buttons/Button";
 import { BiUser } from "react-icons/bi";
 import { FaHome } from "react-icons/fa";
 import useAuthStore from "../../state/Auth/Auth.store";
+import useUserStore from "../../state/User/User.store";
 
 interface HeaderProps {
     user?: User | null;
@@ -16,6 +17,7 @@ interface HeaderProps {
 const Header = ({ user, path, loginStatus }: HeaderProps) => {
     const navigate = useNavigate();
     const auth = useAuthStore((state) => state);
+    const userStore = useUserStore((state) => state);
     const [menuOpen, setMenuOpen] = useState(false);
     const subMenuClassName = "w-full text-left py-4 px-4 font-serif font-semibold text-xl hover:bg-transparent-clay";
     const svgButtonClassName = `bg-mustard text-espresso font-header font-semibold border-tawny-brown 
@@ -73,7 +75,7 @@ const Header = ({ user, path, loginStatus }: HeaderProps) => {
                             text="My Account" 
                             className={`${subMenuClassName} border-solid border-b-4 border-tawny-brown`} />
                     {renderSubMenuButton()}
-                    <Button onClick={() => {navigate('/sign-page'), auth.clearAuth()} } 
+                    <Button onClick={() => {navigate('/sign-page'), auth.clearAuth(), userStore.clearUser()} } 
                             text="Sign Out" 
                             className={subMenuClassName} />
                 </div>
