@@ -4,11 +4,13 @@ import Button from "../components/Buttons/Button";
 import TextInput from "../components/TextInput/TextInput";
 import Form from "../components/Form/Form";
 import { errorButtonStyle } from "../components/Buttons/ButtonStyles";
-import DeleteAccountPopUp from "../components/PopUp/DeleteAccountPopUp";
+import DeletePopUp from "../components/PopUp/DeletePopUp";
 import useAuthStore from "../state/Auth/Auth.store";
 import useUserStore from "../state/User/User.store";
+import { useNavigate } from "react-router-dom";
 
 export const MyAccountPage = () => {
+    const navigate = useNavigate();
     const [firstName, setFirstName] = useState("Jane");
     const [lastName, setLastName] = useState("Doe");
     const [email, setEmail] = useState("janedoe@email.com");
@@ -30,6 +32,15 @@ export const MyAccountPage = () => {
 
     function openDeleteWarning () {
         setShowDeleteWarning(true);
+    }
+
+    function handleDelete() {
+        setShowDeleteWarning(false)
+        navigate('/');
+    }
+
+    function handleCancel() {
+        setShowDeleteWarning(false);
     }
 
     return (
@@ -117,9 +128,14 @@ export const MyAccountPage = () => {
                 </div>
                 {showDeleteWarning && (
                     <div className="fixed inset-0 bg-espresso bg-opacity-50 flex items-center justify-center z-50">
-                        <DeleteAccountPopUp onClose={() => setShowDeleteWarning(false)} />
+                        <DeletePopUp 
+                            header="Delete Account" 
+                            description="Are you sure that you want to delete your account?"
+                            onDelete={handleDelete}
+                            onCancel={handleCancel}
+                        />
                     </div>
-)}
+                )}
             </div>
         </>
     )

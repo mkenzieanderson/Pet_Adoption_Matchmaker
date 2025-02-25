@@ -9,6 +9,9 @@ import './App.css'
 
 export const URL = import.meta.env.VITE_BASE_URL
 
+// For development purposes until bugs with the import.meta.env.VITE_BASE_URL are resolved
+// export const URL = 'http://localhost:8080/';
+
 const routes = createBrowserRouter([
   {path: '/', element: <HomePage />},
   {path: 'pets-page', element: <PetsPage />},
