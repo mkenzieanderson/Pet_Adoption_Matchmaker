@@ -61,7 +61,7 @@ const useUserStore = create<UserStore>((set) => ({
     },
     addFavoritePet: async (petID: number, userID: bigint, token: string) => {
         try {
-            const response = await fetch(`${URL}/favorites`, {
+            const response = await fetch(`${URL}favorites`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

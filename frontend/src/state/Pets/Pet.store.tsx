@@ -59,7 +59,7 @@ const usePetStore = create<PetStore>((set) => ({
     },
     addPet: async (token: string, newPet: Partial<Pet>) => {
         try {
-            const response = await fetch(`${URL}/pets`, {
+            const response = await fetch(`${URL}pets`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
