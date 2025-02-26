@@ -37,6 +37,7 @@ const usePetStore = create<PetStore>((set) => ({
                 throw new Error('Failed to fetch pets');
             }
             const data = await response.json();
+            console.log("Pet Data: ", data);
             set({ pets: data.pets });
         } catch (error) {
             console.error('Failed to fetch pets:', error);
@@ -58,7 +59,7 @@ const usePetStore = create<PetStore>((set) => ({
     },
     addPet: async (token: string, newPet: Partial<Pet>) => {
         try {
-            const response = await fetch(`${URL}/pets`, {
+            const response = await fetch(`${URL}pets`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
