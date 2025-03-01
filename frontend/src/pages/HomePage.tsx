@@ -107,7 +107,7 @@ export const HomePage = () => {
                             )}
                         </div>
                     ) : (
-                        <EmptyCard title="No pets found" message="Try adjusting your filters or check back later." />
+                        <EmptyCard title="No pets found" message="Try adjusting your filters or check back later" />
                     )}
                 </div>
             </div>

@@ -1,4 +1,4 @@
-import CatDog from '../../assets/cat_dog_default.jpg';
+import { FaDog } from 'react-icons/fa';
 
 interface EmptyCardProps {
     title: string;
@@ -7,16 +7,17 @@ interface EmptyCardProps {
 
 const EmptyCard = ({ title, message }: EmptyCardProps) => {
     return (
-        <div className="empty-card bg-black bg-opacity-10 w-full h-full flex flex-col items-center justify-center rounded-lg">
-            <div className="empty-card__icon">
-                <img src={CatDog} alt="Empty Card" />
+        <>
+            <div className="bg-mustard w-1/2 h-[650px] p-4 rounded-lg shadow-md relative">
+                <div className="flex flex-col items-center justify-center w-full h-full gap-y-24">
+                    <span className="text-espresso text-3xl font-header font-bold">{title}</span>
+                    <div className="bg-beige w-1/3 h-1/3 rounded-full flex items-center justify-center">
+                        <FaDog className="text-espresso text-9xl" />
+                    </div>
+                    <span className="text-espresso text-3xl font-header font-bold">{message}</span>
+                </div>
             </div>
-            <div className="empty-card__text">
-                <h3>No Pets Found</h3>
-                <p>Try adjusting your filters or check back later.</p>
-                <p>{title}{message}</p>
-            </div>
-        </div>
+        </>
     )
 }
 
