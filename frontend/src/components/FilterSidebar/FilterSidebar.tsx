@@ -1,5 +1,6 @@
 import Dropdown from '../Dropdown/Dropdown';
 import Button from '../Buttons/Button';
+import { FilterCriteria } from '../../state/Pets/Pet.store';
 import { useState } from 'react';
 import { 
     TypeOptions, 
@@ -11,17 +12,21 @@ import {
     DispositionOptions 
 } from '../Dropdown/PetOptions';
 
+interface FilterSidebarProps {
+    filterPets: (filterCriteria: FilterCriteria) => void;
+}
 
-const FilterSidebar = () => {
+const FilterSidebar = ({filterPets}: FilterSidebarProps) => {
     const [type, setType] = useState("");
     const [breed, setBreed] = useState("");
-    const [age, setAge] = useState<number | null>(null);
+    const [age, setAge] = useState(0);
     const [gender, setGender] = useState("");
     const [disposition, setDisposition] = useState("");
     const [availability, setAvailability] = useState("");
 
     const handleApply = () => {
-        console.log("Applying filters");
+        console.log("Applying filters", { type, breed, age, gender, disposition, availability });
+        filterPets({ type, breed, age, gender, disposition, availability });
     }
 
     return (

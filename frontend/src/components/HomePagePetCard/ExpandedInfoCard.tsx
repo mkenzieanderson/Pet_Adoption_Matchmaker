@@ -1,4 +1,4 @@
-import { Pet } from '../../state/Pets/Pet.types';
+import { Pet } from '../../state/Pets/Pet.store';
 
 interface ExpandedInfoCardProps {
     pet: Pet;
@@ -10,7 +10,7 @@ const ExpandedInfoCard = ({ pet }: ExpandedInfoCardProps) => {
 
     return (
         <>
-            <div className="absolute bottom-0 left-0 bg-beige bg-opacity-95 text-espresso p-2 w-full h-3/5 rounded-sm">
+            <div className="absolute bottom-0 left-0 bg-beige bg-opacity-95 text-espresso p-2 w-full h-1/2 rounded-sm">
                 <h2 className="flex justify-center text-4xl font-semibold font-body">{pet.name}</h2>
                 <div className="flex flex-col justify-start my-2 mx-6">
                     <span className={titleStyles}>
@@ -31,7 +31,7 @@ const ExpandedInfoCard = ({ pet }: ExpandedInfoCardProps) => {
                     </span>
                     <span className={titleStyles}>
                         Disposition:
-                        <span className={contentStyles}>{pet.disposition.join(", ")}</span>
+                        <span className={contentStyles}>{pet.disposition}</span>
                     </span>
                     <span className={titleStyles}>
                         Shelter:
