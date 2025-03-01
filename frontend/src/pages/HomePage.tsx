@@ -1,5 +1,7 @@
 import Header from "../components/Header/Header";
 import HomePagePetCard from "../components/HomePagePetCard/HomePagePetCard";
+import EmptyCard from "../components/EmptyCard/EmptyCard";
+import LoadingState from "../components/LoadingState/LoadingState";
 import useAuthStore from "../state/Auth/Auth.store";
 import useUserStore from "../state/User/User.store";
 import FilterSidebar from "../components/FilterSidebar/FilterSidebar";
@@ -15,9 +17,23 @@ export const HomePage = () => {
     const pets = usePetStore((state) => state.pets);
     const fetchPets = usePetStore((state) => state.fetchPets);
     const [currentPetIndex, setCurrentPetIndex] = useState(0);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetchPets();
+        const fetchData = async () => {
+            setLoading(true);
+            const startTime = Date.now();
+            await fetchPets();
+            const endTime = Date.now();
+            const elapsedTime = endTime - startTime;
+            const minimumLoadingTime = 500; // Minimum loading time in milliseconds
+            if (elapsedTime < minimumLoadingTime) {
+                setTimeout(() => setLoading(false), minimumLoadingTime - elapsedTime);
+            } else {
+                setLoading(false);
+            }
+        };
+        fetchData();
     }, []);
 
     const handleNextPet = () => {
@@ -32,10 +48,20 @@ export const HomePage = () => {
         console.log("Adding favorite", pet);
     };
 
-    const filterPets = (filterCriteria: FilterCriteria) => {
-        fetchPets(filterCriteria);
+    const filterPets = async (filterCriteria: FilterCriteria) => {
+        setLoading(true);
+        const startTime = Date.now();
+        await fetchPets(filterCriteria);
+        const endTime = Date.now();
+        const elapsedTime = endTime - startTime;
+        const minimumLoadingTime = 500; // Minimum loading time in milliseconds
+        if (elapsedTime < minimumLoadingTime) {
+            setTimeout(() => setLoading(false), minimumLoadingTime - elapsedTime);
+        } else {
+            setLoading(false);
+        }
         setCurrentPetIndex(0);
-    }
+    };
 
     return (
         <>
@@ -43,7 +69,9 @@ export const HomePage = () => {
             <div className="flex flex-row h-screen">
                 <FilterSidebar filterPets={filterPets} />
                 <div className="flex flex-col items-center w-screen mt-14">
-                    {pets.length > 0 && (
+                    {loading ? (
+                        <LoadingState />
+                    ) : pets.length > 0 ? (
                         <div className="flex flex-row items-center justify-evenly w-full">
                             {auth.status && user?.role === 'user' ? (
                                 <button
@@ -57,10 +85,9 @@ export const HomePage = () => {
                                     className="bg-beige border-solid border-2 border-tawny-brown hover:border-espresso rounded-xl p-3 mx-2 text-tawny-brown hover:text-espresso text-7xl">
                                     <FaChevronLeft />
                                 </button>
-                            )
-                            }
+                            )}
 
-                            < HomePagePetCard pet={pets[currentPetIndex]} />
+                            <HomePagePetCard pet={pets[currentPetIndex]} />
 
                             {auth.status && user?.role === 'user' ? (
                                 <button
@@ -79,12 +106,15 @@ export const HomePage = () => {
                                 </button>
                             )}
                         </div>
+                    ) : (
+                        <EmptyCard title="No pets found" message="Try adjusting your filters or check back later." />
                     )}
                 </div>
             </div>
         </>
     );
 }
+
 
 const App: React.FC = () => <HomePage />
 
