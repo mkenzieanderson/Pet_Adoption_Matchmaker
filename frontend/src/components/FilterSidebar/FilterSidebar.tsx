@@ -54,7 +54,7 @@ const FilterSidebar = ({ filterPets }: FilterSidebarProps) => {
                     {(type === "dog" || type === "cat") ?
                         <div className="my-4">
                             <Dropdown
-                                title="Breed"
+                                title={type === "dog" ? "Breed" : "Breed"}
                                 width="w-[210px]"
                                 options={type === "cat" ? CatBreedOptions : DogBreedOptions}
                                 onChange={(option) => setBreed(option.value.toString())}
