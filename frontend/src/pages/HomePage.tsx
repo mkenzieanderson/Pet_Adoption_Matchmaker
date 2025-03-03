@@ -14,6 +14,7 @@ import { IoMdClose } from "react-icons/io";
 export const HomePage = () => {
     const auth = useAuthStore((state) => state);
     const user = useUserStore((state) => state.user);
+    const addFavoritePet = useUserStore((state) => state.addFavoritePet);
     const pets = usePetStore((state) => state.pets);
     const fetchPets = usePetStore((state) => state.fetchPets);
     const [currentPetIndex, setCurrentPetIndex] = useState(0);
@@ -26,7 +27,7 @@ export const HomePage = () => {
             await fetchPets();
             const endTime = Date.now();
             const elapsedTime = endTime - startTime;
-            const minimumLoadingTime = 500; // Minimum loading time in milliseconds
+            const minimumLoadingTime = 500; // Minimum loading time 
             if (elapsedTime < minimumLoadingTime) {
                 setTimeout(() => setLoading(false), minimumLoadingTime - elapsedTime);
             } else {
@@ -44,9 +45,22 @@ export const HomePage = () => {
         setCurrentPetIndex((prevIndex) => (prevIndex - 1 + pets.length) % pets.length);
     };
 
-    const addFavorite = (pet: Pet) => {
-        console.log("Adding favorite", pet);
+    const addFavorite = async (pet: Pet) => {
+        if (user?.favoritePets?.find((favorite) => favorite.pet_id === pet.pet_id)) {
+            alert(`${pet.name} is already in your favorites!`);
+            return;
+        } else {
+            await addFavoritePet(pet.pet_id, user!.user_id, auth.token);
+            alert(`${pet.name} has been added to your favorites!`);
+        }
     };
+
+    // For debugging purposes
+    useEffect(() => {
+        if (user?.favoritePets) {
+            console.log("User favorites", user.favoritePets);
+        }
+    }, [user?.favoritePets]);
 
     const filterPets = async (filterCriteria: FilterCriteria) => {
         setLoading(true);
@@ -54,7 +68,7 @@ export const HomePage = () => {
         await fetchPets(filterCriteria);
         const endTime = Date.now();
         const elapsedTime = endTime - startTime;
-        const minimumLoadingTime = 500; // Minimum loading time in milliseconds
+        const minimumLoadingTime = 500;
         if (elapsedTime < minimumLoadingTime) {
             setTimeout(() => setLoading(false), minimumLoadingTime - elapsedTime);
         } else {
@@ -95,7 +109,7 @@ export const HomePage = () => {
                                         addFavorite(pets[currentPetIndex]);
                                         handleNextPet();
                                     }}
-                                    className="bg-white border-solid border-2 rounded-xl border-[#A4B7A7] hover:border-[#7ce28d] px-3 mx-2 text-7xl text-red-400 hover:text-red-600">
+                                    className="bg-white border-solid border-2 rounded-xl border-[#A4B7A7] hover:border-[#7ce28d] p-3 mx-2 text-7xl text-red-400 hover:text-red-600">
                                     <FaHeart />
                                 </button>
                             ) : (

@@ -44,16 +44,14 @@ const usePetStore = create<PetStore>((set) => ({
                 throw new Error("Invalid filters parameter. Expected an object.");
             }
     
-            // Remove empty values ('' and 0) from filters
             const cleanedFilters = Object.fromEntries(
                 Object.entries(filters).filter(([_, value]) => value !== '' && value !== 0)
             );
-    
-            // Construct query string only with valid values
+            
             const queryParams = new URLSearchParams(cleanedFilters).toString();
             const requestUrl = queryParams ? `${URL}pets?${queryParams}` : `${URL}pets`;
     
-            console.log("Fetching pets from:", requestUrl); // Debugging
+            console.log("Fetching pets from:", requestUrl); 
             const response = await fetch(requestUrl, {
                 method: 'GET',
             });
