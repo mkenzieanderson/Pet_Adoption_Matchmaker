@@ -9,6 +9,7 @@ import useUserStore from "../state/User/User.store";
 export const MyAccountPage = () => {
     const user = useUserStore((state) => state.user);
     const auth = useAuthStore((state) => state);
+    const updateUser = useUserStore((state) => state.updateUser);
 
     const [firstName, setFirstName] = useState(user?.name.split(" ")[0] || "");
     const [lastName, setLastName] = useState(user?.name.split(" ")[1] || "");
@@ -49,8 +50,22 @@ export const MyAccountPage = () => {
         setEditMode(true);
     }
     
-    function handleSaveChanges() {
-        setEditMode(false);
+    async function handleSaveChanges() {
+        if (!user || !auth.token) {
+            console.error("User or auth token is missing");
+            return;
+        }
+        const updatedData = {
+            name: `${firstName} ${lastName}`,
+            phone_number: phone,
+        };
+        try {
+            await updateUser(user.user_id, auth.token, updatedData);
+            console.log("[DEBUG] user successfully updated")
+            setEditMode(false);
+        } catch (error) {
+            console.error("Error updating user:", error);
+        }
     }
 
     return (
