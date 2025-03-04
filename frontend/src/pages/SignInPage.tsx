@@ -4,7 +4,6 @@ import Button from "../components/Buttons/Button";
 import TextInput from "../components/TextInput/TextInput";
 import Form from "../components/Form/Form";
 import Header from "../components/Header/Header";
-import usePetStore from "../state/Pets/Pet.store";
 import useAuthStore from "../state/Auth/Auth.store";
 import useUserStore from "../state/User/User.store";
 import useShelterStore from "../state/Shelter/Shelter.store";
@@ -22,7 +21,6 @@ export const SignInPage = () => {
     const fetchShelterPets = useShelterStore((state) => state.fetchShelterPets);
     const user = useUserStore((state) => state.user);
     const fetchUser = useUserStore((state) => state.fetchUser);
-    const fetchPets = usePetStore((state) => state.fetchPets);
     const errorMessage = "Email and/or password are incorrect. Please try again.";
 
 
@@ -53,7 +51,6 @@ export const SignInPage = () => {
                     }
                 });
             }
-            fetchPets();
             navigate("/");
         }
     }, [isUserFetched, user]);

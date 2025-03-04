@@ -1,6 +1,15 @@
 import { create } from 'zustand';
 import { URL } from '../../App';
 
+export interface FilterCriteria {
+    type?: string,
+    gender?: string,
+    age?: number,
+    breed?: string,
+    disposition?: string,
+    availability?: string
+}
+
 export interface Pet {
     pet_id: number;
     name: string;
@@ -16,7 +25,7 @@ export interface Pet {
 interface PetStore {
     pets: Pet[];                       
     currentPet: Pet | null;          // For cases where we need to track one pet in state
-    fetchPets: () => Promise<void>; 
+    fetchPets: (filter?: FilterCriteria) => Promise<void>; 
     fetchPet: (petID: number) => Promise<void>;
     addPet: (token: string, newPet: Partial<Pet>) => Promise<void>;
     updatePet: (petID: number, updatedData: Partial<Pet>) => Promise<void>;
@@ -28,9 +37,22 @@ interface PetStore {
 const usePetStore = create<PetStore>((set) => ({
     pets: [],
     currentPet: null,
-    fetchPets: async () => {
+    fetchPets: async (filters = {}) => {
         try {
-            const response = await fetch(`${URL}pets`, {
+            
+            if (typeof filters !== 'object' || Array.isArray(filters)) {
+                throw new Error("Invalid filters parameter. Expected an object.");
+            }
+    
+            const cleanedFilters = Object.fromEntries(
+                Object.entries(filters).filter(([_, value]) => value !== '' && value !== 0)
+            );
+            
+            const queryParams = new URLSearchParams(cleanedFilters).toString();
+            const requestUrl = queryParams ? `${URL}pets?${queryParams}` : `${URL}pets`;
+    
+            console.log("Fetching pets from:", requestUrl); 
+            const response = await fetch(requestUrl, {
                 method: 'GET',
             });
             if (!response.ok) {
