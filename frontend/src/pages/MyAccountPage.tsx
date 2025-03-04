@@ -35,16 +35,6 @@ export const MyAccountPage = () => {
     // function handleCancel() {
     //     setShowDeleteWarning(false);
     // }
-
-    // useEffect(() => {
-    //     console.log("[DEBUG] User data from store:", user);
-    //     if (user) {
-    //         setFirstName(user.name.split(" ")[0] || "");
-    //         setLastName(user.name.split(" ")[1] || "");
-    //         setEmail(user.email || "");
-    //         setPhone(user.phone_number || "");
-    //     }
-    // }, [user]);
     
     function handleEditAccount() {
         setEditMode(true);
@@ -61,7 +51,6 @@ export const MyAccountPage = () => {
         };
         try {
             await updateUser(user.user_id, auth.token, updatedData);
-            console.log("[DEBUG] user successfully updated")
             setEditMode(false);
         } catch (error) {
             console.error("Error updating user:", error);
