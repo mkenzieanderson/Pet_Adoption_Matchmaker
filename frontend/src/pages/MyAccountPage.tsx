@@ -3,44 +3,54 @@ import Header from "../components/Header/Header";
 import Button from "../components/Buttons/Button";
 import TextInput from "../components/TextInput/TextInput";
 import Form from "../components/Form/Form";
-import { errorButtonStyle } from "../components/Buttons/ButtonStyles";
-import DeletePopUp from "../components/PopUp/DeletePopUp";
 import useAuthStore from "../state/Auth/Auth.store";
 import useUserStore from "../state/User/User.store";
-import { useNavigate } from "react-router-dom";
 
 export const MyAccountPage = () => {
-    const navigate = useNavigate();
-    const [firstName, setFirstName] = useState("Jane");
-    const [lastName, setLastName] = useState("Doe");
-    const [email, setEmail] = useState("janedoe@email.com");
-    const [phone, setPhone] = useState("1234567890");
-    const [password, setPassword] = useState("");
-    const [confirmPwd, setConfirmPwd] = useState("");
-    const [editMode, setEditMode] = useState(false);
-    const [showDeleteWarning, setShowDeleteWarning] = useState(false);
     const user = useUserStore((state) => state.user);
     const auth = useAuthStore((state) => state);
 
+    const [firstName, setFirstName] = useState(user?.name.split(" ")[0] || "");
+    const [lastName, setLastName] = useState(user?.name.split(" ")[1] || "");
+    const [email, setEmail] = useState(user?.email || "");
+    const [phone, setPhone] = useState(user?.phone_number || "");
+    const [editMode, setEditMode] = useState(false);
+
+    // Un-comment this if we allow the user to change their password and/or delete their account
+    // const navigate = useNavigate();
+    // const [password, setPassword] = useState("");
+    // const [confirmPwd, setConfirmPwd] = useState("");
+    // const [showDeleteWarning, setShowDeleteWarning] = useState(false);
+
+    // function openDeleteWarning () {
+    //     setShowDeleteWarning(true);
+    // }
+
+    // function handleDelete() {
+    //     setShowDeleteWarning(false)
+    //     navigate('/');
+    // }
+
+    // function handleCancel() {
+    //     setShowDeleteWarning(false);
+    // }
+
+    // useEffect(() => {
+    //     console.log("[DEBUG] User data from store:", user);
+    //     if (user) {
+    //         setFirstName(user.name.split(" ")[0] || "");
+    //         setLastName(user.name.split(" ")[1] || "");
+    //         setEmail(user.email || "");
+    //         setPhone(user.phone_number || "");
+    //     }
+    // }, [user]);
+    
     function handleEditAccount() {
         setEditMode(true);
     }
     
     function handleSaveChanges() {
         setEditMode(false);
-    }
-
-    function openDeleteWarning () {
-        setShowDeleteWarning(true);
-    }
-
-    function handleDelete() {
-        setShowDeleteWarning(false)
-        navigate('/');
-    }
-
-    function handleCancel() {
-        setShowDeleteWarning(false);
     }
 
     return (
@@ -75,7 +85,7 @@ export const MyAccountPage = () => {
                                 type="email"
                                 title="Email"
                                 width="w-6/12"
-                                disabled={editMode ? false : true}
+                                disabled={true}
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                             >
@@ -89,7 +99,9 @@ export const MyAccountPage = () => {
                                 onChange={(e) => setPhone(e.target.value)}
                             >
                         </TextInput>
-                        {editMode && (
+                        
+                        {/* If we allow the user to change their password, this is the React code for that */}
+                        {/* {editMode && (
                             <>
                                 <TextInput
                                     type="password"
@@ -108,7 +120,8 @@ export const MyAccountPage = () => {
                                 >
                                 </TextInput>
                             </>
-                        )}
+                        )} */}
+
                         <div className={editMode ? "text-center" : ""}>
                             <Button
                                 text={editMode ? "SAVE CHANGES" : "EDIT ACCOUNT INFO"}
@@ -118,7 +131,9 @@ export const MyAccountPage = () => {
                         </div>
                     </Form>
                 </div>
-                <div className="w-3/5 mb-10 text-right">
+
+                {/* Un-comment this if we allow the user to delete their account */}
+                {/* <div className="w-3/5 mb-10 text-right">
                     <Button 
                         text="DELETE ACCOUNT"
                         className={errorButtonStyle}
@@ -135,7 +150,8 @@ export const MyAccountPage = () => {
                             onCancel={handleCancel}
                         />
                     </div>
-                )}
+                )} */}
+
             </div>
         </>
     )

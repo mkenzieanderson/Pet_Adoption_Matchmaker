@@ -6,6 +6,7 @@ export interface User {
     user_id: bigint;
     name: string;
     email: string;
+    phone_number: string;
     role: string;
     favoritePets: Pet[];
 }
