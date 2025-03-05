@@ -13,12 +13,13 @@ export interface FilterCriteria {
 export interface Pet {
     pet_id: number;
     name: string;
+    type: string;
     breed: string;
     image: string;
     age: number;
     availability: string;
     gender: string;
-    disposition: string[];
+    disposition: (string | undefined)[];
     shelter: string;
 }
 
@@ -78,7 +79,7 @@ const usePetStore = create<PetStore>((set) => ({
                     return {...pet, disposition: [] };
                 }
             });
-            
+
             const petsWithDispositions = await Promise.all(fetchDispositions);
             set({ pets: petsWithDispositions });
 

@@ -6,26 +6,25 @@ import Form from "../Form/Form";
 import Dropdown from "../Dropdown/Dropdown";
 import ImgUpload from "../ImgUpload/ImgUpload";
 import Checklist from "../Checklist/Checklist";
-
+import { AgeOptions } from "../Dropdown/AgeOptions";
 import { 
     TypeOptions, 
     DogBreedOptions, 
     CatBreedOptions,
-    AgeOptions,
     GenderOptions,
     DispositionOptions,
     AvailabilityOptions
  } from "../Dropdown/PetOptions";
 
-type PetData = {
+export type PetData = {
     name: string;
     type: string;
     breed: string;
-    age: number | null;
+    age: number | undefined;
     gender: string;
     availability: string;
-    disposition: (string | number)[];
-    imageURL: string | null;
+    disposition: (string | undefined)[];
+    imageURL: string | undefined;
 };
 
 type PetFormProps = {
@@ -41,11 +40,11 @@ export const PetFormPage: React.FC<PetFormProps> = ({ mode, initialData, submitH
     const [name, setName] = useState(initialData?.name || "");
     const [type, setType] = useState(initialData?.type || "");
     const [breed, setBreed] = useState(initialData?.breed || "");
-    const [age, setAge] = useState<number | null>(initialData?.age || null);
+    const [age, setAge] = useState<number | undefined>(initialData?.age || undefined);
     const [gender, setGender] = useState(initialData?.gender || "");
     const [availability, setAvailability] = useState(initialData?.availability || "");
-    const [selectedOptions, setSelectedOptions] = useState<(string | number)[]>(initialData?.disposition || []);
-    const [imageURL, setImageURL] = useState<string | null>(initialData?.imageURL || null);
+    const [selectedOptions, setSelectedOptions] = useState<(string | undefined)[]>(initialData?.disposition || []);
+    const [imageURL, setImageURL] = useState<string | undefined>(initialData?.imageURL || undefined);
     const [showError, setShowError] = useState(false);
 
     function getAllFormData() {

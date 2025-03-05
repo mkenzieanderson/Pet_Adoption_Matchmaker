@@ -6,7 +6,7 @@ interface Shelter {
     shelter_id: number;
     name: string;
     address: string;
-    user_id: number;
+    user_id: bigint;
     zip_code: number;
 };
 

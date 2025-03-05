@@ -2,8 +2,8 @@ import { useRef } from 'react';
 import UploadIcon from "../../assets/upload_icon.png";
 
 type ImgUploadProps = {
-    imageURL: string | null;
-    setImageURL: React.Dispatch<React.SetStateAction<string | null>>;
+    imageURL: string | undefined;
+    setImageURL: React.Dispatch<React.SetStateAction<string | undefined>>;
 }
 
 

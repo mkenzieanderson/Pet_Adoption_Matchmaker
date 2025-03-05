@@ -2,19 +2,19 @@ import X from "../../assets/x_icon.png"
 
 type ChecklistOptions = {
     label: string;
-    value: string | number;
+    value: string;
 }
 
 type ChecklistProps = {
     title?: string;
     options: ChecklistOptions[];
-    selectedOptions: ( string | number )[];
-    setSelectedOptions: React.Dispatch<React.SetStateAction<(string | number)[]>>;
+    selectedOptions: (string | undefined)[];
+    setSelectedOptions: React.Dispatch<React.SetStateAction<(string | undefined)[]>>;
 }
 
 function Checklist ({ title, options, selectedOptions, setSelectedOptions }: ChecklistProps) {
 
-    const toggleOption = (value: string | number) => {
+    const toggleOption = (value: string) => {
         setSelectedOptions(prev =>
             prev.includes(value) ? 
                 prev.filter(checked_option => checked_option !== value)
