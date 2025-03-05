@@ -24,7 +24,7 @@ export type PetData = {
     gender: string;
     availability: string;
     disposition: (string | undefined)[];
-    imageURL: string | undefined;
+    imageFile: File | undefined;
 };
 
 type PetFormProps = {
@@ -44,7 +44,7 @@ export const PetFormPage: React.FC<PetFormProps> = ({ mode, initialData, submitH
     const [gender, setGender] = useState(initialData?.gender || "");
     const [availability, setAvailability] = useState(initialData?.availability || "");
     const [selectedOptions, setSelectedOptions] = useState<(string | undefined)[]>(initialData?.disposition || []);
-    const [imageURL, setImageURL] = useState<string | undefined>(initialData?.imageURL || undefined);
+    const [imageFile, setImageFile] = useState<File | undefined>(initialData?.imageFile || undefined);
     const [showError, setShowError] = useState(false);
 
     function getAllFormData() {
@@ -56,13 +56,13 @@ export const PetFormPage: React.FC<PetFormProps> = ({ mode, initialData, submitH
             gender,
             availability,
             disposition: selectedOptions,
-            imageURL
+            imageFile
         };
         return petData
     }
     
     function handleSubmit() {
-        if (!name || (!type || (type !== "other" && !breed)) || !age || !gender || !availability || !imageURL) {
+        if (!name || (!type || (type !== "other" && !breed)) || !age || !gender || !availability || !imageFile) {
             setShowError(true);
             window.scrollTo({ top: 0, behavior: "smooth" });
             return;
@@ -83,8 +83,8 @@ export const PetFormPage: React.FC<PetFormProps> = ({ mode, initialData, submitH
                     >
                         <div className="place-items-center mt-8">
                             <ImgUpload
-                                imageURL={imageURL}
-                                setImageURL={setImageURL}
+                                imageFile={imageFile}
+                                setImageFile={setImageFile}
                             />
                         </div>
 

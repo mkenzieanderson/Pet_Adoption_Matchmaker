@@ -15,7 +15,7 @@ export interface Pet {
     name: string;
     type: string;
     breed: string;
-    image: string;
+    image: File;
     age: number;
     availability: string;
     gender: string;
@@ -167,7 +167,7 @@ const usePetStore = create<PetStore>((set) => ({
     uploadAvatar: async (petID: number, avatar: File) => {
         try {
             const formData = new FormData();
-            formData.append('avatar', avatar);
+            formData.append('file', avatar);
             const response = await fetch(`${URL}pets/${petID}/avatar`, {
                 method: 'POST',
                 body: formData,

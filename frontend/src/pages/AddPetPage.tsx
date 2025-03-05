@@ -49,12 +49,9 @@ export const AddPetPage = () => {
                 await addDisposition(auth.token, petID, filteredDispositions);
             }
 
-            // if (petData.imageURL && petID) {
-            //     await uploadAvatar(petID, petData.imageURL);
-            // }
-            // need to deal with these separately, or add more functionality in petStore addPet
-            // disposition: petData.disposition,
-            // image: petData.imageURL,
+            if (petData.imageFile && petID) {
+                await uploadAvatar(petID, petData.imageFile);
+            }
 
         } catch (error) {
             console.error('Error adding pet:', error);

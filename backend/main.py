@@ -514,8 +514,6 @@ def add_pet():
 
         #check required fields
         if not content or not all(key in content for key in ["name", "type", "gender", "age", "breed","description", "availability", "shelter_id"]):
-            print("[DEBUG] Content doesn't match one of the key titles")
-            print("[DEBUG] Content is", content)
             raise ValueError(400)
 
         valid_types = ['dog', 'cat', 'other']
@@ -523,13 +521,10 @@ def add_pet():
         valid_availability = ['available', 'not available', 'adopted', 'pending']
 
         if content['type'] not in valid_types:
-            print("[DEBUG] Type not in valid_types")
             raise ValueError(400)
         if content['gender'] not in valid_genders:
-            print("[DEBUG] Gender not in valid genders")
             raise ValueError(400)
         if content['availability'] not in valid_availability:
-            print("[DEBUG] Availability not in valid availabilities")
             raise ValueError(400)
 
         with db.connect() as conn:
