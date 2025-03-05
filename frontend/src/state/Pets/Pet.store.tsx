@@ -60,7 +60,28 @@ const usePetStore = create<PetStore>((set) => ({
             }
             const data = await response.json();
             console.log("Pet Data: ", data);
-            set({ pets: data.pets });
+
+            // Now, fetch the dispositions for each pet and add it to pets data
+            const fetchDispositions = data.pets.map(async (pet: Pet) => {
+                try {
+                    const dispositionsRes = await fetch(`${URL}pet_dispositions/${pet.pet_id}`, { 
+                        method: 'GET' 
+                    });
+                    if (!dispositionsRes.ok) {
+                        throw new Error(`Failed to fetch dispositions for pet ${pet.pet_id}`);
+                    }
+                    const dispositionData = await dispositionsRes.json();
+                    return { ...pet, disposition: dispositionData.dispositions };
+
+                } catch (error) {
+                    console.error(error);
+                    return {...pet, disposition: [] };
+                }
+            });
+            
+            const petsWithDispositions = await Promise.all(fetchDispositions);
+            set({ pets: petsWithDispositions });
+
         } catch (error) {
             console.error('Failed to fetch pets:', error);
         }
