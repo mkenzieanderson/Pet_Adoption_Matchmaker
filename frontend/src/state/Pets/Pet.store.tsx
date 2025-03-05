@@ -20,7 +20,8 @@ export interface Pet {
     availability: string;
     gender: string;
     disposition: (string | undefined)[];
-    shelter: string;
+    shelter_id: string;
+    description: string;
 }
 
 interface PetStore {
@@ -32,6 +33,7 @@ interface PetStore {
     updatePet: (petID: number, updatedData: Partial<Pet>) => Promise<void>;
     deletePet: (petID: number, token: string) => Promise<void>;
     uploadAvatar: (petID: number, avatar: File) => Promise<void>;
+    addDisposition: (token: string, petID: number, dispostions: string[]) => Promise<void>;
 }
 
 
@@ -115,7 +117,9 @@ const usePetStore = create<PetStore>((set) => ({
                 throw new Error('Failed to add pet');
             }
             const data = await response.json();
+            console.log("[DEBUG] add pet response data:", data);
             set((state) => ({ pets: [...state.pets, data.pet] }));
+            return data.pet_id;
         } catch (error) {
             console.error('Failed to add pet:', error);
         }
@@ -181,6 +185,25 @@ const usePetStore = create<PetStore>((set) => ({
             console.error('Failed to upload avatar:', error);
         }
     },
+    addDisposition: async (token: string, petID: number, dispositions: string[]) => {
+        try {
+            for (const disposition of dispositions) {
+                const response = await fetch(`${URL}pet_dispositions/${petID}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ disposition }),
+                });
+                if (!response.ok) {
+                    throw new Error(`Failed to add disposition: ${disposition}`);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to add dispositions:', error);
+        }
+    }
 }));
 
 export default usePetStore;

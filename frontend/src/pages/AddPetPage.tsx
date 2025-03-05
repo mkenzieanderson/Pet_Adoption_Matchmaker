@@ -11,7 +11,7 @@ export const AddPetPage = () => {
     const user = useUserStore((state) => state.user);
     const auth = useAuthStore((state) => state);
     const { shelters, fetchShelters }  = useShelterStore();
-    const { addPet } = usePetStore();
+    const { addPet, addDisposition, uploadAvatar } = usePetStore();
 
     useEffect(() => {
         if (auth.token) {
@@ -32,17 +32,30 @@ export const AddPetPage = () => {
                 console.error("No shelter found for the current user.");
                 return;
             }
-            await addPet(auth.token, {
+            const petID = await addPet(auth.token, {
                 name: petData.name,
                 type: petData.type,
                 breed: petData.breed,
                 age: petData.age,
                 gender: petData.gender,
                 availability: petData.availability,
-                disposition: petData.disposition,
-                image: petData.imageURL,
-                shelter: String(shelterID),
+                shelter_id: String(shelterID),
+                description: "",
             });
+
+            if (petData.disposition && petData.disposition.length > 0 && petID) {
+                console.log("[DEBUG] Adding dispositions...")
+                const filteredDispositions = petData.disposition.filter((disposition): disposition is string => disposition !== undefined);
+                await addDisposition(auth.token, petID, filteredDispositions);
+            }
+
+            // if (petData.imageURL && petID) {
+            //     await uploadAvatar(petID, petData.imageURL);
+            // }
+            // need to deal with these separately, or add more functionality in petStore addPet
+            // disposition: petData.disposition,
+            // image: petData.imageURL,
+
         } catch (error) {
             console.error('Error adding pet:', error);
         }
