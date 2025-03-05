@@ -34,6 +34,7 @@ interface PetStore {
     deletePet: (petID: number, token: string) => Promise<void>;
     uploadAvatar: (petID: number, avatar: File) => Promise<void>;
     addDisposition: (token: string, petID: number, dispostions: string[]) => Promise<void>;
+    getAvatar: (petID: number) => Promise<string | undefined>;
 }
 
 
@@ -65,7 +66,7 @@ const usePetStore = create<PetStore>((set) => ({
             console.log("Pet Data: ", data);
 
             // Now, fetch the dispositions for each pet and add it to pets data
-            const fetchDispositions = data.pets.map(async (pet: Pet) => {
+            const fetchData = data.pets.map(async (pet: Pet) => {
                 try {
                     const dispositionsRes = await fetch(`${URL}pet_dispositions/${pet.pet_id}`, { 
                         method: 'GET' 
@@ -74,16 +75,17 @@ const usePetStore = create<PetStore>((set) => ({
                         throw new Error(`Failed to fetch dispositions for pet ${pet.pet_id}`);
                     }
                     const dispositionData = await dispositionsRes.json();
-                    return { ...pet, disposition: dispositionData.dispositions };
+                    const avatarURL = await usePetStore.getState().getAvatar(pet.pet_id);
+                    return { ...pet, disposition: dispositionData.dispositions, image: avatarURL };
 
                 } catch (error) {
                     console.error(error);
-                    return {...pet, disposition: [] };
+                    return {...pet, disposition: [], image: null };
                 }
             });
 
-            const petsWithDispositions = await Promise.all(fetchDispositions);
-            set({ pets: petsWithDispositions });
+            const petsWithDispositionsAndImage = await Promise.all(fetchData);
+            set({ pets: petsWithDispositionsAndImage });
 
         } catch (error) {
             console.error('Failed to fetch pets:', error);
@@ -202,6 +204,21 @@ const usePetStore = create<PetStore>((set) => ({
             }
         } catch (error) {
             console.error('Failed to add dispositions:', error);
+        }
+    },
+    getAvatar: async (petID: number) => {
+        try {
+            const response = await fetch(`${URL}pets/${petID}/avatar`, {
+                method: 'GET',
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Failed to fetch avatar for pet ${petID}`);
+            }
+            const blob = await response.blob();
+            return window.URL.createObjectURL(blob);
+        } catch (error) {
+            console.error(`Failed to fetch avatar for pet ${petID}:`, error);
         }
     }
 }));
