@@ -6,26 +6,25 @@ import Form from "../Form/Form";
 import Dropdown from "../Dropdown/Dropdown";
 import ImgUpload from "../ImgUpload/ImgUpload";
 import Checklist from "../Checklist/Checklist";
-
+import { AgeOptions } from "../Dropdown/AgeOptions";
 import { 
     TypeOptions, 
     DogBreedOptions, 
     CatBreedOptions,
-    AgeOptions,
     GenderOptions,
     DispositionOptions,
     AvailabilityOptions
  } from "../Dropdown/PetOptions";
 
-type PetData = {
+export type PetData = {
     name: string;
     type: string;
     breed: string;
-    age: number | null;
+    age: number | undefined;
     gender: string;
     availability: string;
-    disposition: (string | number)[];
-    imageURL: string | null;
+    disposition: (string | undefined)[];
+    imageFile: File | undefined;
 };
 
 type PetFormProps = {
@@ -41,11 +40,11 @@ export const PetFormPage: React.FC<PetFormProps> = ({ mode, initialData, submitH
     const [name, setName] = useState(initialData?.name || "");
     const [type, setType] = useState(initialData?.type || "");
     const [breed, setBreed] = useState(initialData?.breed || "");
-    const [age, setAge] = useState<number | null>(initialData?.age || null);
+    const [age, setAge] = useState<number | undefined>(initialData?.age || undefined);
     const [gender, setGender] = useState(initialData?.gender || "");
     const [availability, setAvailability] = useState(initialData?.availability || "");
-    const [selectedOptions, setSelectedOptions] = useState<(string | number)[]>(initialData?.disposition || []);
-    const [imageURL, setImageURL] = useState<string | null>(initialData?.imageURL || null);
+    const [selectedOptions, setSelectedOptions] = useState<(string | undefined)[]>(initialData?.disposition || []);
+    const [imageFile, setImageFile] = useState<File | undefined>(initialData?.imageFile || undefined);
     const [showError, setShowError] = useState(false);
 
     function getAllFormData() {
@@ -57,13 +56,13 @@ export const PetFormPage: React.FC<PetFormProps> = ({ mode, initialData, submitH
             gender,
             availability,
             disposition: selectedOptions,
-            imageURL
+            imageFile
         };
         return petData
     }
     
     function handleSubmit() {
-        if (!name || (!type || (type !== "other" && !breed)) || !age || !gender || !availability || !imageURL) {
+        if (!name || (!type || (type !== "other" && !breed)) || !age || !gender || !availability || !imageFile) {
             setShowError(true);
             window.scrollTo({ top: 0, behavior: "smooth" });
             return;
@@ -84,8 +83,8 @@ export const PetFormPage: React.FC<PetFormProps> = ({ mode, initialData, submitH
                     >
                         <div className="place-items-center mt-8">
                             <ImgUpload
-                                imageURL={imageURL}
-                                setImageURL={setImageURL}
+                                imageFile={imageFile}
+                                setImageFile={setImageFile}
                             />
                         </div>
 

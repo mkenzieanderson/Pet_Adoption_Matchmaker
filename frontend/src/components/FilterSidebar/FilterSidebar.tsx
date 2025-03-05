@@ -2,11 +2,11 @@ import Dropdown from '../Dropdown/Dropdown';
 import Button from '../Buttons/Button';
 import { FilterCriteria } from '../../state/Pets/Pet.store';
 import { useEffect, useState } from 'react';
+import { AgeOptions } from '../Dropdown/AgeOptions';
 import {
     TypeOptions,
     DogBreedOptions,
     CatBreedOptions,
-    AgeOptions,
     GenderOptions,
     AvailabilityOptions,
     DispositionOptions

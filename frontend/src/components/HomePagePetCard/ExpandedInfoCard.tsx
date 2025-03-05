@@ -31,11 +31,13 @@ const ExpandedInfoCard = ({ pet }: ExpandedInfoCardProps) => {
                     </span>
                     <span className={titleStyles}>
                         Disposition:
-                        <span className={contentStyles}>{pet.disposition}</span>
+                        <span className={contentStyles}>
+                            {Array.isArray(pet.disposition) ? pet.disposition.join(', ') : pet.disposition}
+                        </span>
                     </span>
                     <span className={titleStyles}>
                         Shelter:
-                        <span className={contentStyles}>{pet.shelter}</span>
+                        <span className={contentStyles}>{pet.shelter_id}</span>
                     </span>
                 </div>
             </div>
