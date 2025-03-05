@@ -38,29 +38,33 @@ const useUserStore = create<UserStore>((set) => ({
             console.log("User data: ", data);
 
             // Fetch the user's favorite pets
-            const favoritesResponse = await fetch(`${URL}favorites/${userID}`, {
-                method: 'GET',
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            if (!favoritesResponse.ok) {
-                throw new Error('Failed to fetch favorite pets');
+            if (data.role === 'user') {
+                const favoritesResponse = await fetch(`${URL}favorites/${userID}`, {
+                    method: 'GET',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                if (!favoritesResponse.ok) {
+                    throw new Error('Failed to fetch favorite pets');
+                }
+                const favoritesData = await favoritesResponse.json();
+                const favoritePets = await Promise.all(
+                    favoritesData.favorites.map(async (favorite: { pet_id: number }) => {
+                        const petResponse = await fetch(`${URL}pets/${favorite.pet_id}`, {
+                            method: 'GET',
+                        });
+                        if (!petResponse.ok) {
+                            throw new Error('Failed to fetch pet');
+                        }
+                        return await petResponse.json();
+                    })
+                );
+ 
+                set({ user: { ...data, favoritePets } });
+            } else {
+                set({ user: data });
             }
-            const favoritesData = await favoritesResponse.json();
-            const favoritePets = await Promise.all(
-                favoritesData.favorites.map(async (favorite: { pet_id: number }) => {
-                    const petResponse = await fetch(`${URL}pets/${favorite.pet_id}`, {
-                        method: 'GET',
-                    });
-                    if (!petResponse.ok) {
-                        throw new Error('Failed to fetch pet');
-                    }
-                    return await petResponse.json();
-                })
-            );
-
-            set({ user: { ...data, favoritePets } });
         } catch (error) {
             console.error('Failed to fetch user:', error);
         }
