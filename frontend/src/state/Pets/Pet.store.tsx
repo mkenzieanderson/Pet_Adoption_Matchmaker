@@ -71,12 +71,19 @@ const usePetStore = create<PetStore>((set) => ({
                     const dispositionsRes = await fetch(`${URL}pet_dispositions/${pet.pet_id}`, { 
                         method: 'GET' 
                     });
-                    if (!dispositionsRes.ok) {
+                    let dispositions: string[] = [];
+                    if (dispositionsRes.status === 404) {
+                        console.warn(`No dispositions found for pet ${pet.pet_id}, setting to empty array.`);
+                    }
+                    else if (!dispositionsRes.ok) {
                         throw new Error(`Failed to fetch dispositions for pet ${pet.pet_id}`);
                     }
-                    const dispositionData = await dispositionsRes.json();
+                    else {
+                        const dispositionData = await dispositionsRes.json();
+                        dispositions = dispositionData.dispositions;
+                    }
                     const avatarURL = await usePetStore.getState().getAvatar(pet.pet_id);
-                    return { ...pet, disposition: dispositionData.dispositions, image: avatarURL };
+                    return { ...pet, disposition: dispositions, image: avatarURL };
 
                 } catch (error) {
                     console.error(error);
