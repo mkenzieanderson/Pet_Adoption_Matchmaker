@@ -1270,7 +1270,6 @@ def add_favorite():
 
         user_id = request.json.get('user_id')
         pet_id = request.json.get('pet_id')
-        print("[DEBUG] user_id and pet_id:", user_id, pet_id)
 
         if not user_id or not pet_id:
             return jsonify({"Error": "User ID and Pet ID are required"}), 400
