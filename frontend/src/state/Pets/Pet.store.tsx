@@ -15,7 +15,7 @@ export interface Pet {
     name: string;
     type: string;
     breed: string;
-    image: File;
+    image: string;
     age: number;
     availability: string;
     gender: string;
@@ -27,6 +27,10 @@ export interface Pet {
 interface PetStore {
     pets: Pet[];                       
     currentPet: Pet | null;          // For cases where we need to track one pet in state
+    setPets: (pets: Pet[]) => void;  // Setter function for pets
+    setDispositions: (dispositions: { [key: number]: string[] }) => void;
+    setAvatars: (avatars: { [key: number]: string }) => void;
+    addPetToState: (pet: Pet) => void;
     fetchPets: (filter?: FilterCriteria) => Promise<void>; 
     fetchPet: (petID: number) => Promise<void>;
     addPet: (token: string, newPet: Partial<Pet>) => Promise<void>;
@@ -41,6 +45,26 @@ interface PetStore {
 const usePetStore = create<PetStore>((set) => ({
     pets: [],
     currentPet: null,
+    setPets: (pets: Pet[]) => set({ pets }),
+    setDispositions: (dispositions: { [key: number]: string[] }) => {
+        set((state) => ({
+            pets: state.pets.map((pet) => ({
+                ...pet,
+                disposition: dispositions[pet.pet_id] ?? [],
+            })),
+        }));
+    },
+    setAvatars: (avatars: { [key: number]: string }) => {
+        set((state) => ({
+            pets: state.pets.map((pet) => ({
+                ...pet,
+                image: avatars[pet.pet_id] ?? null,
+            })),
+        }));
+    },
+    addPetToState: (pet: Pet) => {
+        set((state) => ({ pets: [...state.pets, pet] }));
+    },
     fetchPets: async (filters = {}) => {
         try {
             

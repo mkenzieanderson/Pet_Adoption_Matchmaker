@@ -3,7 +3,7 @@ import { Pet } from '../Pets/Pet.store';
 import { URL } from '../../App'
 
 export interface User {
-    user_id: bigint;
+    user_id: number;
     name: string;
     email: string;
     phone_number: string;
@@ -13,17 +13,23 @@ export interface User {
 
 interface UserStore {
     user: User | null;
-    fetchUser: (userID: bigint, token: string) => Promise<void>;
-    updateUser: (userID: bigint, token: string, updatedData: Partial<User>) => Promise<void>;
-    addFavoritePet: (petID: number, userID: bigint, token: string) => Promise<void>;
-    deleteFavoritePet: (petID: number, userID: bigint, token: string) => Promise<void>;
-    fetchFavoritePets: (userID: bigint, token: string) => Promise<void>;
+    setUser: (user: User) => void;
+    setFavoritePets: (favoritePets: Pet[]) => void;
+    fetchUser: (userID: number, token: string) => Promise<void>;
+    updateUser: (userID: number, token: string, updatedData: Partial<User>) => Promise<void>;
+    addFavoritePet: (petID: number, userID: number, token: string) => Promise<void>;
+    deleteFavoritePet: (petID: number, userID: number, token: string) => Promise<void>;
+    fetchFavoritePets: (userID: number, token: string) => Promise<void>;
     clearUser: () => void;
 }
 
 const useUserStore = create<UserStore>((set) => ({
     user: null,
-    fetchUser: async (userID: bigint, token: string) => {
+    setUser: (user: User) => set({ user }),
+    setFavoritePets: (favoritePets: Pet[]) => set((state) => ({
+        user: state.user ? { ...state.user, favoritePets } : null,
+    })),
+    fetchUser: async (userID: number, token: string) => {
         try {
             const response = await fetch(`${URL}users/${userID}`, {
                 method: 'GET',
@@ -69,7 +75,7 @@ const useUserStore = create<UserStore>((set) => ({
             console.error('Failed to fetch user:', error);
         }
     },
-    updateUser: async (userID: bigint, token: string, updatedData: Partial<User>) => {
+    updateUser: async (userID: number, token: string, updatedData: Partial<User>) => {
         try {
             const response = await fetch(`${URL}users/${userID}`, {
                 method: 'PATCH',
@@ -88,7 +94,7 @@ const useUserStore = create<UserStore>((set) => ({
             console.error('Failed to update user:', error);
         }
     },
-    addFavoritePet: async (petID: number, userID: bigint, token: string) => {
+    addFavoritePet: async (petID: number, userID: number, token: string) => {
         try {
             const response = await fetch(`${URL}favorites`, {
                 method: 'POST',
@@ -120,7 +126,7 @@ const useUserStore = create<UserStore>((set) => ({
             console.error('Failed to add favorite pet:', error);
         }
     },
-    deleteFavoritePet: async (petID: number, userID: bigint, token: string) => {
+    deleteFavoritePet: async (petID: number, userID: number, token: string) => {
         try {
             const response = await fetch(`${URL}${userID}/favorites/${petID}`, {
                 method: 'DELETE',
@@ -141,7 +147,7 @@ const useUserStore = create<UserStore>((set) => ({
             console.error('Failed to delete favorite pet:', error);
         }
     },
-    fetchFavoritePets: async (userID: bigint, token: string) => {
+    fetchFavoritePets: async (userID: number, token: string) => {
         try {
             const response = await fetch(`${URL}favorites/${userID}`, {
                 method: 'GET',

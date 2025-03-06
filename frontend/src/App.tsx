@@ -5,6 +5,7 @@ import { MyAccountPage } from './pages/MyAccountPage'
 import { PetsPage } from './pages/PetsPage'
 import { EditPetPage } from './pages/EditPetPage'
 import { AddPetPage } from './pages/AddPetPage'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import './App.css'
 
 export const URL = import.meta.env.VITE_BASE_URL
@@ -13,17 +14,21 @@ export const URL = import.meta.env.VITE_BASE_URL
 // export const URL = 'http://localhost:8080/';
 
 const routes = createBrowserRouter([
-  {path: '/', element: <HomePage />},
-  {path: 'pets-page', element: <PetsPage />},
-  {path: 'sign-page', element: <SignInPage />},
-  {path: 'my-account-page', element: <MyAccountPage />},
-  {path: 'pets-page', element: <PetsPage />},
-  {path: 'edit-pet-page', element: <EditPetPage />},
-  {path: 'add-pet-page', element: <AddPetPage />},
+  { path: '/', element: <HomePage /> },
+  { path: 'pets-page', element: <PetsPage /> },
+  { path: 'sign-page', element: <SignInPage /> },
+  { path: 'my-account-page', element: <MyAccountPage /> },
+  { path: 'pets-page', element: <PetsPage /> },
+  { path: 'edit-pet-page', element: <EditPetPage /> },
+  { path: 'add-pet-page', element: <AddPetPage /> },
 ])
 
 function App() {
-  return <RouterProvider router={routes} />
+  return (
+    <QueryClientProvider client={new QueryClient}>
+      <RouterProvider router={routes} />
+    </QueryClientProvider>
+  )
 }
 
 export default App

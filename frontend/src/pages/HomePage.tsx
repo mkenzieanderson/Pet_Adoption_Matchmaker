@@ -9,33 +9,83 @@ import usePetStore, { Pet, FilterCriteria } from "../state/Pets/Pet.store";
 import { useEffect, useState } from "react";
 import { FaChevronLeft, FaChevronRight, FaHeart } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
-
+import { useFetchPets } from "../apis/PetApis/useFetchPets";
+import { useQueryClient } from "@tanstack/react-query";
+import { useFetchAllDispositions } from "../apis/PetApis/useFetchDisposition";
+import { useFetchAvatar } from "../apis/PetApis/useFetchAvatar";
+import { useFetchUserFavorites } from "../apis/UserApis/useFetchUserFavorites";
+import { useAddFavoritePet } from "../apis/UserApis/useAddFavoritePet";
+import { useFetchShelterPets } from "../apis/ShelterApis/useFetchShelterPets";
+import useShelterStore from "../state/Shelter/Shelter.store";
 
 export const HomePage = () => {
     const auth = useAuthStore((state) => state);
     const user = useUserStore((state) => state.user);
-    const addFavoritePet = useUserStore((state) => state.addFavoritePet);
+    const shelter = useShelterStore((state) => state.shelter);
     const pets = usePetStore((state) => state.pets);
-    const fetchPets = usePetStore((state) => state.fetchPets);
+    const [filters, setFilters] = useState<FilterCriteria | {}>({});
     const [currentPetIndex, setCurrentPetIndex] = useState(0);
-    const [loading, setLoading] = useState(true);
+    const [currentPet, setCurrentPet] = useState<Pet | null>(null);
+
+    const { data: petsData, isLoading, error } = useFetchPets(filters);
 
     useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            const startTime = Date.now();
-            await fetchPets();
-            const endTime = Date.now();
-            const elapsedTime = endTime - startTime;
-            const minimumLoadingTime = 500; // Minimum loading time 
-            if (elapsedTime < minimumLoadingTime) {
-                setTimeout(() => setLoading(false), minimumLoadingTime - elapsedTime);
-            } else {
-                setLoading(false);
-            }
-        };
-        fetchData();
-    }, []);
+        if (error) {
+            console.error("Failed to fetch pets:", error);
+        } else if (petsData && !isLoading) {
+            usePetStore.getState().setPets(petsData);
+        }
+    }, [petsData, isLoading, error]);
+
+    const filterPets = async (filterCriteria: FilterCriteria) => {
+        setFilters(filterCriteria);
+        setCurrentPetIndex(0);
+    };
+
+    const { data: dispositionsData, isLoading: dispositionsLoading, error: dispositionError } = useFetchAllDispositions(pets);
+    const { data: avatarData, isLoading: avatarLoading, error: avatarError } = useFetchAvatar(pets);
+
+    useEffect(() => {
+        if (dispositionError) {
+            console.error("Failed to fetch dispositions:", dispositionError);
+        } else if (dispositionsData && !dispositionsLoading) {
+            usePetStore.getState().setDispositions(dispositionsData);
+        }
+    }, [dispositionsData, dispositionsLoading, dispositionError]);
+
+    useEffect(() => {
+        if (avatarError) {
+            console.error("Failed to fetch avatar:", avatarError);
+        } else if (avatarData && !avatarLoading) {
+            usePetStore.getState().setAvatars(avatarData);
+        }
+    }, [avatarData, avatarLoading, avatarError]);
+
+    const { data: favoritesData, isLoading: favoritesIsLoading, isError: favoritesIsError } = user ? useFetchUserFavorites(user, useAuthStore.getState().token) : { data: null, isLoading: false, isError: false };
+
+    useEffect(() => {
+        if (favoritesIsError) {
+            console.error("Failed to fetch favorite pets:", favoritesIsError);
+        } else if (favoritesData && !favoritesIsLoading) {
+            console.log("Favorites data: ", favoritesData);
+            useUserStore.getState().setFavoritePets(favoritesData);
+        }
+    }, [favoritesData, favoritesIsLoading, favoritesIsError, user?.favoritePets]);
+
+    console.log("Shelter store state: ", useShelterStore.getState());
+
+    const shelterID = useShelterStore.getState().shelter?.shelter_id;
+    console.log("Shelter ID: ", shelterID);
+
+    const { data: shelterPetsData, isLoading: shelterPetsIsLoading, isError: shelterPetsIsError } = useFetchShelterPets(shelter?.shelter_id ?? 0);
+
+    useEffect(() => {
+        if (shelterPetsIsError) {
+            console.error("Failed to fetch shelter pets:", shelterPetsIsError);
+        } else if (shelterPetsData && !shelterPetsIsLoading) {
+            console.log("Shelter pets data: ", shelterPetsData);
+        }
+    }, [shelterPetsData, shelterPetsIsLoading, shelterPetsIsError]);
 
     const handleNextPet = () => {
         setCurrentPetIndex((prevIndex) => (prevIndex + 1) % pets.length);
@@ -45,37 +95,29 @@ export const HomePage = () => {
         setCurrentPetIndex((prevIndex) => (prevIndex - 1 + pets.length) % pets.length);
     };
 
+    const queryClient = useQueryClient();
+
+    const addFavoriteMutation = useAddFavoritePet();
+
     const addFavorite = async (pet: Pet) => {
         if (user?.favoritePets?.find((favorite) => favorite.pet_id === pet.pet_id)) {
             alert(`${pet.name} is already in your favorites!`);
             return;
-        } else {
-            await addFavoritePet(pet.pet_id, user!.user_id, auth.token);
-            alert(`${pet.name} has been added to your favorites!`);
         }
-    };
-
-    // For debugging purposes
-    useEffect(() => {
-        if (user?.favoritePets) {
-            console.log("User favorites", user.favoritePets);
+        if (pet && user) {
+            console.log("Adding favorite pet: ", pet);
+            addFavoriteMutation.mutate(
+                { petID: pet.pet_id, userID: user.user_id, token: auth.token },
+                {
+                    onSuccess: () => {
+                        // Invalidate favorites query to trigger a refetch
+                        queryClient.invalidateQueries({ queryKey: ['favorites', user?.user_id] });
+                    }
+                }
+            );
+            console.log("Updated favorites: ", user.favoritePets);
         }
-    }, [user?.favoritePets]);
-
-    const filterPets = async (filterCriteria: FilterCriteria) => {
-        setLoading(true);
-        const startTime = Date.now();
-        await fetchPets(filterCriteria);
-        const endTime = Date.now();
-        const elapsedTime = endTime - startTime;
-        const minimumLoadingTime = 500;
-        if (elapsedTime < minimumLoadingTime) {
-            setTimeout(() => setLoading(false), minimumLoadingTime - elapsedTime);
-        } else {
-            setLoading(false);
-        }
-        setCurrentPetIndex(0);
-    };
+    }
 
     return (
         <>
@@ -83,7 +125,7 @@ export const HomePage = () => {
             <div className="flex flex-row h-screen">
                 <FilterSidebar filterPets={filterPets} />
                 <div className="flex flex-col items-center w-screen mt-14">
-                    {loading ? (
+                    {isLoading ? (
                         <LoadingState />
                     ) : pets.length > 0 ? (
                         <div className="flex flex-row items-center justify-evenly w-full">
