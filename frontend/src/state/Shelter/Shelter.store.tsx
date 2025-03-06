@@ -19,7 +19,10 @@ interface ShelterStore {
 
 const useShelterStore = create<ShelterStore>((set) => ({
     shelter: null,
-    setShelter: (shelter: Shelter) => set({ shelter }),
+    setShelter: (shelter: Shelter | Shelter[]) => {
+        const formattedShelter = Array.isArray(shelter) ? shelter[0] : shelter;
+        set({ shelter: formattedShelter });
+    },
     fetchShelterPets: async (shelterID: number) => {
         try {
             const response = await fetch(`${URL}pets/${shelterID}`, {

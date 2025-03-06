@@ -15,7 +15,6 @@ const addPet = async (token: string, newPet: Partial<Pet>) => {
         throw new Error('Failed to add pet');
     }
     const data = await response.json();
-    console.log("[DEBUG] add pet response data:", data);
     return data;
 };
 
