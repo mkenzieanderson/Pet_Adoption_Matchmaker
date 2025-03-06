@@ -1279,19 +1279,17 @@ def add_favorite():
             stmt = sqlalchemy.text('SELECT * FROM users WHERE user_id = :user_id')
             user_result = conn.execute(stmt, {'user_id': user_id}).fetchone()
 
-        if user_result is None:
-            return jsonify({"Error": "User not found"}), 404
+            if user_result is None:
+                return jsonify({"Error": "User not found"}), 404
 
-        # Check if pet exists
-        with db.connect() as conn:
+            # Check if pet exists
             stmt = sqlalchemy.text('SELECT * FROM pets WHERE pet_id = :pet_id')
             pet_result = conn.execute(stmt, {'pet_id': pet_id}).fetchone()
 
-        if pet_result is None:
-            return jsonify({"Error": "Pet not found"}), 404
+            if pet_result is None:
+                return jsonify({"Error": "Pet not found"}), 404
 
-        # Add pet to favorites
-        with db.connect() as conn:
+            # Add pet to favorites
             stmt = sqlalchemy.text('''
                 INSERT INTO favorites (user_id, pet_id, favorited_at)
                 VALUES (:user_id, :pet_id, NOW())
