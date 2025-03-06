@@ -1,7 +1,7 @@
 import PetProfileCard from "../PetProfileCard/PetProfileCard";
 import Button from "../Buttons/Button";
-import { pets } from "./TempData";
-import { Pet } from "../../state/Pets/Pet.types";
+import { pets as tempPets } from "./TempData";
+import { Pet } from "../../state/Pets/Pet.store";
 import { User } from "../../state/User/User.store";
 import { useNavigate } from "react-router-dom";
 
@@ -13,6 +13,7 @@ interface PetCardGridProps {
 const PetCardGrid = ({user}: PetCardGridProps) => {
     const navigate = useNavigate();
     const title = user?.role === 'user' ? 'My Saved Pets' : 'My Shelter';
+    const petsToDisplay = user?.role === 'user' ? user.favoritePets : tempPets;
 
     return (
         <>
@@ -26,9 +27,13 @@ const PetCardGrid = ({user}: PetCardGridProps) => {
                     ) : null}
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-x-40 gap-y-6">
-                    {pets.map((pet, index) => (
-                        <PetProfileCard key={index} pet={pet} user={user} />
-                    ))}
+                    {petsToDisplay?.length > 0 ? (
+                        petsToDisplay.map((pet, index) => (
+                            <PetProfileCard key={index} pet={pet} user={user} />
+                        ))
+                    ) : (
+                        <p className="text-gray-500">No pets found.</p>
+                    )}
                 </div>
             </div>
         </>

@@ -1,204 +1,108 @@
-import { Pet } from "../../state/Pets/Pet.types";
+import { Pet } from "../../state/Pets/Pet.store";
 
 export const pets: Pet[] = [
     {
+        pet_id: 10000,
         name: 'Buddy',
+        type: 'Dog',
         breed: 'Golden Retriever',
         image: 'https://images.unsplash.com/photo-1517849845537-4d257902454a',
         age: 3,
         availability: 'available',
         gender: 'Male',
         disposition: ['friendly', 'playful', 'loving'],
-        shelter: 'Best Friends Animal Society'
+        shelter_id: 'Best Friends Animal Society',
+        description: ''
     },
     {
+        pet_id: 10001,
         name: 'Mittens',
+        type: 'Cat',
         breed: 'Siamese',
         image: 'https://images.unsplash.com/photo-1517423440428-a5a00ad493e8',
         age: 2,
         availability: 'pending',
         gender: 'Female',
         disposition: ['calm', 'affectionate'],
-        shelter: 'Cozy Cats Shelter'
+        shelter_id: 'Cozy Cats Shelter',
+        description: ''
     },
     {
+        pet_id: 100002,
         name: 'Rex',
+        type: 'Dog',
         breed: 'German Shepherd',
         image: 'https://images.unsplash.com/photo-1560807707-8cc77767d783',
         age: 5,
         availability: 'adopted',
         gender: 'Male',
         disposition: ['loyal', 'protective'],
-        shelter: 'Guardians of the Paws'
+        shelter_id: 'Guardians of the Paws',
+        description: ''
     },
     {
+        pet_id: 100003,
         name: 'Bella',
+        type: 'Dog',
         breed: 'Labrador Retriever',
         image: 'https://images.unsplash.com/photo-1560807707-8cc77767d783',
         age: 4,
         availability: 'available',
         gender: 'Female',
         disposition: ['energetic', 'friendly'],
-        shelter: 'Happy Tails Shelter'
+        shelter_id: 'Happy Tails Shelter',
+        description: ''
     },
     {
+        pet_id: 100004,
         name: 'Whiskers',
+        type: 'Cat',
         breed: 'Tabby',
         image: 'https://images.unsplash.com/photo-1560807707-8cc77767d783',
         age: 1,
         availability: 'not available',
         gender: 'Male',
         disposition: ['curious', 'playful'],
-        shelter: 'Purrfect Pals'
+        shelter_id: 'Purrfect Pals',
+        description: ''
     },
     {
+        pet_id: 100005,
         name: 'Luna',
+        type: 'Dog',
         breed: 'Husky',
         image: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b',
         age: 3,
         availability: 'available',
         gender: 'Female',
         disposition: ['adventurous', 'vocal'],
-        shelter: 'Northern Lights Rescue'
+        shelter_id: 'Northern Lights Rescue',
+        description: ''
     },
     {
+        pet_id: 10006,
         name: 'Buddy',
+        type: 'Dog',
         breed: 'Golden Retriever',
         image: 'https://images.unsplash.com/photo-1517849845537-4d257902454a',
         age: 3,
         availability: 'available',
         gender: 'Male',
         disposition: ['friendly', 'playful', 'loving'],
-        shelter: 'Best Friends Animal Society'
+        shelter_id: 'Best Friends Animal Society',
+        description: ''
     },
     {
+        pet_id: 10007,
         name: 'Mittens',
+        type: 'Cat',
         breed: 'Siamese',
         image: 'https://images.unsplash.com/photo-1517423440428-a5a00ad493e8',
         age: 2,
         availability: 'pending',
         gender: 'Female',
         disposition: ['calm', 'affectionate'],
-        shelter: 'Cozy Cats Shelter'
-    },
-    {
-        name: 'Rex',
-        breed: 'German Shepherd',
-        image: 'https://images.unsplash.com/photo-1560807707-8cc77767d783',
-        age: 5,
-        availability: 'adopted',
-        gender: 'Male',
-        disposition: ['loyal', 'protective'],
-        shelter: 'Guardians of the Paws'
-    },
-    {
-        name: 'Bella',
-        breed: 'Labrador Retriever',
-        image: 'https://images.unsplash.com/photo-1517849845537-4d257902454a',
-        age: 4,
-        availability: 'available',
-        gender: 'Female',
-        disposition: ['energetic', 'friendly'],
-        shelter: 'Happy Tails Shelter'
-    },
-    {
-        name: 'Whiskers',
-        breed: 'Tabby',
-        image:'https://images.unsplash.com/photo-1517849845537-4d257902454a',
-        age: 1,
-        availability: 'not available',
-        gender: 'Male',
-        disposition: ['curious', 'playful'],
-        shelter: 'Purrfect Pals'
-    },
-    {
-        name: 'Luna',
-        breed: 'Husky',
-        image: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b',
-        age: 3,
-        availability: 'available',
-        gender: 'Female',
-        disposition: ['adventurous', 'vocal'],
-        shelter: 'Northern Lights Rescue'
-    },
-    {
-        name: 'Max',
-        breed: 'Beagle',
-        image:'https://images.unsplash.com/photo-1548199973-03cce0bbc87b',
-        age: 4,
-        availability: 'available',
-        gender: 'Male',
-        disposition: ['curious', 'friendly'],
-        shelter: 'Happy Paws Shelter'
-    },
-    {
-        name: 'Shadow',
-        breed: 'Black Cat',
-        image: 'https://images.unsplash.com/photo-1560807707-8cc77767d783',
-        age: 2,
-        availability: 'pending',
-        gender: 'Female',
-        disposition: ['mysterious', 'quiet'],
-        shelter: 'Mystic Paws'
-    },
-    {
-        name: 'Charlie',
-        breed: 'Cocker Spaniel',
-        image: 'https://images.unsplash.com/photo-1517849845537-4d257902454a',
-        age: 3,
-        availability: 'available',
-        gender: 'Male',
-        disposition: ['playful', 'loving'],
-        shelter: 'Best Friends Animal Society'
-    },
-    {
-        name: 'Simba',
-        breed: 'Maine Coon',
-        image: 'https://images.unsplash.com/photo-1517423440428-a5a00ad493e8',
-        age: 5,
-        availability: 'adopted',
-        gender: 'Male',
-        disposition: ['calm', 'affectionate'],
-        shelter: 'Cozy Cats Shelter'
-    },
-    {
-        name: 'Daisy',
-        breed: 'Poodle',
-        image: 'https://images.unsplash.com/photo-1560807707-8cc77767d783',
-        age: 4,
-        availability: 'available',
-        gender: 'Female',
-        disposition: ['energetic', 'friendly'],
-        shelter: 'Happy Tails Shelter'
-    },
-    {
-        name: 'Oscar',
-        breed: 'Bulldog',
-        image: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b',
-        age: 3,
-        availability: 'available',
-        gender: 'Male',
-        disposition: ['loyal', 'protective'],
-        shelter: 'Guardians of the Paws'
-    },
-    {
-        name: 'Nala',
-        breed: 'Ragdoll',
-        image: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b',
-        age: 2,
-        availability: 'not available',
-        gender: 'Female',
-        disposition: ['calm', 'affectionate'],
-        shelter: 'Purrfect Pals'
-    },
-    {
-        name: 'Rocky',
-        breed: 'Boxer',
-        image: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b',
-        age: 5,
-        availability: 'available',
-        gender: 'Male',
-        disposition: ['energetic', 'playful'],
-        shelter: 'Northern Lights Rescue'
-    },
+        shelter_id: 'Cozy Cats Shelter',
+        description: ''
+    }
 ];

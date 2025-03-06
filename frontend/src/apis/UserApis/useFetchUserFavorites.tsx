@@ -14,7 +14,6 @@ const fetchUserFavorites = async (userID: number, token: string): Promise<Pet[]>
         throw new Error('Failed to fetch favorite pets');
     }
     const data = await response.json();
-    console.log("[DEBUG] fetch user favorites response data:", data);
 
     const validFavorites = data.favorites.filter((favorite: { pet_id: number | null }) => favorite.pet_id !== null);
 

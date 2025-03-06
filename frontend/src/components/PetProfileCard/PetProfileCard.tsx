@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import Edit from "../../assets/edit.svg";
 import Delete from "../../assets/delete.svg";
-import { Pet } from "../../state/Pets/Pet.types";
+import { Pet } from "../../state/Pets/Pet.store";
 import { User} from "../../state/User/User.store";
 
 
