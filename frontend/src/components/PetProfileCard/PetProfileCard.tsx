@@ -1,25 +1,34 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import Edit from "../../assets/edit.svg";
 import Delete from "../../assets/delete.svg";
 import { Pet } from "../../state/Pets/Pet.store";
 import { User} from "../../state/User/User.store";
+import { useFetchAvatar } from "../../apis/PetApis/useFetchAvatar";
 
 
 interface PetProfileCardProps {
     pet: Pet;
     user: User | null;
-    }
+}
 
     const PetProfileCard = ({ pet, user }: PetProfileCardProps) => {
         const navigate = useNavigate();
+        const { data: avatarData, error } = useFetchAvatar([pet]);
+
+        useEffect(() => {
+            if (error) {
+                console.error("Error fetching pet avatar:", error);
+            }
+        }, [error]);
     
         return (
             <>
                 <div className="bg-mustard w-full h-auto p-4 rounded-lg shadow-md cursor-pointer relative" >
                     <img 
-                        src={pet.image} 
+                        src={avatarData?.[pet.pet_id] || pet.image} 
                         alt={pet.name} 
-                        className="w-full h-[150px] sm:h-[200px] object-cover rounded-t-lg" 
+                        className="w-full h-[150px] sm:h-[200px] object-cover rounded-t-lg"
                     />
                     <div className="absolute top-2 right-1">
                     {user?.role === 'user' ? (

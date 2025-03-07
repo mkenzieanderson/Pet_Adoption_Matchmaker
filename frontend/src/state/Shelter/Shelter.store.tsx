@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Pet } from '../Pets/Pet.types';
+import { Pet } from '../Pets/Pet.store';
 import { URL } from '../../App';  
 
 export interface Shelter {
