@@ -1,4 +1,4 @@
-import { BrowserRouter, RouterProvider, createBrowserRouter } from 'react-router-dom'
+import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import { SignInPage } from './pages/SignInPage'
 import { HomePage } from './pages/HomePage'
 import { MyAccountPage } from './pages/MyAccountPage'
@@ -19,13 +19,11 @@ const routes = createBrowserRouter([
   {path: 'my-account-page', element: <MyAccountPage />},
   {path: 'edit-pet-page', element: <EditPetPage />},
   {path: 'add-pet-page', element: <AddPetPage />},
-])
+], {basename: "/Pet-Adoption/"})
 
 function App() {
   return  (
-    <BrowserRouter basename='/Pet-Adoption'>
       <RouterProvider router={routes} />
-    </BrowserRouter>
   )
 }
 
