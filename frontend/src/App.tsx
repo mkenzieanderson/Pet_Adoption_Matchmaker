@@ -1,4 +1,4 @@
-import { RouterProvider, createBrowserRouter } from 'react-router-dom'
+import { BrowserRouter, RouterProvider, createBrowserRouter } from 'react-router-dom'
 import { SignInPage } from './pages/SignInPage'
 import { HomePage } from './pages/HomePage'
 import { MyAccountPage } from './pages/MyAccountPage'
@@ -23,7 +23,11 @@ const routes = createBrowserRouter([
 ])
 
 function App() {
-  return <RouterProvider router={routes} />
+  return  (
+    <BrowserRouter basename='/Pet-Adoption/'>
+      <RouterProvider router={routes} />
+    </BrowserRouter>
+  )
 }
 
 export default App
