@@ -23,8 +23,10 @@ const routes = createBrowserRouter([
 ], {basename: "/Pet-Adoption/"})
 
 function App() {
-  return  (
+  return (
+    <QueryClientProvider client={new QueryClient}>
       <RouterProvider router={routes} />
+    </QueryClientProvider>
   )
 }
 
