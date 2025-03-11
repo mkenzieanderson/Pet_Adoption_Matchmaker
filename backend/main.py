@@ -41,15 +41,15 @@ load_dotenv()
 
 # Global endpoint names
 PETS = "pets"
-PET_DISPOSITIONS  = 'pet_dispositions'
+PET_DISPOSITIONS = 'pet_dispositions'
 SHELTERS = "shelters"
 FAVORITES = "favorites"
 USERS = "users"
 
-PET_PIC_BUCKET = "cap_pet_photos"
-PROJECT_ID = 'pet-adoption-448417'
+PET_PIC_BUCKET = "animal_adopt_photos"
+PROJECT_ID = 'animal-adopt-453400'
 
-ERROR_NOT_FOUND = {'Error' : 'Not Found'}
+ERROR_NOT_FOUND = {'Error': 'Not Found'}
 
 app = Flask(__name__)
 logger = logging.getLogger()
@@ -85,6 +85,7 @@ auth0 = oauth.register(
 auth0_token = Auth0Token(DOMAIN, CLIENT_ID, CLIENT_SECRET)
 access_token = auth0_token.get_access_token()
 
+
 class AuthError(Exception):
     def __init__(self, error, status_code):
         self.error = error
@@ -98,16 +99,18 @@ def handle_auth_error(ex):
     return response
 
 # Verify the JWT in the request's Authorization header
+
+
 def verify_jwt(request):
     if 'Authorization' in request.headers:
         auth_header = request.headers['Authorization'].split()
         token = auth_header[1]
     else:
         raise AuthError({"code": "no auth header",
-                            "description":
-                                "Authorization header is missing"}, 401)
+                         "description":
+                         "Authorization header is missing"}, 401)
 
-    jsonurl = urlopen("https://"+ DOMAIN+"/.well-known/jwks.json")
+    jsonurl = urlopen("https://" + DOMAIN+"/.well-known/jwks.json")
     jwks = json.loads(jsonurl.read())
     try:
         unverified_header = jwt.get_unverified_header(token)
@@ -138,7 +141,7 @@ def verify_jwt(request):
                 rsa_key,
                 algorithms=ALGORITHMS,
                 audience=CLIENT_ID,
-                issuer="https://"+ DOMAIN+"/"
+                issuer="https://" + DOMAIN+"/"
             )
         except jwt.ExpiredSignatureError:
             raise AuthError({"code": "token_expired",
@@ -157,10 +160,12 @@ def verify_jwt(request):
         return payload
     else:
         raise AuthError({"code": "no_rsa_key",
-                            "description":
-                                "No RSA key in JWKS"}, 401)
+                         "description":
+                         "No RSA key in JWKS"}, 401)
 
 # Sets up connection pool for the app
+
+
 def init_connection_pool() -> sqlalchemy.engine.base.Engine:
     if os.environ.get('INSTANCE_CONNECTION_NAME'):
         return connect_with_connector()
@@ -169,13 +174,17 @@ def init_connection_pool() -> sqlalchemy.engine.base.Engine:
         'Missing database connection type. Please define INSTANCE_CONNECTION_NAME'
     )
 
+
 # This global variable is declared with a value of `None`
 db = None
 
 # Initiates connection to database
+
+
 def init_db():
     global db
     db = init_connection_pool()
+
 
 def create_table(db: sqlalchemy.engine.base.Engine) -> None:
     with db.connect() as conn:
@@ -183,7 +192,7 @@ def create_table(db: sqlalchemy.engine.base.Engine) -> None:
         # Create the users table
         conn.execute(
             sqlalchemy.text(
-               '''CREATE TABLE IF NOT EXISTS users (
+                '''CREATE TABLE IF NOT EXISTS users (
                     user_id BIGINT AUTO_INCREMENT NOT NULL,
                     sub VARCHAR(255) UNIQUE,
                     email VARCHAR(255) NOT NULL UNIQUE,
@@ -265,6 +274,7 @@ def create_table(db: sqlalchemy.engine.base.Engine) -> None:
 
         conn.commit()
 
+
 def get_error_message(status_code):
     """Return a JSON error message for a given response status code."""
     error_messages = {
@@ -281,7 +291,8 @@ def get_error_message(status_code):
 def index():
     return 'Please navigate to /pets to use this API'
 
-@app.route('/'+ USERS + '/login', methods=['POST'])
+
+@app.route('/' + USERS + '/login', methods=['POST'])
 def login_user():
     try:
         content = request.get_json()
@@ -292,14 +303,14 @@ def login_user():
         email = content["email"]
         password = content["password"]
 
-        body = {'grant_type':'password',
-                'username':email, #Auth0 Setup with username. Using email address as username
-                'password':password,
-                'client_id':CLIENT_ID,
-                'client_secret':CLIENT_SECRET
+        body = {'grant_type': 'password',
+                'username': email,  # Auth0 Setup with username. Using email address as username
+                'password': password,
+                'client_id': CLIENT_ID,
+                'client_secret': CLIENT_SECRET
                 }
 
-        headers = { 'content-type': 'application/json' }
+        headers = {'content-type': 'application/json'}
         url = 'https://' + DOMAIN + '/oauth/token'
 
         r = requests.post(url, json=body, headers=headers)
@@ -310,7 +321,8 @@ def login_user():
 
         # Extract user_id for the response
         with db.connect() as conn:
-            stmt = sqlalchemy.text('SELECT user_id FROM users WHERE email = :email')
+            stmt = sqlalchemy.text(
+                'SELECT user_id FROM users WHERE email = :email')
             result = conn.execute(stmt, {'email': email}).fetchone()
             user_id = result[0] if result else None
 
@@ -320,7 +332,8 @@ def login_user():
         status_code = int(str(e))
         return get_error_message(status_code), status_code
 
-@app.route('/'+USERS, methods = ['GET'])
+
+@app.route('/'+USERS, methods=['GET'])
 def get_all_users():
     """Returns a list of all users if the provided JWT is type admin"""
     try:
@@ -333,13 +346,14 @@ def get_all_users():
             stmt = sqlalchemy.text(
                 'SELECT role, email FROM users WHERE sub = :sub'
             )
-            result = conn.execute(stmt, parameters={'sub': owner_sub}).one_or_none()
+            result = conn.execute(
+                stmt, parameters={'sub': owner_sub}).one_or_none()
             user = result._asdict()
             role = user['role']
             if role != 'admin':
                 raise ValueError(403)
 
-            users_stmt = sqlalchemy.text (
+            users_stmt = sqlalchemy.text(
                 'SELECT user_id, email, name, role, sub from users'
             )
             users_result = conn.execute(users_stmt)
@@ -349,7 +363,7 @@ def get_all_users():
                 user['self'] = f"{request.host_url.rstrip('/')}/{USERS}/{user['user_id']}"
 
             response = {
-                'users':users
+                'users': users
             }
 
             return response, 200
@@ -360,7 +374,8 @@ def get_all_users():
         _, status_code = e.args
         return get_error_message(status_code), status_code
 
-@app.route('/'+USERS+'/<int:user_id>', methods = ['GET'])
+
+@app.route('/'+USERS+'/<int:user_id>', methods=['GET'])
 def get_user(user_id):
     """Gets a user provided the id of the user. JWT must match the user_id or be and admin"""
     try:
@@ -373,7 +388,8 @@ def get_user(user_id):
             stmt = sqlalchemy.text(
                 'SELECT * FROM users WHERE sub = :sub'
             )
-            result = conn.execute(stmt, parameters={'sub': owner_sub}).one_or_none()
+            result = conn.execute(
+                stmt, parameters={'sub': owner_sub}).one_or_none()
             user = result._asdict()
             if result is None:
                 raise ValueError(404)
@@ -383,22 +399,23 @@ def get_user(user_id):
             if role != 'admin' and owner_user_id != user_id:
                 raise ValueError(403)
 
-            stmt =sqlalchemy.text(
+            stmt = sqlalchemy.text(
                 '''SELECT email, name, phone_number, role, user_id
                 FROM users WHERE user_id = :user_id'''
             )
-            result = conn.execute(stmt, parameters={'user_id':user_id}).one_or_none()
+            result = conn.execute(
+                stmt, parameters={'user_id': user_id}).one_or_none()
         if result is None:
             raise ValueError(404)
 
         user = result._asdict()
 
         user = {
-            'user_id':user['user_id'],
-            'email':user['email'],
-            'name':user['name'],
-            'phone_number':user['phone_number'],
-            'role':user['role']
+            'user_id': user['user_id'],
+            'email': user['email'],
+            'name': user['name'],
+            'phone_number': user['phone_number'],
+            'role': user['role']
         }
 
         return user
@@ -409,7 +426,8 @@ def get_user(user_id):
         _, status_code = e.args
         return get_error_message(status_code), status_code
 
-@app.route('/' + USERS + '/<int:user_id>', methods = ['PATCH'])
+
+@app.route('/' + USERS + '/<int:user_id>', methods=['PATCH'])
 def update_user(user_id):
     """Updates the given user and returns the updated fields. If no values are
     specified to be updated, the user info is simply returned"""
@@ -418,13 +436,14 @@ def update_user(user_id):
         if not payload:  # Handle missing or invalid JWT
             raise ValueError(401)
 
-        #check the modifier is an admin or the user
+        # check the modifier is an admin or the user
         owner_sub = payload['sub']
         with db.connect() as conn:
             stmt = sqlalchemy.text(
                 'SELECT * FROM users WHERE sub = :sub'
             )
-            result = conn.execute(stmt, parameters={'sub': owner_sub}).one_or_none()
+            result = conn.execute(
+                stmt, parameters={'sub': owner_sub}).one_or_none()
             user = result._asdict()
             if result is None:
                 raise ValueError(404)
@@ -434,7 +453,7 @@ def update_user(user_id):
             if role != 'admin' and owner_user_id != user_id:
                 raise ValueError(403)
 
-        #check for optional fields
+        # check for optional fields
         content = request.get_json()
 
         expected_types = {
@@ -448,11 +467,11 @@ def update_user(user_id):
             if not isinstance(value, expected_types[key]):
                 raise ValueError(400)
 
-        #get the values to update, if any
+        # get the values to update, if any
         phone_number = content.get("phone_number")
         name = content.get("name")
 
-        #update and get new user details
+        # update and get new user details
         with db.connect() as conn:
             stmt = sqlalchemy.text(
                 '''UPDATE users
@@ -462,13 +481,15 @@ def update_user(user_id):
                 WHERE user_id = :user_id;
                 '''
             )
-            conn.execute(stmt, {"name": name, "phone_number": phone_number, "user_id": user_id})
+            conn.execute(
+                stmt, {"name": name, "phone_number": phone_number, "user_id": user_id})
 
-            stmt =sqlalchemy.text(
+            stmt = sqlalchemy.text(
                 '''SELECT email, name, phone_number, role, user_id
                 FROM users WHERE user_id = :user_id'''
             )
-            result = conn.execute(stmt, parameters={'user_id':user_id}).one_or_none()
+            result = conn.execute(
+                stmt, parameters={'user_id': user_id}).one_or_none()
             conn.commit()
 
         if result is None:
@@ -477,11 +498,11 @@ def update_user(user_id):
         user = result._asdict()
 
         user = {
-            'user_id':user['user_id'],
-            'email':user['email'],
-            'name':user['name'],
-            'phone_number':user['phone_number'],
-            'role':user['role']
+            'user_id': user['user_id'],
+            'email': user['email'],
+            'name': user['name'],
+            'phone_number': user['phone_number'],
+            'role': user['role']
         }
 
         return user
@@ -493,22 +514,24 @@ def update_user(user_id):
         _, status_code = e.args
         return get_error_message(status_code), status_code
 
-@app.route('/'+PETS, methods = ['POST'])
+
+@app.route('/'+PETS, methods=['POST'])
 def add_pet():
     """Adds a pet to the database"""
     try:
 
-        #verify uploader is an admin
+        # verify uploader is an admin
         payload = verify_jwt(request)
         if not payload:
             raise ValueError(401)
         owner_sub = payload['sub']
 
         with db.connect() as conn:
-            stmt = sqlalchemy.text (
+            stmt = sqlalchemy.text(
                 'SELECT role FROM users WHERE sub = :sub'
             )
-            result = conn.execute(stmt, parameters={'sub': owner_sub}).one_or_none()
+            result = conn.execute(
+                stmt, parameters={'sub': owner_sub}).one_or_none()
 
         user = result._asdict()
         role = user['role']
@@ -517,13 +540,14 @@ def add_pet():
 
         content = request.get_json()
 
-        #check required fields
-        if not content or not all(key in content for key in ["name", "type", "gender", "age", "breed","description", "availability", "shelter_id"]):
+        # check required fields
+        if not content or not all(key in content for key in ["name", "type", "gender", "age", "breed", "description", "availability", "shelter_id"]):
             raise ValueError(400)
 
         valid_types = ['dog', 'cat', 'other']
         valid_genders = ['male', 'female', 'unknown']
-        valid_availability = ['available', 'not available', 'adopted', 'pending']
+        valid_availability = ['available',
+                              'not available', 'adopted', 'pending']
 
         if content['type'] not in valid_types:
             raise ValueError(400)
@@ -533,7 +557,7 @@ def add_pet():
             raise ValueError(400)
 
         with db.connect() as conn:
-            stmt = sqlalchemy.text (
+            stmt = sqlalchemy.text(
                 '''
                 INSERT INTO pets (name, type, gender, news_item, date_created, age, breed,
                                 description, availability, shelter_id)
@@ -547,7 +571,8 @@ def add_pet():
                     'name': content['name'],
                     'type': content['type'],
                     'gender': content['gender'],
-                    'news_item': content.get('news_item', None),  # Optional field
+                    # Optional field
+                    'news_item': content.get('news_item', None),
                     'age': content['age'],
                     'breed': content['breed'],
                     'description': content['description'],
@@ -561,18 +586,18 @@ def add_pet():
             conn.commit()
 
         response = {
-                'pet_id': pet_id,
-                'name': content['name'],
-                'type': content['type'],
-                'gender': content['gender'],
-                'age': content['age'],
-                'breed': content['breed'],
-                'description': content['description'],
-                'availability': content['availability'],
-                'shelter_id': content['shelter_id']
-            }
+            'pet_id': pet_id,
+            'name': content['name'],
+            'type': content['type'],
+            'gender': content['gender'],
+            'age': content['age'],
+            'breed': content['breed'],
+            'description': content['description'],
+            'availability': content['availability'],
+            'shelter_id': content['shelter_id']
+        }
         if content.get('news_item'):
-                response['news_item'] = content['news_item']
+            response['news_item'] = content['news_item']
         return response, 200
 
     except ValueError as e:
@@ -582,25 +607,25 @@ def add_pet():
         _, status_code = e.args
         return get_error_message(status_code), status_code
 
-@app.route('/'+PETS+'/<int:pet_id>', methods = ['GET'])
+
+@app.route('/'+PETS+'/<int:pet_id>', methods=['GET'])
 def get_pet(pet_id):
     """Gets a pet provided the id of the pet"""
     try:
 
         with db.connect() as conn:
 
-            stmt = sqlalchemy.text (
+            stmt = sqlalchemy.text(
                 'SELECT * FROM pets where pet_id = :pet_id'
             )
-            pet_result = conn.execute(stmt, parameters={'pet_id': pet_id}).one_or_none()
+            pet_result = conn.execute(
+                stmt, parameters={'pet_id': pet_id}).one_or_none()
             if pet_result is None:
                 raise ValueError(404)
 
-
             pet = pet_result._asdict()
 
-            return pet,200
-
+            return pet, 200
 
     except ValueError as e:
         status_code = int(str(e))
@@ -609,7 +634,8 @@ def get_pet(pet_id):
         _, status_code = e.args
         return get_error_message(status_code), status_code
 
-@app.route('/'+ PETS, methods=['GET'])
+
+@app.route('/' + PETS, methods=['GET'])
 def get_pets():
     """Returns a list of pets based on filtered attributes"""
     try:
@@ -621,12 +647,14 @@ def get_pets():
         shelter_id = request.args.get('shelter_id')
 
         if gender and gender not in ['male', 'female', 'unknown']:
-            raise ValueError("Invalid gender value. Must be 'male', 'female', or 'unknown'.")
+            raise ValueError(
+                "Invalid gender value. Must be 'male', 'female', or 'unknown'.")
         if pet_type and pet_type not in ['dog', 'cat', 'other']:
-            raise ValueError("Invalid type value. Must be 'dog', 'cat', or 'other'.")
+            raise ValueError(
+                "Invalid type value. Must be 'dog', 'cat', or 'other'.")
         if availability and availability not in ['available', 'not available', 'adopted', 'pending']:
-            raise ValueError("Invalid availability value. Must be 'available', 'not available', 'adopted', or 'pending'.")
-
+            raise ValueError(
+                "Invalid availability value. Must be 'available', 'not available', 'adopted', or 'pending'.")
 
         query = sqlalchemy.text('SELECT * FROM pets WHERE 1=1')
 
@@ -652,17 +680,19 @@ def get_pets():
                 shelter_check_stmt = sqlalchemy.text(
                     'SELECT COUNT(*) FROM shelters WHERE shelter_id = :shelter_id'
                 )
-                shelter_exists = conn.execute(shelter_check_stmt, {'shelter_id': shelter_id}).scalar()
+                shelter_exists = conn.execute(
+                    shelter_check_stmt, {'shelter_id': shelter_id}).scalar()
 
                 if shelter_exists == 0:
-                    return {'Error': 'Shelter not found'}, 404  # Shelter does not exist
+                    # Shelter does not exist
+                    return {'Error': 'Shelter not found'}, 404
 
             result = conn.execute(query, {
                 'age': age,
                 'gender': gender,
                 'type': pet_type,
                 'availability': availability,
-                'shelter_id' : shelter_id
+                'shelter_id': shelter_id
             }).fetchall()
 
             pets = [row._asdict() for row in result]
@@ -676,46 +706,47 @@ def get_pets():
         _, status_code = e.args
         return get_error_message(status_code), status_code
 
-@app.route('/'+PETS+'/<int:pet_id>/avatar', methods = ['POST'])
+
+@app.route('/'+PETS+'/<int:pet_id>/avatar', methods=['POST'])
 def upload_pet_avatar(pet_id):
     """Upload a picture for the pet"""
     try:
-       if 'file' not in request.files:
+        if 'file' not in request.files:
             raise ValueError(400)
 
-       with db.connect() as conn:
+        with db.connect() as conn:
 
-            stmt = sqlalchemy.text (
+            stmt = sqlalchemy.text(
                 'SELECT * FROM pets where pet_id = :pet_id'
             )
-            pet_result = conn.execute(stmt, parameters={'pet_id': pet_id}).one_or_none()
+            pet_result = conn.execute(
+                stmt, parameters={'pet_id': pet_id}).one_or_none()
             if pet_result is None:
                 raise ValueError(404)
-       pet = pet_result._asdict()
+        pet = pet_result._asdict()
 
-
-       file_obj = request.files['file']
-       storage_client = storage.Client()
-       bucket = storage_client.get_bucket(PET_PIC_BUCKET)
+        file_obj = request.files['file']
+        storage_client = storage.Client()
+        bucket = storage_client.get_bucket(PET_PIC_BUCKET)
         # Create a blob object for the bucket with the name of the file
-       blob = bucket.blob(file_obj.filename)
+        blob = bucket.blob(file_obj.filename)
         # Position the file_obj to its beginning
-       file_obj.seek(0)
+        file_obj.seek(0)
         # Upload the file into Cloud Storage
-       blob.upload_from_file(file_obj)
+        blob.upload_from_file(file_obj)
 
-       with db.connect() as conn:
+        with db.connect() as conn:
 
-            stmt = sqlalchemy.text (
+            stmt = sqlalchemy.text(
                 'UPDATE pets SET picture_url = :picture_url WHERE pet_id = :pet_id'
             )
-            conn.execute(stmt, parameters={'picture_url':file_obj.filename,
-                                                        'pet_id': pet_id})
+            conn.execute(stmt, parameters={'picture_url': file_obj.filename,
+                                           'pet_id': pet_id})
             conn.commit()
 
-       pet['picture_url'] = file_obj.filename
+        pet['picture_url'] = file_obj.filename
 
-       return ({'picture_url':f"{request.host_url.rstrip('/')}/pets/{pet_id}/avatar"},200)
+        return ({'picture_url': f"{request.host_url.rstrip('/')}/pets/{pet_id}/avatar"}, 200)
 
     except ValueError as e:
         status_code = int(str(e))
@@ -724,15 +755,17 @@ def upload_pet_avatar(pet_id):
         _, status_code = e.args
         return get_error_message(status_code), status_code
 
-@app.route('/'+PETS+'/<int:pet_id>/avatar', methods = ['GET'])
+
+@app.route('/'+PETS+'/<int:pet_id>/avatar', methods=['GET'])
 def get_pet_avatar(pet_id):
     try:
         with db.connect() as conn:
 
-            stmt = sqlalchemy.text (
+            stmt = sqlalchemy.text(
                 'SELECT * FROM pets where pet_id = :pet_id'
             )
-            pet_result = conn.execute(stmt, parameters={'pet_id': pet_id}).one_or_none()
+            pet_result = conn.execute(
+                stmt, parameters={'pet_id': pet_id}).one_or_none()
             if pet_result is None:
                 raise ValueError(404)
         pet = pet_result._asdict()
@@ -761,7 +794,8 @@ def get_pet_avatar(pet_id):
         _, status_code = e.args
         return get_error_message(status_code), status_code
 
-@app.route('/' + PETS + '/<int:pet_id>', methods = ['PATCH'])
+
+@app.route('/' + PETS + '/<int:pet_id>', methods=['PATCH'])
 def update_pet(pet_id):
     """Updates the given pet and returns the updated fields. If no values are
     specified to be updated, the pet info is simply returned"""
@@ -770,13 +804,14 @@ def update_pet(pet_id):
         if not payload:  # Handle missing or invalid JWT
             raise ValueError(401)
 
-        #check the modifier is an admin
+        # check the modifier is an admin
         owner_sub = payload['sub']
         with db.connect() as conn:
             stmt = sqlalchemy.text(
                 'SELECT * FROM users WHERE sub = :sub'
             )
-            result = conn.execute(stmt, parameters={'sub': owner_sub}).one_or_none()
+            result = conn.execute(
+                stmt, parameters={'sub': owner_sub}).one_or_none()
             user = result._asdict()
             if result is None:
                 raise ValueError(404)
@@ -785,12 +820,13 @@ def update_pet(pet_id):
             if role != 'admin':
                 raise ValueError(403)
 
-        #check for optional fields
+        # check for optional fields
         content = request.get_json()
 
         valid_types = ['dog', 'cat', 'other']
         valid_genders = ['male', 'female', 'unknown']
-        valid_availabilities = ['available', 'not available', 'adopted', 'pending']
+        valid_availabilities = ['available',
+                                'not available', 'adopted', 'pending']
 
         expected_types = {
             "age": int,
@@ -814,7 +850,6 @@ def update_pet(pet_id):
             raise ValueError(400)  # Invalid gender
         if 'availability' in content and content['availability'] not in valid_availabilities:
             raise ValueError(400)  # Invalid availability
-
 
          # Get the values to update, if any
         age = content.get("age")
@@ -860,7 +895,8 @@ def update_pet(pet_id):
                 FROM pets WHERE pet_id = :pet_id
                 '''
             )
-            result = conn.execute(stmt, parameters={'pet_id': pet_id}).one_or_none()
+            result = conn.execute(
+                stmt, parameters={'pet_id': pet_id}).one_or_none()
 
             if result is None:
                 raise ValueError(404)
@@ -877,7 +913,8 @@ def update_pet(pet_id):
         _, status_code = e.args
         return get_error_message(status_code), status_code
 
-@app.route('/' + PETS + '/<int:pet_id>', methods = ['DELETE'])
+
+@app.route('/' + PETS + '/<int:pet_id>', methods=['DELETE'])
 def delete_pet(pet_id):
     """Deletes the given pet and returns a confirmation message."""
     try:
@@ -892,7 +929,8 @@ def delete_pet(pet_id):
             stmt = sqlalchemy.text(
                 'SELECT * FROM users WHERE sub = :sub'
             )
-            result = conn.execute(stmt, parameters={'sub': owner_sub}).one_or_none()
+            result = conn.execute(
+                stmt, parameters={'sub': owner_sub}).one_or_none()
             user = result._asdict() if result else None
             if user is None:
                 raise ValueError(404)
@@ -906,7 +944,8 @@ def delete_pet(pet_id):
             stmt = sqlalchemy.text(
                 'SELECT * FROM pets WHERE pet_id = :pet_id'
             )
-            result = conn.execute(stmt, parameters={'pet_id': pet_id}).one_or_none()
+            result = conn.execute(
+                stmt, parameters={'pet_id': pet_id}).one_or_none()
 
             if result is None:
                 raise ValueError(404)  # Pet not found
@@ -927,6 +966,7 @@ def delete_pet(pet_id):
         _, status_code = e.args
         return get_error_message(status_code), status_code
 
+
 @app.route('/' + SHELTERS, methods=['GET'])
 def get_all_shelters():
     """Returns a list of all shelters, optionally filtered by user_id"""
@@ -935,11 +975,13 @@ def get_all_shelters():
         if not payload:  # Handle missing or invalid JWT
             raise ValueError(401)
 
-        user_id = request.args.get('user_id')  # Get user_id from query parameters (optional)
+        # Get user_id from query parameters (optional)
+        user_id = request.args.get('user_id')
 
         with db.connect() as conn:
             if user_id:
-                stmt = sqlalchemy.text('SELECT * FROM shelters WHERE user_id = :user_id')
+                stmt = sqlalchemy.text(
+                    'SELECT * FROM shelters WHERE user_id = :user_id')
                 result = conn.execute(stmt, {'user_id': user_id})
             else:
                 stmt = sqlalchemy.text('SELECT * FROM shelters')
@@ -993,7 +1035,7 @@ def get_all_shelters():
 #         _, status_code = e.args
 #         return get_error_message(status_code), status_code
 
-@app.route('/'+SHELTERS+'/<int:shelter_id>', methods = ['GET'])
+@app.route('/'+SHELTERS+'/<int:shelter_id>', methods=['GET'])
 def get_shelter(shelter_id):
     """Gets a shelter provided the id of the shelter"""
     try:
@@ -1002,21 +1044,22 @@ def get_shelter(shelter_id):
             raise ValueError(401)
 
         with db.connect() as conn:
-            stmt =sqlalchemy.text(
+            stmt = sqlalchemy.text(
                 '''SELECT * FROM shelters WHERE shelter_id = :shelter_id'''
             )
-            result = conn.execute(stmt, parameters={'shelter_id':shelter_id}).one_or_none()
+            result = conn.execute(
+                stmt, parameters={'shelter_id': shelter_id}).one_or_none()
         if result is None:
             raise ValueError(404)
 
         shelter = result._asdict()
 
         shelter = {
-            'shelter_id':shelter['shelter_id'],
-            'name':shelter['name'],
-            'user_id':shelter['user_id'],
-            'zip_code':shelter['zip_code']
-            }
+            'shelter_id': shelter['shelter_id'],
+            'name': shelter['name'],
+            'user_id': shelter['user_id'],
+            'zip_code': shelter['zip_code']
+        }
 
         return shelter
     except ValueError as e:
@@ -1025,6 +1068,7 @@ def get_shelter(shelter_id):
     except AuthError as e:
         _, status_code = e.args
         return get_error_message(status_code), status_code
+
 
 @app.route('/' + SHELTERS + '/<int:shelter_id>', methods=['DELETE'])
 def delete_shelter(shelter_id):
@@ -1039,7 +1083,8 @@ def delete_shelter(shelter_id):
 
         with db.connect() as conn:
             stmt = sqlalchemy.text('SELECT role FROM users WHERE sub = :sub')
-            result = conn.execute(stmt, parameters={'sub': owner_sub}).one_or_none()
+            result = conn.execute(
+                stmt, parameters={'sub': owner_sub}).one_or_none()
 
         user = result._asdict()
         role = user['role']
@@ -1048,20 +1093,21 @@ def delete_shelter(shelter_id):
 
         # Check if the shelter exists
         with db.connect() as conn:
-            stmt = sqlalchemy.text('SELECT * FROM shelters WHERE shelter_id = :shelter_id')
+            stmt = sqlalchemy.text(
+                'SELECT * FROM shelters WHERE shelter_id = :shelter_id')
             shelter = conn.execute(stmt, {'shelter_id': shelter_id}).fetchone()
 
         if not shelter:
-            raise ValueError(404) # Shelter not found
+            raise ValueError(404)  # Shelter not found
 
         # Delete the shelter (pets will be deleted automatically due to ON DELETE CASCADE)
         with db.connect() as conn:
-            stmt = sqlalchemy.text('DELETE FROM shelters WHERE shelter_id = :shelter_id')
+            stmt = sqlalchemy.text(
+                'DELETE FROM shelters WHERE shelter_id = :shelter_id')
             conn.execute(stmt, {'shelter_id': shelter_id})
             conn.commit()
 
         # Commit the changes
-
 
         return jsonify({'message': f'Shelter {shelter_id} has been successfully deleted.'}), 200
 
@@ -1070,6 +1116,7 @@ def delete_shelter(shelter_id):
         return get_error_message(status_code), status_code
     except Exception as e:
         return get_error_message(500), 500  # Internal server error
+
 
 @app.route('/' + SHELTERS, methods=['POST'])
 def add_shelter():
@@ -1083,8 +1130,10 @@ def add_shelter():
         owner_sub = payload['sub']
 
         with db.connect() as conn:
-            stmt = sqlalchemy.text('SELECT role, user_id FROM users WHERE sub = :sub')
-            result = conn.execute(stmt, parameters={'sub': owner_sub}).one_or_none()
+            stmt = sqlalchemy.text(
+                'SELECT role, user_id FROM users WHERE sub = :sub')
+            result = conn.execute(
+                stmt, parameters={'sub': owner_sub}).one_or_none()
 
         user = result._asdict()
         role = user['role']
@@ -1134,7 +1183,8 @@ def add_shelter():
         _, status_code = e.args
         return get_error_message(status_code), status_code
 
-@app.route('/' + SHELTERS + '/<int:shelter_id>', methods = ['PATCH'])
+
+@app.route('/' + SHELTERS + '/<int:shelter_id>', methods=['PATCH'])
 def update_shelter(shelter_id):
     """Updates the given shelter and returns the updated fields. If no values are
     specified to be updated, the shelter info is simply returned"""
@@ -1143,13 +1193,14 @@ def update_shelter(shelter_id):
         if not payload:
             raise ValueError(401)
 
-        #check the modifier is an admin
+        # check the modifier is an admin
         owner_sub = payload['sub']
         with db.connect() as conn:
             stmt = sqlalchemy.text(
                 'SELECT * FROM users WHERE sub = :sub'
             )
-            result = conn.execute(stmt, parameters={'sub': owner_sub}).one_or_none()
+            result = conn.execute(
+                stmt, parameters={'sub': owner_sub}).one_or_none()
             user = result._asdict()
             if result is None:
                 raise ValueError(404)
@@ -1158,13 +1209,13 @@ def update_shelter(shelter_id):
             if role != 'admin':
                 raise ValueError(403)
 
-        #check for optional fields
+        # check for optional fields
         content = request.get_json()
 
         expected_types = {
-            "name" : str,
-            "user_id" : int,
-            "zip_code" : str
+            "name": str,
+            "user_id": int,
+            "zip_code": str
         }
         for key, value in content.items():
             if key not in expected_types:
@@ -1178,19 +1229,20 @@ def update_shelter(shelter_id):
         zip_code = content.get("zip_code")
 
         with db.connect() as conn:
-            #check that a given user id exists and belongs to an admin
+            # check that a given user id exists and belongs to an admin
             if user_id:
                 stmt = sqlalchemy.text(
                     'SELECT role FROM users WHERE user_id = :user_id'
                 )
-                result = conn.execute(stmt, parameters={'user_id': user_id}).one_or_none()
+                result = conn.execute(
+                    stmt, parameters={'user_id': user_id}).one_or_none()
                 if result is None:
-                    return {"Error" : "user_id does not match to existing user"}, 404
+                    return {"Error": "user_id does not match to existing user"}, 404
 
                 user = result._asdict()
                 role = user['role']
                 if role != 'admin':
-                    return {"Error" : "user_id for a Shelter must have role admin"}
+                    return {"Error": "user_id for a Shelter must have role admin"}
 
             stmt = sqlalchemy.text(
                 '''UPDATE shelters
@@ -1205,7 +1257,7 @@ def update_shelter(shelter_id):
                 "name": name,
                 "user_id": user_id,
                 "zip_code": zip_code,
-                "shelter_id" : shelter_id
+                "shelter_id": shelter_id
             })
 
             # Fetch the updated pet details
@@ -1214,7 +1266,8 @@ def update_shelter(shelter_id):
                 FROM shelters WHERE shelter_id = :shelter_id
                 '''
             )
-            result = conn.execute(stmt, parameters={'shelter_id': shelter_id}).one_or_none()
+            result = conn.execute(
+                stmt, parameters={'shelter_id': shelter_id}).one_or_none()
 
             if result is None:
                 raise ValueError(404)
@@ -1231,7 +1284,8 @@ def update_shelter(shelter_id):
         _, status_code = e.args
         return get_error_message(status_code), status_code
 
-@app.route('/'+FAVORITES+'/<int:user_id>', methods = ['GET'])
+
+@app.route('/'+FAVORITES+'/<int:user_id>', methods=['GET'])
 def get_user_favorites(user_id):
     try:
         payload = verify_jwt(request)
@@ -1239,18 +1293,19 @@ def get_user_favorites(user_id):
             raise ValueError(401)
 
         with db.connect() as conn:
-            stmt =sqlalchemy.text(
+            stmt = sqlalchemy.text(
                 '''SELECT * FROM favorites WHERE user_id = :user_id'''
             )
-            result = conn.execute(stmt, parameters={'user_id':user_id}).fetchall()
+            result = conn.execute(
+                stmt, parameters={'user_id': user_id}).fetchall()
         if not result:
-            return {"Error":"No favorites found for given user ID"},404
+            return {"Error": "No favorites found for given user ID"}, 404
 
         favorites = [row._asdict() for row in result]
 #
         response = {
-                'favorites':favorites
-            }
+            'favorites': favorites
+        }
 
         return response, 200
 
@@ -1260,6 +1315,7 @@ def get_user_favorites(user_id):
     except AuthError as e:
         _, status_code = e.args
         return get_error_message(status_code), status_code
+
 
 @app.route('/'+FAVORITES, methods=['POST'])
 def add_favorite():
@@ -1281,7 +1337,8 @@ def add_favorite():
 
         # Check if user exists
         with db.connect() as conn:
-            stmt = sqlalchemy.text('SELECT * FROM users WHERE user_id = :user_id')
+            stmt = sqlalchemy.text(
+                'SELECT * FROM users WHERE user_id = :user_id')
             user_result = conn.execute(stmt, {'user_id': user_id}).fetchone()
 
             if user_result is None:
@@ -1300,7 +1357,6 @@ def add_favorite():
                 VALUES (:user_id, :pet_id, NOW())
             ''')
             conn.execute(stmt, {'user_id': user_id, 'pet_id': pet_id})
-            conn.commit()
             new_favorite_id = conn.execute(sqlalchemy.text('SELECT LAST_INSERT_ID()')).scalar()
 
         return jsonify(
@@ -1318,7 +1374,8 @@ def add_favorite():
         _, status_code = e.args
         return get_error_message(status_code), status_code
 
-@app.route('/'+ FAVORITES + '/<int:favorite_id>', methods=['DELETE'])
+
+@app.route('/' + FAVORITES + '/<int:favorite_id>', methods=['DELETE'])
 def delete_favorite(favorite_id):
     """Deletes a favorite from a user's list if they are the owner."""
     try:
@@ -1329,7 +1386,8 @@ def delete_favorite(favorite_id):
         user_sub = payload['sub']
 
         with db.connect() as conn:
-            stmt = sqlalchemy.text('SELECT user_id FROM users WHERE sub = :sub')
+            stmt = sqlalchemy.text(
+                'SELECT user_id FROM users WHERE sub = :sub')
             result = conn.execute(stmt, {'sub': user_sub}).one_or_none()
 
             if result is None:
@@ -1338,13 +1396,16 @@ def delete_favorite(favorite_id):
             user_id = result.user_id
 
             # Check if the favorite exists and belongs to the user
-            stmt = sqlalchemy.text('SELECT id FROM favorites WHERE id = :favorite_id AND user_id = :user_id')
-            result = conn.execute(stmt, {'favorite_id': favorite_id, 'user_id': user_id}).one_or_none()
+            stmt = sqlalchemy.text(
+                'SELECT id FROM favorites WHERE id = :favorite_id AND user_id = :user_id')
+            result = conn.execute(
+                stmt, {'favorite_id': favorite_id, 'user_id': user_id}).one_or_none()
 
             if result is None:
                 raise ValueError(403)
 
-            stmt = sqlalchemy.text('DELETE FROM favorites WHERE id = :favorite_id')
+            stmt = sqlalchemy.text(
+                'DELETE FROM favorites WHERE id = :favorite_id')
             conn.execute(stmt, {'favorite_id': favorite_id})
             conn.commit()
 
@@ -1357,7 +1418,8 @@ def delete_favorite(favorite_id):
         _, status_code = e.args
         return get_error_message(status_code), status_code
 
-@app.route('/'+ PET_DISPOSITIONS +'/<int:pet_id>', methods=['GET'])
+
+@app.route('/' + PET_DISPOSITIONS + '/<int:pet_id>', methods=['GET'])
 def get_pet_dispositions(pet_id):
     """Retrieve all dispositions for a given pet."""
 
@@ -1374,7 +1436,9 @@ def get_pet_dispositions(pet_id):
                 raise ValueError(404)
 
             # Extract only the 'disposition' values correctly
-            dispositions = [row._mapping["disposition"] for row in rows]  # Correct way to access named columns
+            dispositions = [row._mapping["disposition"]
+                            # Correct way to access named columns
+                            for row in rows]
 
             return {"pet_id": pet_id, "dispositions": dispositions}, 200
 
@@ -1384,6 +1448,7 @@ def get_pet_dispositions(pet_id):
     except AuthError as e:
         _, status_code = e.args
         return get_error_message(status_code), status_code
+
 
 @app.route('/' + PET_DISPOSITIONS + '/<int:pet_id>', methods=['POST'])
 def add_pet_disposition(pet_id):
@@ -1403,7 +1468,8 @@ def add_pet_disposition(pet_id):
                 raise ValueError(403)
 
             # Check if pet exists
-            stmt = sqlalchemy.text('SELECT pet_id FROM pets WHERE pet_id = :pet_id')
+            stmt = sqlalchemy.text(
+                'SELECT pet_id FROM pets WHERE pet_id = :pet_id')
             pet_result = conn.execute(stmt, {'pet_id': pet_id}).one_or_none()
             if pet_result is None:
                 raise ValueError(404)
@@ -1429,6 +1495,7 @@ def add_pet_disposition(pet_id):
         _, status_code = e.args
         return get_error_message(status_code), status_code
 
+
 @app.route('/' + PET_DISPOSITIONS + '/<int:pet_id>', methods=['DELETE'])
 def delete_pet_disposition(pet_id):
     """Delete a specific disposition for a given pet."""
@@ -1448,7 +1515,8 @@ def delete_pet_disposition(pet_id):
             stmt_check = sqlalchemy.text(
                 '''SELECT * FROM pet_dispositions WHERE pet_id = :pet_id AND disposition = :disposition'''
             )
-            result = conn.execute(stmt_check, {'pet_id': pet_id, 'disposition': disposition}).fetchone()
+            result = conn.execute(
+                stmt_check, {'pet_id': pet_id, 'disposition': disposition}).fetchone()
 
             if result is None:
                 return {"message": "Disposition not found"}, 404
@@ -1457,7 +1525,8 @@ def delete_pet_disposition(pet_id):
             stmt_delete = sqlalchemy.text(
                 '''DELETE FROM pet_dispositions WHERE pet_id = :pet_id AND disposition = :disposition'''
             )
-            conn.execute(stmt_delete, {'pet_id': pet_id, 'disposition': disposition})
+            conn.execute(
+                stmt_delete, {'pet_id': pet_id, 'disposition': disposition})
             conn.commit()
 
         return {"message": f"Disposition '{disposition}' deleted successfully"}, 200
@@ -1468,7 +1537,6 @@ def delete_pet_disposition(pet_id):
     except AuthError as e:
         _, status_code = e.args
         return get_error_message(status_code), status_code
-
 
 
 init_db()

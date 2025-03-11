@@ -14,20 +14,17 @@ import './App.css'
 export const URL = 'http://localhost:8080/';
 
 const routes = createBrowserRouter([
-  { path: '/', element: <HomePage /> },
-  { path: 'pets-page', element: <PetsPage /> },
-  { path: 'sign-page', element: <SignInPage /> },
-  { path: 'my-account-page', element: <MyAccountPage /> },
-  { path: 'pets-page', element: <PetsPage /> },
-  { path: 'edit-pet-page', element: <EditPetPage /> },
-  { path: 'add-pet-page', element: <AddPetPage /> },
-])
+  {path: '/', element: <HomePage />},
+  {path: 'pets-page', element: <PetsPage />},
+  {path: 'sign-page', element: <SignInPage />},
+  {path: 'my-account-page', element: <MyAccountPage />},
+  {path: 'edit-pet-page', element: <EditPetPage />},
+  {path: 'add-pet-page', element: <AddPetPage />},
+], {basename: "/Pet-Adoption/"})
 
 function App() {
-  return (
-    <QueryClientProvider client={new QueryClient}>
+  return  (
       <RouterProvider router={routes} />
-    </QueryClientProvider>
   )
 }
 
