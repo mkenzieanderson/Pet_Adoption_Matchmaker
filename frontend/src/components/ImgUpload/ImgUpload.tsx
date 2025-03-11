@@ -2,22 +2,18 @@ import { useRef } from 'react';
 import UploadIcon from "../../assets/upload_icon.png";
 
 type ImgUploadProps = {
-    imageURL: string | null;
-    setImageURL: React.Dispatch<React.SetStateAction<string | null>>;
+    imageFile: File | undefined;
+    setImageFile: React.Dispatch<React.SetStateAction<File| undefined>>;
 }
 
 
-function ImgUpload ({ imageURL, setImageURL }: ImgUploadProps) {
+function ImgUpload ({ imageFile, setImageFile }: ImgUploadProps) {
     const imgUploadRef = useRef<HTMLInputElement>(null);
 
     const handleImgUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const imgFile = event.target.files?.[0];
         if (imgFile) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImageURL(reader.result as string);
-            }
-            reader.readAsDataURL(imgFile)
+            setImageFile(imgFile);
         }
     };
 
@@ -31,10 +27,10 @@ function ImgUpload ({ imageURL, setImageURL }: ImgUploadProps) {
                     className="text-espresso font-header font-semibold text-lg text-center cursor-pointer"
                     onClick={handleClick}
                 >
-                    { imageURL ?
+                    { imageFile ?
                         (<div className="w-[245px] h-[220px] overflow-hidden">
                             <img
-                                src={imageURL}
+                                src={URL.createObjectURL(imageFile)}
                                 className="w-full h-full"
                             />
                         </div>) 

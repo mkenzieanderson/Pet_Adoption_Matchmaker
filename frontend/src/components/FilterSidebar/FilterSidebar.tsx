@@ -1,27 +1,36 @@
 import Dropdown from '../Dropdown/Dropdown';
 import Button from '../Buttons/Button';
-import { useState } from 'react';
-import { 
-    TypeOptions, 
-    DogBreedOptions, 
-    CatBreedOptions, 
-    AgeOptions, 
+import { FilterCriteria } from '../../state/Pets/Pet.store';
+import { useEffect, useState } from 'react';
+import { AgeOptions } from '../Dropdown/AgeOptions';
+import {
+    TypeOptions,
+    DogBreedOptions,
+    CatBreedOptions,
     GenderOptions,
-    AvailabilityOptions, 
-    DispositionOptions 
+    AvailabilityOptions,
+    DispositionOptions
 } from '../Dropdown/PetOptions';
 
+interface FilterSidebarProps {
+    filterPets: (filterCriteria: FilterCriteria) => void;
+}
 
-const FilterSidebar = () => {
+const FilterSidebar = ({ filterPets }: FilterSidebarProps) => {
     const [type, setType] = useState("");
     const [breed, setBreed] = useState("");
-    const [age, setAge] = useState<number | null>(null);
+    const [age, setAge] = useState(0);
     const [gender, setGender] = useState("");
     const [disposition, setDisposition] = useState("");
     const [availability, setAvailability] = useState("");
 
+    useEffect(() => {
+        setBreed("");
+    }, [type]);
+
     const handleApply = () => {
-        console.log("Applying filters");
+        console.log("Applying filters", { type, breed, age, gender, disposition, availability });
+        filterPets({ type, breed, age, gender, disposition, availability });
     }
 
     return (
@@ -35,52 +44,55 @@ const FilterSidebar = () => {
                 </div>
                 <div className="pb-4">
                     <div className="my-4">
-                        <Dropdown 
-                            title="Type" 
-                            width="w-[210px]" 
+                        <Dropdown
+                            title="Type"
+                            width="w-[210px]"
                             options={TypeOptions}
                             onChange={(option) => setType(option.value.toString())}
                         />
                     </div>
+                    {(type === "dog" || type === "cat") ?
+                        <div className="my-4">
+                            <Dropdown
+                                title={type === "dog" ? "Breed" : "Breed"}
+                                width="w-[210px]"
+                                options={type === "cat" ? CatBreedOptions : DogBreedOptions}
+                                onChange={(option) => setBreed(option.value.toString())}
+                            />
+                        </div>
+                        : null
+                    }
                     <div className="my-4">
-                        <Dropdown 
-                            title="Breed" 
-                            width="w-[210px]" 
-                            options={type === "cat" ? CatBreedOptions : DogBreedOptions}
-                            onChange={(option) => setBreed(option.value.toString())}
-                        />
-                    </div>
-                    <div className="my-4">
-                        <Dropdown 
-                            title="Age" 
-                            width="w-[210px]" 
+                        <Dropdown
+                            title="Age"
+                            width="w-[210px]"
                             options={AgeOptions}
                             onChange={(option) => setAge(Number(option.value))}
                         />
                     </div>
                     <div className="my-4">
-                        <Dropdown 
-                            title="Gender" 
-                            width="w-[210px]"  
+                        <Dropdown
+                            title="Gender"
+                            width="w-[210px]"
                             options={GenderOptions}
                             onChange={(option) => setGender(option.value.toString())}
                         />
                     </div>
                     <div className="my-4">
-                        <Dropdown 
-                            title="Disposition" 
-                            width="w-[210px]"  
+                        <Dropdown
+                            title="Disposition"
+                            width="w-[210px]"
                             options={DispositionOptions}
                             onChange={(option) => setDisposition(option.value.toString())}
                         />
                     </div>
                     <div className="my-4">
-                        <Dropdown 
-                            title="Availability" 
-                            width="w-[210px]"  
+                        <Dropdown
+                            title="Availability"
+                            width="w-[210px]"
                             options={AvailabilityOptions}
                             onChange={(option) => setAvailability(option.value.toString())}
-                    />
+                        />
                     </div>
                     <div className="flex justify-center my-[22px]">
                         <Button

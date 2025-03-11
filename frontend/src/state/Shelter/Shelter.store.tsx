@@ -6,7 +6,7 @@ interface Shelter {
     shelter_id: number;
     name: string;
     address: string;
-    user_id: number;
+    user_id: bigint;
     zip_code: number;
 };
 
@@ -15,7 +15,7 @@ interface ShelterStore {
     currentShelter: Shelter | null;
     shelterPets: Pet[];
     fetchShelters: (token: string) => Promise<void>;
-    fetchShelter: (shelterID: bigint) => Promise<void>;
+    fetchShelter: (shelterID: bigint, token: string) => Promise<void>;
     addShelter: (token: string, newShelter: Partial<Shelter>) => Promise<void>;
     updateShelter: (shelterID: number, updatedData: Partial<Shelter>, token: string) => Promise<void>;
     deleteShelter: (shelterID: number, token: string) => Promise<void>;
@@ -43,10 +43,14 @@ const useShelterStore = create<ShelterStore>((set) => ({
             console.error('Failed to fetch shelters:', error);
         }
     },
-    fetchShelter: async (shelterID: bigint) => {
+    fetchShelter: async (shelterID: bigint, token: string) => {
         try {
             const response = await fetch(`${URL}shelters/${shelterID}`, {
                 method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                }
                 }); 
             if (!response.ok) {
                 throw new Error('Failed to fetch shelter');
@@ -78,7 +82,7 @@ const useShelterStore = create<ShelterStore>((set) => ({
     },
     updateShelter: async (shelterID: number, updatedData: Partial<Shelter>, token) => {
         try {
-            const response = await fetch(`${URL}${shelterID}`, {
+            const response = await fetch(`${URL}shelters/${shelterID}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',

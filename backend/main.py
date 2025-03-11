@@ -1425,10 +1425,6 @@ def get_pet_dispositions(pet_id):
     """Retrieve all dispositions for a given pet."""
 
     try:
-        payload = verify_jwt(request)
-        if not payload:
-            raise ValueError(401)
-
         with db.connect() as conn:
             stmt = sqlalchemy.text(
                 '''SELECT disposition FROM pet_dispositions WHERE pet_id = :pet_id'''

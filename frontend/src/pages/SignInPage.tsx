@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/Buttons/Button";
 import TextInput from "../components/TextInput/TextInput";
 import Form from "../components/Form/Form";
 import Header from "../components/Header/Header";
-import usePetStore from "../state/Pets/Pet.store";
 import useAuthStore from "../state/Auth/Auth.store";
 import useUserStore from "../state/User/User.store";
 import useShelterStore from "../state/Shelter/Shelter.store";
@@ -15,17 +14,17 @@ export const SignInPage = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showError, setShowError] = useState(false);
+    const [isUserFetched, setIsUserFetched] = useState(false);
 
     const authStore = useAuthStore((state) => state);
     const shelter = useShelterStore((state) => state);
     const fetchShelterPets = useShelterStore((state) => state.fetchShelterPets);
     const user = useUserStore((state) => state.user);
     const fetchUser = useUserStore((state) => state.fetchUser);
-    const fetchPets = usePetStore((state) => state.fetchPets);
     const errorMessage = "Email and/or password are incorrect. Please try again.";
 
 
-    function clearDataFields () {
+    function clearDataFields() {
         setEmail("");
         setPassword("");
     }
@@ -33,30 +32,34 @@ export const SignInPage = () => {
     async function handleValidLogin(res_token: string, res_user_id: bigint) {
         clearDataFields();
         setShowError(false);
-    
+
         authStore.setToken(res_token);
         authStore.setUserID(res_user_id);
         authStore.setStatus(true);
-    
+
         await fetchUser(res_user_id, res_token);
-    
-        if (user?.role === "admin") {
-            await shelter.fetchShelter(user.user_id);
-    
-            if (shelter.currentShelter?.shelter_id) {
-                await fetchShelterPets(shelter.currentShelter.shelter_id);
-            }
-        } 
-        console.log("User role: ", user?.role);
-        fetchPets();
-        navigate('/');
+        setIsUserFetched(true);
     }
 
-    function handleInvalidLogin () {
+    useEffect(() => {
+        if (isUserFetched && user) {
+            console.log("User data after fetch:", user);
+            if (user.role === "admin") {
+                shelter.fetchShelter(user.user_id, authStore.token).then(() => {
+                    if (shelter.currentShelter?.shelter_id) {
+                        fetchShelterPets(shelter.currentShelter.shelter_id)
+                    }
+                });
+            }
+            navigate("/");
+        }
+    }, [isUserFetched, user]);
+
+    function handleInvalidLogin() {
         clearDataFields();
         setShowError(true);
     }
-    
+
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
         await authenticateLogin();
@@ -64,6 +67,7 @@ export const SignInPage = () => {
 
     const authenticateLogin = async () => {
         try {
+            console.log("From URL:", URL);
             const response = await fetch(`${URL}users/login`, {
                 method: 'POST',
                 headers: {
