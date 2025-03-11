@@ -15,7 +15,7 @@ export interface Pet {
     name: string;
     type: string;
     breed: string;
-    image: File;
+    image: string;
     age: number;
     availability: string;
     gender: string;

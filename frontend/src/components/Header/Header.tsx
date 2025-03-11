@@ -32,7 +32,7 @@ const Header = ({ user, path, loginStatus }: HeaderProps) => {
     const renderButton = () => {
         if (auth.status) {
             return <Button onClick={toggleMenu} svgIcon={BiUser} className={svgButtonClassName}/>;
-        } else if (path === '/' && !auth.status) {
+        } else if ((path === '/' || path == '/Pet-Adoption/') && !auth.status) {
             return <Button onClick={() => navigate('/sign-page')} text="Sign In" />;
         } else {
             return <Button onClick={() => navigate('/')} svgIcon={FaHome} className={svgButtonClassName}/>;

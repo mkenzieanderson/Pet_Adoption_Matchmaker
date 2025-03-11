@@ -26,7 +26,7 @@ function Checklist ({ title, options, selectedOptions, setSelectedOptions }: Che
         <div className="font-header text-espresso">
             {title && <label className="font-semibold text-lg block mb-1">{title}</label>}
             <div className="flex flex-row flex-wrap gap-8 mt-2">
-                {options.map((option, index) => {
+                {options.map((option, _index) => {
                     return (
                         <div className="flex items-center">
                             <span>

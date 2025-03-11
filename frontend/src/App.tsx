@@ -17,13 +17,14 @@ const routes = createBrowserRouter([
   {path: 'pets-page', element: <PetsPage />},
   {path: 'sign-page', element: <SignInPage />},
   {path: 'my-account-page', element: <MyAccountPage />},
-  {path: 'pets-page', element: <PetsPage />},
   {path: 'edit-pet-page', element: <EditPetPage />},
   {path: 'add-pet-page', element: <AddPetPage />},
-])
+], {basename: "/Pet-Adoption/"})
 
 function App() {
-  return <RouterProvider router={routes} />
+  return  (
+      <RouterProvider router={routes} />
+  )
 }
 
 export default App
