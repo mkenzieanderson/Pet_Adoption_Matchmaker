@@ -59,9 +59,14 @@ ALGORITHMS = ["RS256"]
 oauth = OAuth(app)
 
 
-CLIENT_ID = access_secret_version("CLIENT_ID")
-CLIENT_SECRET = access_secret_version("CLIENT_SECRET")
-DOMAIN = access_secret_version("DOMAIN")
+# CLIENT_ID = access_secret_version("CLIENT_ID")
+# CLIENT_SECRET = access_secret_version("CLIENT_SECRET")
+# DOMAIN = access_secret_version("DOMAIN")
+
+# global secrets for auth - using for local deployment
+CLIENT_ID = os.getenv("CLIENT_ID")
+CLIENT_SECRET = os.getenv("CLIENT_SECRET")
+DOMAIN = os.getenv("DOMAIN")
 
 
 auth0 = oauth.register(
