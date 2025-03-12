@@ -34,6 +34,11 @@ interface PetProfileCardProps {
             deleteFavoritePet.mutate({ userID, petID, token });
         };
 
+        const handleEdit = () => {
+            if (!user) return;
+            navigate('/edit-pet-page', { state: { pet } });
+        };
+
         return (
             <>
                 <div className="bg-mustard w-full h-auto p-4 rounded-lg shadow-md cursor-pointer relative" >
@@ -48,7 +53,7 @@ interface PetProfileCardProps {
                             <Delete />
                         </button>
                     ) : (
-                        <button className="w-6 h-6 mx-4 my-4" onClick={() => navigate('/edit-pet-page')}>
+                        <button className="w-6 h-6 mx-4 my-4" onClick={handleEdit}>
                             <Edit />
                         </button>
                     )}

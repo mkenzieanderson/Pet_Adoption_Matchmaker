@@ -34,7 +34,7 @@ interface PetStore {
     fetchPets: (filter?: FilterCriteria) => Promise<void>; 
     fetchPet: (petID: number) => Promise<void>;
     addPet: (token: string, newPet: Partial<Pet>) => Promise<void>;
-    updatePet: (petID: number, updatedData: Partial<Pet>) => Promise<void>;
+    updatePet: (petID: number, updatedData: Partial<Pet>, token: string) => Promise<void>;
     deletePet: (petID: number, token: string) => Promise<void>;
     uploadAvatar: (petID: number, avatar: File) => Promise<void>;
     addDisposition: (token: string, petID: number, dispostions: string[]) => Promise<void>;
@@ -157,11 +157,12 @@ const usePetStore = create<PetStore>((set) => ({
             console.error('Failed to add pet:', error);
         }
     },
-    updatePet: async (petID: number, updatedData: Partial<Pet>) => {
+    updatePet: async (petID: number, updatedData: Partial<Pet>, token: string) => {
         try {
             const response = await fetch(`${URL}pets/${petID}`, {
                 method: 'PATCH',
                 headers: {
+                    Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(updatedData),

@@ -7,12 +7,14 @@ type ButtonProps = {
     onClick: (event: MouseEvent<HTMLButtonElement>) => void;
     svgIcon?: ElementType;
     svgClassName?: string;
+    disabled?: boolean;
 }
 
 function Button (props: ButtonProps) {
     return (
         <button 
             className={ props.className ? props.className : defaultButtonStyle }
+            disabled={props.disabled ? props.disabled : false}
             onClick={(e) => {
                 e.preventDefault();
                 props.onClick(e);

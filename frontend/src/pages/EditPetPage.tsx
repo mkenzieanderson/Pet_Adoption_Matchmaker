@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../components/Header/Header";
 import { PetFormPage } from "../components/PetForm/PetForm";
 import useAuthStore from "../state/Auth/Auth.store";
@@ -7,16 +7,35 @@ import useUserStore from "../state/User/User.store";
 import DeletePopUp from "../components/PopUp/DeletePopUp";
 import Button from "../components/Buttons/Button";
 import { errorButtonStyle } from "../components/Buttons/ButtonStyles";
+import { PetData } from "../components/PetForm/PetForm";
+import usePetStore, { Pet } from "../state/Pets/Pet.store";
+
 
 export const EditPetPage = () => {
     const user = useUserStore((state) => state.user);
     const auth = useAuthStore((state) => state);
     const navigate = useNavigate();
+    const location = useLocation();
+    const pet = location.state?.pet;
     const [showDeleteWarning, setShowDeleteWarning] = useState(false);
 
-    function submitHandler() {
-        return;
-    }
+    const submitHandler = async (petID: number, petData: Omit<PetData, 'pet_id'>) => {
+        try {
+            const { imageFile, ...updatedPetData } = petData;
+            const updatedData: Partial<Pet> = {
+                ...updatedPetData
+            };
+            if (auth.token) {
+                await usePetStore.getState().updatePet(petID, updatedData, auth.token);
+            }
+            if (imageFile) {
+                await usePetStore.getState().uploadAvatar(petID, imageFile);
+            }
+            navigate('/pets-page');
+        } catch (error) {
+            console.error("Error updating pet:", error);
+        }
+    };
 
     function openDeleteWarning() {
         setShowDeleteWarning(true)
@@ -34,7 +53,7 @@ export const EditPetPage = () => {
     return (
         <>
             <Header user={user} path={location.pathname} loginStatus={auth.status} />
-            <PetFormPage mode="edit" submitHandler={submitHandler}/>
+            <PetFormPage mode="edit" initialData={pet} submitHandler={submitHandler}/>
             <div className="w-4/5 mb-10 text-right">
                     <Button 
                         text="DELETE PET"

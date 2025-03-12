@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { URL } from '../../App';
 import { Pet } from '../../state/Pets/Pet.store';
 
-const fetchAvatar = async (petID: number): Promise<String> => {
+export const fetchAvatar = async (petID: number): Promise<string> => {
     const response = await fetch(`${URL}pets/${petID}/avatar`, {
         method: 'GET',
     });
