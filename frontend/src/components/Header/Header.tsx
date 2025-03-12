@@ -81,9 +81,8 @@ const Header = ({ user, path, loginStatus }: HeaderProps) => {
                 </div>
             )}
             <div className="bg-mustard w-full h-12 flex items-center justify-start px-4 sm:px-6 lg:px-8 border-solid border-t-2 border-b-2 border-tawny-brown">
-                <Button onClick={() => navigate('/')} text="Success Stories" className={subHeaderClassName} />
-                <Button onClick={() => navigate('/')} text="FAQ" className={subHeaderClassName} />
-                <Button onClick={() => navigate('/')} text="Contact Us" className={subHeaderClassName} />
+                <Button onClick={() => navigate('/faq-page')} text="FAQ" className={subHeaderClassName} />
+                <Button onClick={() => navigate('/contact-page')} text="Contact Us" className={subHeaderClassName} />
             </div>
         </>
     );
