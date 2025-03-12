@@ -8,7 +8,7 @@ const addFavoritePet = async ({ petID, userID, token } : { petID: number, userID
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ pet_id: petID, user_id: userID }),
+        body: JSON.stringify({ user_id: userID, pet_id: petID }),
     });
     if (!response.ok) {
         throw new Error('Failed to add favorite pet');

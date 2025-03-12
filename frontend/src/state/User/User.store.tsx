@@ -126,25 +126,18 @@ const useUserStore = create<UserStore>((set) => ({
             console.error('Failed to add favorite pet:', error);
         }
     },
-    deleteFavoritePet: async (petID: number, userID: number, token: string) => {
-        try {
-            const response = await fetch(`${URL}${userID}/favorites/${petID}`, {
-                method: 'DELETE',
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            if (!response.ok) {
-                throw new Error('Failed to delete favorite pet');
-            }
-            set((state) => ({
-                user: state.user ? {
-                    ...state.user,
-                    favoritePets: state.user.favoritePets.filter((pet) => pet.pet_id !== petID),
-                } : null,
-            }));
-        } catch (error) {
-            console.error('Failed to delete favorite pet:', error);
+    deleteFavoritePet: async (userID, petID, token): Promise<void> => {
+        const response = await fetch(`${URL}favorites`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ user_id: userID, pet_id: petID }),
+        });
+    
+        if (!response.ok) {
+            throw new Error('Failed to delete favorite pet');
         }
     },
     fetchFavoritePets: async (userID: number, token: string) => {

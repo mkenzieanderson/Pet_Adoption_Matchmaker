@@ -5,6 +5,8 @@ import Delete from "../../assets/delete.svg";
 import { Pet } from "../../state/Pets/Pet.store";
 import { User} from "../../state/User/User.store";
 import { useFetchAvatar } from "../../apis/PetApis/useFetchAvatar";
+import { useDeleteFavoritePet } from "../../apis/UserApis/useDeleteFavoritePet";
+import useAuthStore from "../../state/Auth/Auth.store";
 
 
 interface PetProfileCardProps {
@@ -15,13 +17,23 @@ interface PetProfileCardProps {
     const PetProfileCard = ({ pet, user }: PetProfileCardProps) => {
         const navigate = useNavigate();
         const { data: avatarData, error } = useFetchAvatar([pet]);
+        const auth = useAuthStore((state) => state);
+        const deleteFavoritePet = useDeleteFavoritePet();
 
         useEffect(() => {
             if (error) {
                 console.error("Error fetching pet avatar:", error);
             }
         }, [error]);
-    
+
+        const handleDelete = () => {
+            if (!user) return;
+            const petID = pet.pet_id
+            const userID = user.user_id
+            const token = auth.token
+            deleteFavoritePet.mutate({ userID, petID, token });
+        };
+
         return (
             <>
                 <div className="bg-mustard w-full h-auto p-4 rounded-lg shadow-md cursor-pointer relative" >
@@ -32,7 +44,7 @@ interface PetProfileCardProps {
                     />
                     <div className="absolute top-2 right-1">
                     {user?.role === 'user' ? (
-                        <button className="w-6 h-6 mx-4 my-4" onClick={() => navigate('/edit-pet-page')}>
+                        <button className="w-6 h-6 mx-4 my-4" onClick={handleDelete}>
                             <Delete />
                         </button>
                     ) : (

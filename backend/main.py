@@ -1357,6 +1357,7 @@ def add_favorite():
                 VALUES (:user_id, :pet_id, NOW())
             ''')
             conn.execute(stmt, {'user_id': user_id, 'pet_id': pet_id})
+            conn.commit()
             new_favorite_id = conn.execute(sqlalchemy.text('SELECT LAST_INSERT_ID()')).scalar()
 
         return jsonify(
@@ -1375,38 +1376,37 @@ def add_favorite():
         return get_error_message(status_code), status_code
 
 
-@app.route('/' + FAVORITES + '/<int:favorite_id>', methods=['DELETE'])
-def delete_favorite(favorite_id):
-    """Deletes a favorite from a user's list if they are the owner."""
+@app.route('/' + FAVORITES, methods=['DELETE'])
+def delete_favorite():
+    """Deletes a favorite from a user's list based on user_id and pet_id."""
     try:
         payload = verify_jwt(request)
         if not payload:
             raise ValueError(401)
 
-        user_sub = payload['sub']
+        data = request.get_json()
+
+        if not data or 'user_id' not in data or 'pet_id' not in data:
+            return jsonify({"Error": "Missing user_id or pet_id in request body"}), 400
+
+        user_id = data['user_id']
+        pet_id = data['pet_id']
 
         with db.connect() as conn:
+            # Check if the favorite entry exists
             stmt = sqlalchemy.text(
-                'SELECT user_id FROM users WHERE sub = :sub')
-            result = conn.execute(stmt, {'sub': user_sub}).one_or_none()
+                'SELECT id FROM favorites WHERE user_id = :user_id AND pet_id = :pet_id'
+            )
+            result = conn.execute(stmt, {'user_id': user_id, 'pet_id': pet_id}).one_or_none()
 
             if result is None:
-                raise ValueError(404)
+                return jsonify({"Error": "Favorite not found"}), 404
 
-            user_id = result.user_id
-
-            # Check if the favorite exists and belongs to the user
+            # Delete the favorite entry
             stmt = sqlalchemy.text(
-                'SELECT id FROM favorites WHERE id = :favorite_id AND user_id = :user_id')
-            result = conn.execute(
-                stmt, {'favorite_id': favorite_id, 'user_id': user_id}).one_or_none()
-
-            if result is None:
-                raise ValueError(403)
-
-            stmt = sqlalchemy.text(
-                'DELETE FROM favorites WHERE id = :favorite_id')
-            conn.execute(stmt, {'favorite_id': favorite_id})
+                'DELETE FROM favorites WHERE user_id = :user_id AND pet_id = :pet_id'
+            )
+            conn.execute(stmt, {'user_id': user_id, 'pet_id': pet_id})
             conn.commit()
 
         return {"message": "Favorite successfully deleted"}, 200
