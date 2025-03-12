@@ -5,6 +5,8 @@ import { MyAccountPage } from './pages/MyAccountPage'
 import { PetsPage } from './pages/PetsPage'
 import { EditPetPage } from './pages/EditPetPage'
 import { AddPetPage } from './pages/AddPetPage'
+import { ContactPage } from './pages/ContactPage'
+import { FaqPage } from './pages/FaqPage'
 import './App.css'
 
 export const URL = import.meta.env.VITE_BASE_URL
@@ -19,6 +21,8 @@ const routes = createBrowserRouter([
   {path: 'my-account-page', element: <MyAccountPage />},
   {path: 'edit-pet-page', element: <EditPetPage />},
   {path: 'add-pet-page', element: <AddPetPage />},
+  {path: 'contact-page', element: <ContactPage />},
+  {path: 'faq-page', element: <FaqPage />}
 ], {basename: "/Pet-Adoption/"})
 
 function App() {
