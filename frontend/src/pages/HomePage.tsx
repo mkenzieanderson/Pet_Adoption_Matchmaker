@@ -25,7 +25,6 @@ export const HomePage = () => {
     const pets = usePetStore((state) => state.pets);
     const [filters, setFilters] = useState<FilterCriteria | {}>({});
     const [currentPetIndex, setCurrentPetIndex] = useState(0);
-    const [currentPet, setCurrentPet] = useState<Pet | null>(null);
 
     const { data: petsData, isLoading, error } = useFetchPets(filters);
 
@@ -71,11 +70,6 @@ export const HomePage = () => {
             useUserStore.getState().setFavoritePets(favoritesData);
         }
     }, [favoritesData, favoritesIsLoading, favoritesIsError, user?.favoritePets]);
-
-    console.log("Shelter store state: ", useShelterStore.getState());
-
-    const shelterID = useShelterStore.getState().shelter?.shelter_id;
-    console.log("Shelter ID: ", shelterID);
 
     const { data: shelterPetsData, isLoading: shelterPetsIsLoading, isError: shelterPetsIsError } = useFetchShelterPets(shelter?.shelter_id ?? 0);
 

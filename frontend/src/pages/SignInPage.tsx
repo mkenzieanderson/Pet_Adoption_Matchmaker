@@ -18,7 +18,6 @@ export const SignInPage = () => {
     const [showError, setShowError] = useState(false);
     const authStore = useAuthStore((state) => state);
     const shelter = useShelterStore((state) => state);
-    const fetchShelterPets = useShelterStore((state) => state.fetchShelterPets);
     const user = useUserStore((state) => state.user);
     const errorMessage = "Email and/or password are incorrect. Please try again.";
 

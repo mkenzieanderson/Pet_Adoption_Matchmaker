@@ -31,7 +31,6 @@ const useShelterStore = create<ShelterStore>((set) => ({
             if (!response.ok) {
                 throw new Error('Failed to fetch shelter pets');
             }
-            const data = await response.json();
         } catch (error) {
             console.error('Failed to fetch shelter pets:', error);
         }

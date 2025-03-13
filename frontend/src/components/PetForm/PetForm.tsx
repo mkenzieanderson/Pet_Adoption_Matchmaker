@@ -50,7 +50,7 @@ export const PetFormPage: React.FC<PetFormProps> = ({ mode, initialData, submitH
     const [showError, setShowError] = useState(false);
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
     const [loadingAvatar, setLoadingAvatar] = useState(true);
-    const [avatarError, setAvatarError] = useState(false);
+    const [_avatarError, setAvatarError] = useState(false);
 
     useEffect(() => {
         if (initialData?.pet_id) {

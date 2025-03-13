@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import Header from "../components/Header/Header";
 import { PetFormPage } from "../components/PetForm/PetForm";
 import useAuthStore from "../state/Auth/Auth.store";
@@ -19,7 +19,7 @@ export const AddPetPage = () => {
         return <div>Error: Failed to load shelter data</div>; 
     }
 
-    async function submitHandler(petData: PetData) {
+    async function submitHandler(_petId: number, petData: Omit<PetData, 'pet_id'>) {
         try {
             if (!auth.token) {
                 console.error("No authorization token available");

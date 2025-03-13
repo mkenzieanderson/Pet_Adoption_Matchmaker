@@ -6,13 +6,14 @@ import { useNavigate } from "react-router-dom";
 import useShelterStore from "../../state/Shelter/Shelter.store";
 import { useFetchShelterPets } from "../../apis/ShelterApis/useFetchShelterPets";
 import { useFetchAllDispositions } from "../../apis/PetApis/useFetchDisposition";
+import LoadingState from "../LoadingState/LoadingState";
 
 interface PetCardGridProps {
     pet?: Pet;
     user: User | null;
 }
 
-const PetCardGrid = ({user}: PetCardGridProps) => {
+const PetCardGrid = ({ user }: PetCardGridProps) => {
     const navigate = useNavigate();
     const title = user?.role === 'user' ? 'My Saved Pets' : 'My Shelter';
     const { shelter } = useShelterStore();
@@ -23,12 +24,11 @@ const PetCardGrid = ({user}: PetCardGridProps) => {
         shelterPets = data || [];
     }
 
-    const petsToDisplay = user?.role === 'user' 
-        ? user.favoritePets 
+    const petsToDisplay = user?.role === 'user'
+        ? user.favoritePets
         : shelterPets;
 
-    // Fetch dispositions for all pets once pet data is available
-    const { data: dispositionsData, isLoading, isError } = useFetchAllDispositions(petsToDisplay);
+    const { data: dispositionsData, isLoading, isError } = useFetchAllDispositions(petsToDisplay || []);
     const petsWithDispositions = petsToDisplay.map((pet) => ({
         ...pet,
         disposition: dispositionsData?.[pet.pet_id] || [],
@@ -48,7 +48,7 @@ const PetCardGrid = ({user}: PetCardGridProps) => {
                     ) : null}
                 </div>
                 {isLoading ? (
-                    <div className="loading-message">Loading pet data...</div>
+                    <LoadingState />
                 ) : isError ? (
                     <p className="text-red-500">Failed to fetch dispositions</p>
                 ) : (
