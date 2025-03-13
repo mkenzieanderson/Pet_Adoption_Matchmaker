@@ -9,7 +9,6 @@ import {
     CatBreedOptions,
     GenderOptions,
     AvailabilityOptions,
-    DispositionOptions
 } from '../Dropdown/PetOptions';
 
 interface FilterSidebarProps {
@@ -21,7 +20,6 @@ const FilterSidebar = ({ filterPets }: FilterSidebarProps) => {
     const [breed, setBreed] = useState("");
     const [age, setAge] = useState(0);
     const [gender, setGender] = useState("");
-    const [disposition, setDisposition] = useState("");
     const [availability, setAvailability] = useState("");
 
     useEffect(() => {
@@ -29,8 +27,8 @@ const FilterSidebar = ({ filterPets }: FilterSidebarProps) => {
     }, [type]);
 
     const handleApply = () => {
-        console.log("Applying filters", { type, breed, age, gender, disposition, availability });
-        filterPets({ type, breed, age, gender, disposition, availability });
+        console.log("Applying filters", { type, breed, age, gender, availability });
+        filterPets({ type, breed, age, gender, availability });
     }
 
     return (
