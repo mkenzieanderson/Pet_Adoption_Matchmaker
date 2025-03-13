@@ -4,10 +4,12 @@ import UploadIcon from "../../assets/upload_icon.png";
 type ImgUploadProps = {
     imageFile: File | undefined;
     setImageFile: React.Dispatch<React.SetStateAction<File| undefined>>;
+    avatarUrl?: string | null;
+    loadingAvatar?: boolean;
 }
 
 
-function ImgUpload ({ imageFile, setImageFile }: ImgUploadProps) {
+function ImgUpload ({ imageFile, setImageFile, avatarUrl, loadingAvatar }: ImgUploadProps) {
     const imgUploadRef = useRef<HTMLInputElement>(null);
 
     const handleImgUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,21 +28,32 @@ function ImgUpload ({ imageFile, setImageFile }: ImgUploadProps) {
                 <div 
                     className="text-espresso font-header font-semibold text-lg text-center cursor-pointer"
                     onClick={handleClick}
-                >
-                    { imageFile ?
-                        (<div className="w-[245px] h-[220px] overflow-hidden">
+                >                
+                    {imageFile ? ( // PRIORITIZE imageFile first
+                        <div className="w-[245px] h-[220px] overflow-hidden">
                             <img
                                 src={URL.createObjectURL(imageFile)}
-                                className="w-full h-full"
+                                className="w-full h-full object-cover"
+                                alt="Uploaded Image"
                             />
-                        </div>) 
-                    :
-                        (<>
+                        </div>
+                    ) : loadingAvatar ? (
+                        <p>Loading avatar...</p>
+                    ) : avatarUrl ? (
+                        <div className="w-[245px] h-[220px] overflow-hidden">
+                            <img
+                                src={avatarUrl}
+                                className="w-full h-full object-cover"
+                                alt="Pet Avatar"
+                            />
+                        </div>
+                    ) : (
+                        <>
                             <p className="mt-10">UPLOAD IMAGE</p>
                             <p>HERE</p>
-                            <img src={UploadIcon} className="mt-5 mx-auto"/>
-                        </>)
-                    }
+                            <img src={UploadIcon} className="mt-5 mx-auto" />
+                        </>
+                    )}
                     <input
                         type="file"
                         accept="image/*"

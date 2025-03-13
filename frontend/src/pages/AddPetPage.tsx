@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import Header from "../components/Header/Header";
 import { PetFormPage } from "../components/PetForm/PetForm";
 import useAuthStore from "../state/Auth/Auth.store";
@@ -10,26 +10,19 @@ import { PetData } from "../components/PetForm/PetForm";
 export const AddPetPage = () => {
     const user = useUserStore((state) => state.user);
     const auth = useAuthStore((state) => state);
-    const { shelters, fetchShelters }  = useShelterStore();
+    const { shelter }  = useShelterStore();
     const { addPet, addDisposition, uploadAvatar } = usePetStore();
 
-    useEffect(() => {
-        if (auth.token) {
-            fetchShelters(auth.token);
-        }
-    }, [auth.token, fetchShelters]);
+    // Mackenzie: I'll change this later so that it has better error handling if unable
+    // to grab the shelter data from global state
+    if (!shelter) {
+        return <div>Error: Failed to load shelter data</div>; 
+    }
 
-    const shelter = shelters.find((shelter) => shelter.user_id === user?.user_id);
-    const shelterID = shelter ? shelter.shelter_id : null;
-
-    async function submitHandler(petData: PetData) {
+    async function submitHandler(_petId: number, petData: Omit<PetData, 'pet_id'>) {
         try {
             if (!auth.token) {
                 console.error("No authorization token available");
-                return;
-            }
-            if (!shelterID) {
-                console.error("No shelter found for the current user.");
                 return;
             }
             const petID = await addPet(auth.token, {
@@ -39,12 +32,11 @@ export const AddPetPage = () => {
                 age: petData.age,
                 gender: petData.gender,
                 availability: petData.availability,
-                shelter_id: String(shelterID),
+                shelter_id: String(shelter?.shelter_id),
                 description: "",
             });
 
             if (petData.disposition && petData.disposition.length > 0 && petID) {
-                console.log("[DEBUG] Adding dispositions...")
                 const filteredDispositions = petData.disposition.filter((disposition): disposition is string => disposition !== undefined);
                 await addDisposition(auth.token, petID, filteredDispositions);
             }

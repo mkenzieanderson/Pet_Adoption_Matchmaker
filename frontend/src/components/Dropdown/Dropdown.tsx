@@ -14,11 +14,17 @@ type DropdownProps = {
     value?: string | number;
 }
 
-function Dropdown ({ title, width, options, onChange }: DropdownProps) {
+function Dropdown ({ title, width, options, onChange, value }: DropdownProps) {
     const [open, setOpen] = useState(false);
     const [selectedOption, setSelectedOption] = useState<DropdownOptions | null>(null);
     const dropdownRef = useRef<HTMLDivElement>(null)
 
+    // Set selectedOption when value changes
+    useEffect(() => {
+        const defaultOption = options.find(option => option.value === value);
+        setSelectedOption(defaultOption || null);
+    }, [value, options]);
+    
     // Any click outside the dropdown menu will close the dropdown menu
     useEffect (() => {
         function handleClickOutside(event: MouseEvent) {

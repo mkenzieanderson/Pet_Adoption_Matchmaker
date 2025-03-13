@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../Buttons/Button";
 import TextInput from "../TextInput/TextInput";
@@ -6,6 +6,7 @@ import Form from "../Form/Form";
 import Dropdown from "../Dropdown/Dropdown";
 import ImgUpload from "../ImgUpload/ImgUpload";
 import Checklist from "../Checklist/Checklist";
+import { fetchAvatar } from "../../apis/PetApis/useFetchAvatar";
 import { AgeOptions } from "../Dropdown/AgeOptions";
 import { 
     TypeOptions, 
@@ -17,6 +18,7 @@ import {
  } from "../Dropdown/PetOptions";
 
 export type PetData = {
+    pet_id: number;
     name: string;
     type: string;
     breed: string;
@@ -30,7 +32,7 @@ export type PetData = {
 type PetFormProps = {
     mode: "add" | "edit",
     initialData?: PetData;
-    submitHandler: (data: PetData) => void;
+    submitHandler: (petID: number, data: Omit<PetData, 'pet_id'>) => void;
 }
 
 export const PetFormPage: React.FC<PetFormProps> = ({ mode, initialData, submitHandler }) => {
@@ -46,9 +48,31 @@ export const PetFormPage: React.FC<PetFormProps> = ({ mode, initialData, submitH
     const [selectedOptions, setSelectedOptions] = useState<(string | undefined)[]>(initialData?.disposition || []);
     const [imageFile, setImageFile] = useState<File | undefined>(initialData?.imageFile || undefined);
     const [showError, setShowError] = useState(false);
+    const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+    const [loadingAvatar, setLoadingAvatar] = useState(true);
+    const [_avatarError, setAvatarError] = useState(false);
 
+    useEffect(() => {
+        if (initialData?.pet_id) {
+            const loadAvatar = async () => {
+                try {
+                    setLoadingAvatar(true);
+                    const avatar = await fetchAvatar(initialData.pet_id);
+                    setAvatarUrl(avatar);
+                    setAvatarError(false);
+                } catch (error) {
+                    setAvatarError(true);
+                    console.error("Error fetching avatar:", error);
+                } finally {
+                    setLoadingAvatar(false);
+                }
+            };
+            loadAvatar();
+        }
+    }, [initialData]);
+    
     function getAllFormData() {
-        const petData: PetData = {
+        const petData: Omit<PetData, 'pet_id'> = {
             name,
             type,
             breed,
@@ -62,14 +86,16 @@ export const PetFormPage: React.FC<PetFormProps> = ({ mode, initialData, submitH
     }
     
     function handleSubmit() {
-        if (!name || (!type || (type !== "other" && !breed)) || !age || !gender || !availability || !imageFile) {
+        if (!name || (!type || (type !== "other" && !breed)) || !age || !gender || !availability || (!imageFile && !avatarUrl)) {
             setShowError(true);
             window.scrollTo({ top: 0, behavior: "smooth" });
             return;
         }
         setShowError(false);
         const petData = getAllFormData();
-        submitHandler(petData);
+        if (initialData?.pet_id) {
+            submitHandler(initialData.pet_id, petData);
+        }
         navigate('/pets-page');
     }
 
@@ -85,6 +111,8 @@ export const PetFormPage: React.FC<PetFormProps> = ({ mode, initialData, submitH
                             <ImgUpload
                                 imageFile={imageFile}
                                 setImageFile={setImageFile}
+                                avatarUrl={avatarUrl}
+                                loadingAvatar={loadingAvatar}
                             />
                         </div>
 
@@ -118,7 +146,7 @@ export const PetFormPage: React.FC<PetFormProps> = ({ mode, initialData, submitH
                                 width="min-w-[150px]"
                                 options={AgeOptions}
                                 onChange={(option) => setAge(Number(option.value))}
-                                value={age ? age.toString() : ""}
+                                value={age} 
                             />
                             <Dropdown
                                 title="Gender"

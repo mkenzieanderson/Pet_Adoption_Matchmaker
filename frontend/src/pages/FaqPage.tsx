@@ -1,10 +1,15 @@
 import React from 'react';
 import Header from '../components/Header/Header';
+import useUserStore from '../state/User/User.store';
+import useAuthStore from '../state/Auth/Auth.store';
 
 export const FaqPage = () => {
+    const user = useUserStore((state) => state.user);
+    const auth = useAuthStore((state) => state);
+
     return (
         <>
-            <Header />
+            <Header user={user} loginStatus={auth.status} />
             <div className="flex flex-col items-center mt-6">
                 <div className="font-header text-espresso bg-cream border-tawny-brown border-2 rounded-lg p-14 pt-10 pb-10 w-full max-w-4xl">
                     <h1 className="font-bold text-3xl mb-1 text-center">Frequently Asked Questions</h1>

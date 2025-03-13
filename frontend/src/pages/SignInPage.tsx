@@ -7,6 +7,8 @@ import Header from "../components/Header/Header";
 import useAuthStore from "../state/Auth/Auth.store";
 import useUserStore from "../state/User/User.store";
 import useShelterStore from "../state/Shelter/Shelter.store";
+import { useFetchUser } from "../apis/UserApis/useFetchUser";
+import { useFetchShelter } from "../apis/ShelterApis/useFetchShelter";
 import { URL } from "../App";
 
 export const SignInPage = () => {
@@ -14,46 +16,53 @@ export const SignInPage = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showError, setShowError] = useState(false);
-    const [isUserFetched, setIsUserFetched] = useState(false);
-
     const authStore = useAuthStore((state) => state);
     const shelter = useShelterStore((state) => state);
-    const fetchShelterPets = useShelterStore((state) => state.fetchShelterPets);
     const user = useUserStore((state) => state.user);
-    const fetchUser = useUserStore((state) => state.fetchUser);
     const errorMessage = "Email and/or password are incorrect. Please try again.";
-
 
     function clearDataFields() {
         setEmail("");
         setPassword("");
     }
 
-    async function handleValidLogin(res_token: string, res_user_id: bigint) {
+    
+    async function handleValidLogin(res_token: string, res_user_id: number) {
         clearDataFields();
         setShowError(false);
 
         authStore.setToken(res_token);
         authStore.setUserID(res_user_id);
         authStore.setStatus(true);
-
-        await fetchUser(res_user_id, res_token);
-        setIsUserFetched(true);
     }
 
+    const { data: userData, isLoading: userIsLoading, isError: userIsError } = useFetchUser(authStore.userId, authStore.token);
+
     useEffect(() => {
-        if (isUserFetched && user) {
-            console.log("User data after fetch:", user);
-            if (user.role === "admin") {
-                shelter.fetchShelter(user.user_id, authStore.token).then(() => {
-                    if (shelter.currentShelter?.shelter_id) {
-                        fetchShelterPets(shelter.currentShelter.shelter_id)
-                    }
-                });
-            }
-            navigate("/");
+        if (userIsError) {
+            console.error("Failed to fetch user:", userIsError);
+        } else if (userData && !userIsLoading) {
+            useUserStore.getState().setUser(userData);
         }
-    }, [isUserFetched, user]);
+        if (user && user.role === "user") {
+            navigate("/")
+        }
+    }, [userData, userIsLoading, userIsError]);
+
+    const { data: shelterData, isLoading: shelterIsLoading, isError: shelterIsError } = useFetchShelter(authStore.token, user?.user_id ?? 0);
+
+    useEffect(() => {
+        if (shelterIsError) {
+            console.error("Failed to fetch shelter:", shelterIsError);
+        } else if (shelterData && !shelterIsLoading) {
+            useShelterStore.getState().setShelter(shelterData);
+            navigate("/")
+        }
+    }, [shelterData, shelterIsLoading, shelterIsError]);
+
+    useEffect(() => {
+        console.log("Data in shelter store:", useShelterStore.getState().shelter);
+    }, [shelter]);
 
     function handleInvalidLogin() {
         clearDataFields();
@@ -67,7 +76,6 @@ export const SignInPage = () => {
 
     const authenticateLogin = async () => {
         try {
-            console.log("From URL:", URL);
             const response = await fetch(`${URL}users/login`, {
                 method: 'POST',
                 headers: {

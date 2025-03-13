@@ -62,6 +62,8 @@ oauth = OAuth(app)
 # CLIENT_ID = access_secret_version("CLIENT_ID")
 # CLIENT_SECRET = access_secret_version("CLIENT_SECRET")
 # DOMAIN = access_secret_version("DOMAIN")
+
+# global secrets for auth - using for local deployment
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 DOMAIN = os.getenv("DOMAIN")
@@ -835,18 +837,24 @@ def update_pet(pet_id):
             "name": str,
             "news_item": str,
             "type": str,
+            "disposition": list,
         }
         for key, value in content.items():
             if key not in expected_types:
+                print("DEBUG: Key not in expected types", key)
                 raise ValueError(400)
             if not isinstance(value, expected_types[key]):
+                print("DEBUG: not is instance")
                 raise ValueError(400)
 
         if 'type' in content and content['type'] not in valid_types:
+            print("DEBUG: invalid type")
             raise ValueError(400)  # Invalid pet type
         if 'gender' in content and content['gender'] not in valid_genders:
+            print("DEBUG: invalid gender")
             raise ValueError(400)  # Invalid gender
         if 'availability' in content and content['availability'] not in valid_availabilities:
+            print("DEBUG invalid availability")
             raise ValueError(400)  # Invalid availability
 
          # Get the values to update, if any
@@ -858,6 +866,7 @@ def update_pet(pet_id):
         availability = content.get("availability")
         type_ = content.get("type")
         news_item = content.get("news_item")
+        dispositions = content.get("disposition", [])
 
         # Update the pet and get the new details
         with db.connect() as conn:
@@ -886,6 +895,35 @@ def update_pet(pet_id):
                 "news_item": news_item,
                 "pet_id": pet_id
             })
+
+            # Fetch the current dispositions for the pet
+            stmt = sqlalchemy.text(
+                '''SELECT disposition FROM pet_dispositions WHERE pet_id = :pet_id'''
+            )
+            current_dispositions = [row['disposition'] for row in conn.execute(stmt, {'pet_id': pet_id}).mappings()]
+
+            # Add new dispositions that are not already in the current dispositions
+            new_dispositions = [d for d in dispositions if d not in current_dispositions]
+
+            # Remove dispositions that are no longer in the updated list
+            remove_dispositions = [d for d in current_dispositions if d not in dispositions]
+
+            # Insert new dispositions into the pet_dispositions table
+            for disposition in new_dispositions:
+                stmt = sqlalchemy.text(
+                    '''INSERT INTO pet_dispositions (pet_id, disposition)
+                    VALUES (:pet_id, :disposition)
+                    '''
+                )
+                conn.execute(stmt, parameters={'pet_id': pet_id, 'disposition': disposition})
+
+            # Remove outdated dispositions
+            for disposition in remove_dispositions:
+                stmt = sqlalchemy.text(
+                    '''DELETE FROM pet_dispositions WHERE pet_id = :pet_id AND disposition = :disposition
+                    '''
+                )
+                conn.execute(stmt, parameters={'pet_id': pet_id, 'disposition': disposition})
 
             # Fetch the updated pet details
             stmt = sqlalchemy.text(
@@ -1339,26 +1377,24 @@ def add_favorite():
                 'SELECT * FROM users WHERE user_id = :user_id')
             user_result = conn.execute(stmt, {'user_id': user_id}).fetchone()
 
-        if user_result is None:
-            return jsonify({"Error": "User not found"}), 404
+            if user_result is None:
+                return jsonify({"Error": "User not found"}), 404
 
-        # Check if pet exists
-        with db.connect() as conn:
+            # Check if pet exists
             stmt = sqlalchemy.text('SELECT * FROM pets WHERE pet_id = :pet_id')
             pet_result = conn.execute(stmt, {'pet_id': pet_id}).fetchone()
 
-        if pet_result is None:
-            return jsonify({"Error": "Pet not found"}), 404
+            if pet_result is None:
+                return jsonify({"Error": "Pet not found"}), 404
 
-        # Add pet to favorites
-        with db.connect() as conn:
+            # Add pet to favorites
             stmt = sqlalchemy.text('''
                 INSERT INTO favorites (user_id, pet_id, favorited_at)
                 VALUES (:user_id, :pet_id, NOW())
             ''')
             conn.execute(stmt, {'user_id': user_id, 'pet_id': pet_id})
-            new_favorite_id = conn.execute(
-                sqlalchemy.text('SELECT LAST_INSERT_ID()')).scalar()
+            conn.commit()
+            new_favorite_id = conn.execute(sqlalchemy.text('SELECT LAST_INSERT_ID()')).scalar()
 
         return jsonify(
             {
@@ -1376,38 +1412,37 @@ def add_favorite():
         return get_error_message(status_code), status_code
 
 
-@app.route('/' + FAVORITES + '/<int:favorite_id>', methods=['DELETE'])
-def delete_favorite(favorite_id):
-    """Deletes a favorite from a user's list if they are the owner."""
+@app.route('/' + FAVORITES, methods=['DELETE'])
+def delete_favorite():
+    """Deletes a favorite from a user's list based on user_id and pet_id."""
     try:
         payload = verify_jwt(request)
         if not payload:
             raise ValueError(401)
 
-        user_sub = payload['sub']
+        data = request.get_json()
+
+        if not data or 'user_id' not in data or 'pet_id' not in data:
+            return jsonify({"Error": "Missing user_id or pet_id in request body"}), 400
+
+        user_id = data['user_id']
+        pet_id = data['pet_id']
 
         with db.connect() as conn:
+            # Check if the favorite entry exists
             stmt = sqlalchemy.text(
-                'SELECT user_id FROM users WHERE sub = :sub')
-            result = conn.execute(stmt, {'sub': user_sub}).one_or_none()
+                'SELECT id FROM favorites WHERE user_id = :user_id AND pet_id = :pet_id'
+            )
+            result = conn.execute(stmt, {'user_id': user_id, 'pet_id': pet_id}).one_or_none()
 
             if result is None:
-                raise ValueError(404)
+                return jsonify({"Error": "Favorite not found"}), 404
 
-            user_id = result.user_id
-
-            # Check if the favorite exists and belongs to the user
+            # Delete the favorite entry
             stmt = sqlalchemy.text(
-                'SELECT id FROM favorites WHERE id = :favorite_id AND user_id = :user_id')
-            result = conn.execute(
-                stmt, {'favorite_id': favorite_id, 'user_id': user_id}).one_or_none()
-
-            if result is None:
-                raise ValueError(403)
-
-            stmt = sqlalchemy.text(
-                'DELETE FROM favorites WHERE id = :favorite_id')
-            conn.execute(stmt, {'favorite_id': favorite_id})
+                'DELETE FROM favorites WHERE user_id = :user_id AND pet_id = :pet_id'
+            )
+            conn.execute(stmt, {'user_id': user_id, 'pet_id': pet_id})
             conn.commit()
 
         return {"message": "Favorite successfully deleted"}, 200
