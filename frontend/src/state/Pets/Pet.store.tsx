@@ -138,6 +138,7 @@ const usePetStore = create<PetStore>((set) => ({
     },
     addPet: async (token: string, newPet: Partial<Pet>) => {
         try {
+            console.log("[DEBUG]: In addPet function in petstore")
             const response = await fetch(`${URL}pets`, {
                 method: 'POST',
                 headers: {
