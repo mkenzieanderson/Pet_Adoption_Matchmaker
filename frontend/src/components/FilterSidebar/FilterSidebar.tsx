@@ -80,14 +80,6 @@ const FilterSidebar = ({ filterPets }: FilterSidebarProps) => {
                     </div>
                     <div className="my-4">
                         <Dropdown
-                            title="Disposition"
-                            width="w-[210px]"
-                            options={DispositionOptions}
-                            onChange={(option) => setDisposition(option.value.toString())}
-                        />
-                    </div>
-                    <div className="my-4">
-                        <Dropdown
                             title="Availability"
                             width="w-[210px]"
                             options={AvailabilityOptions}
