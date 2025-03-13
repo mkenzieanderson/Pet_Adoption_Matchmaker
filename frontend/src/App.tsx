@@ -10,10 +10,7 @@ import { ContactPage } from './pages/ContactPage'
 import { FaqPage } from './pages/FaqPage'
 import './App.css'
 
-// export const URL = import.meta.env.VITE_BASE_URL
-
-// For development purposes until bugs with the import.meta.env.VITE_BASE_URL are resolved
-export const URL = 'http://localhost:8080/';
+export const URL = 'https://animal-adopt-453400.wl.r.appspot.com/';
 
 const routes = createBrowserRouter([
   {path: '/', element: <HomePage />},
