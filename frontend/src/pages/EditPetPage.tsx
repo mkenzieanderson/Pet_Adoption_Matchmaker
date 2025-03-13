@@ -17,6 +17,7 @@ export const EditPetPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const pet = location.state?.pet;
+    const deletePet = usePetStore((state) => state.deletePet);
     const [showDeleteWarning, setShowDeleteWarning] = useState(false);
 
     const submitHandler = async (petID: number, petData: Omit<PetData, 'pet_id'>) => {
@@ -43,7 +44,13 @@ export const EditPetPage = () => {
 
     function handleDelete() {
         setShowDeleteWarning(false)
-        navigate('pets-page')
+        deletePet(pet.pet_id, auth.token)
+        .then(() => {
+            navigate('/');
+        })
+        .catch((error) => {
+            console.error('Failed to delete pet:', error);
+        });
     }
 
     function handleCancel() {
