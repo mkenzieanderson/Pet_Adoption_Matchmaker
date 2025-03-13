@@ -46,7 +46,7 @@ export const EditPetPage = () => {
         setShowDeleteWarning(false)
         deletePet(pet.pet_id, auth.token)
         .then(() => {
-            navigate('/');
+            navigate('/pets-page');
         })
         .catch((error) => {
             console.error('Failed to delete pet:', error);

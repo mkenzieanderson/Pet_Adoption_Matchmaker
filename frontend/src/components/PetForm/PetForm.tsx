@@ -16,6 +16,7 @@ import {
     DispositionOptions,
     AvailabilityOptions
  } from "../Dropdown/PetOptions";
+ import useAuthStore from "../../state/Auth/Auth.store";
 
 export type PetData = {
     pet_id: number;
@@ -29,15 +30,24 @@ export type PetData = {
     imageFile: File | undefined;
 };
 
-type PetFormProps = {
-    mode: "add" | "edit",
+type PetFormPropsAdd = {
+    mode: "add";
     initialData?: PetData;
-    submitHandler: (petID: number, data: Omit<PetData, 'pet_id'>) => void;
-}
+    submitHandler: (identifier: string, data: Omit<PetData, 'pet_id'>) => void;
+};
+
+type PetFormPropsEdit = {
+    mode: "edit";
+    initialData: PetData;
+    submitHandler: (identifier: number, data: Omit<PetData, 'pet_id'>) => void;
+};
+
+type PetFormProps = PetFormPropsAdd | PetFormPropsEdit;
 
 export const PetFormPage: React.FC<PetFormProps> = ({ mode, initialData, submitHandler }) => {
     const navigate = useNavigate();
     const errorMsg = "One or more fields are missing. Please fill in all fields before submitting.";
+    const auth = useAuthStore((state) => state);
 
     const [name, setName] = useState(initialData?.name || "");
     const [type, setType] = useState(initialData?.type || "");
@@ -93,8 +103,10 @@ export const PetFormPage: React.FC<PetFormProps> = ({ mode, initialData, submitH
         }
         setShowError(false);
         const petData = getAllFormData();
-        if (initialData?.pet_id) {
+        if (mode === "edit" && initialData?.pet_id) {
             submitHandler(initialData.pet_id, petData);
+        } else if (mode === "add") {
+            submitHandler(auth.token, petData);
         }
         navigate('/pets-page');
     }
