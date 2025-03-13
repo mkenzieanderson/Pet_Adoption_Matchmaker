@@ -25,8 +25,8 @@ const PetCardGrid = ({ user }: PetCardGridProps) => {
     }
 
     const petsToDisplay = user?.role === 'user'
-        ? user.favoritePets
-        : shelterPets;
+        ? user.favoritePets ?? []
+        : shelterPets ?? [];
 
     const { data: dispositionsData, isLoading, isError } = useFetchAllDispositions(petsToDisplay || []);
     const petsWithDispositions = petsToDisplay.map((pet) => ({

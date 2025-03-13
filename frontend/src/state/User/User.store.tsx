@@ -13,18 +13,21 @@ export interface User {
 
 interface UserStore {
     user: User | null;
+    deletionInProgress: boolean;
     setUser: (user: User) => void;
     setFavoritePets: (favoritePets: Pet[]) => void;
     fetchUser: (userID: number, token: string) => Promise<void>;
     updateUser: (userID: number, token: string, updatedData: Partial<User>) => Promise<void>;
     addFavoritePet: (petID: number, userID: number, token: string) => Promise<void>;
     deleteFavoritePet: (petID: number, userID: number, token: string) => Promise<void>;
+    setDeletionInProgress: (status: boolean) => void;
     fetchFavoritePets: (userID: number, token: string) => Promise<void>;
     clearUser: () => void;
 }
 
 const useUserStore = create<UserStore>((set) => ({
     user: null,
+    deletionInProgress: false,
     setUser: (user: User) => set({ user }),
     setFavoritePets: (favoritePets: Pet[]) => set((state) => ({
         user: state.user ? { ...state.user, favoritePets } : null,
@@ -122,6 +125,11 @@ const useUserStore = create<UserStore>((set) => ({
                 favoritePets: [...state.user.favoritePets, pet],
             } : null,
         }));
+        // const fetchFavoritePets = useUserStore.getState().fetchFavoritePets;
+        // await fetchFavoritePets(userID, token);
+
+
+
         } catch (error) {
             console.error('Failed to add favorite pet:', error);
         }
@@ -139,7 +147,21 @@ const useUserStore = create<UserStore>((set) => ({
         if (!response.ok) {
             throw new Error('Failed to delete favorite pet');
         }
+        set((state) => {
+            const updatedFavorites = state.user?.favoritePets.filter(pet => pet.pet_id !== petID) || [];
+            return {
+                user: state.user
+                    ? {
+                        ...state.user,
+                        favoritePets: updatedFavorites.length > 0 ? updatedFavorites : [],
+                    }
+                    : null,
+            };
+        });
+        console.log("[DEBUG] Store after deletion:", useUserStore.getState().user);
+        useUserStore.getState().setDeletionInProgress(true);
     },
+    setDeletionInProgress: (status: boolean) => set({ deletionInProgress: status }),
     fetchFavoritePets: async (userID: number, token: string) => {
         try {
             const response = await fetch(`${URL}favorites/${userID}`, {

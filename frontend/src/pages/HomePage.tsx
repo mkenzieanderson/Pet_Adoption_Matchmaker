@@ -23,6 +23,7 @@ export const HomePage = () => {
     const user = useUserStore((state) => state.user);
     const shelter = useShelterStore((state) => state.shelter);
     const pets = usePetStore((state) => state.pets);
+    const deletionInProgress = useUserStore((state) => state.deletionInProgress);
     const [filters, setFilters] = useState<FilterCriteria | {}>({});
     const [currentPetIndex, setCurrentPetIndex] = useState(0);
 
@@ -67,7 +68,11 @@ export const HomePage = () => {
             console.error("Failed to fetch favorite pets:", favoritesIsError);
         } else if (favoritesData && !favoritesIsLoading) {
             console.log("Favorites data: ", favoritesData);
-            useUserStore.getState().setFavoritePets(favoritesData);
+            if (!deletionInProgress) {
+                useUserStore.getState().setFavoritePets(favoritesData);
+            }
+            useUserStore.getState().setDeletionInProgress(false);
+            // useUserStore.getState().setFavoritePets(favoritesData);
         }
     }, [favoritesData, favoritesIsLoading, favoritesIsError, user?.favoritePets]);
 
@@ -103,7 +108,7 @@ export const HomePage = () => {
             addFavoriteMutation.mutate(
                 { petID: pet.pet_id, userID: user.user_id, token: auth.token },
                 {
-                    onSuccess: () => {
+                    onSuccess: async () => {
                         // Invalidate favorites query to trigger a refetch
                         queryClient.invalidateQueries({ queryKey: ['favorites', user?.user_id] });
                     }
