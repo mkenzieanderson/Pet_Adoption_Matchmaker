@@ -59,14 +59,15 @@ ALGORITHMS = ["RS256"]
 oauth = OAuth(app)
 
 
-# CLIENT_ID = access_secret_version("CLIENT_ID")
-# CLIENT_SECRET = access_secret_version("CLIENT_SECRET")
-# DOMAIN = access_secret_version("DOMAIN")
+# global secrets - used for cloud deployment:
+CLIENT_ID = access_secret_version("CLIENT_ID")
+CLIENT_SECRET = access_secret_version("CLIENT_SECRET")
+DOMAIN = access_secret_version("DOMAIN")
 
-# global secrets for auth - using for local deployment
-CLIENT_ID = os.getenv("CLIENT_ID")
-CLIENT_SECRET = os.getenv("CLIENT_SECRET")
-DOMAIN = os.getenv("DOMAIN")
+# global secrets - using for local deployment:
+# CLIENT_ID = os.getenv("CLIENT_ID")
+# CLIENT_SECRET = os.getenv("CLIENT_SECRET")
+# DOMAIN = os.getenv("DOMAIN")
 
 
 auth0 = oauth.register(
@@ -900,13 +901,16 @@ def update_pet(pet_id):
             stmt = sqlalchemy.text(
                 '''SELECT disposition FROM pet_dispositions WHERE pet_id = :pet_id'''
             )
-            current_dispositions = [row['disposition'] for row in conn.execute(stmt, {'pet_id': pet_id}).mappings()]
+            current_dispositions = [row['disposition'] for row in conn.execute(
+                stmt, {'pet_id': pet_id}).mappings()]
 
             # Add new dispositions that are not already in the current dispositions
-            new_dispositions = [d for d in dispositions if d not in current_dispositions]
+            new_dispositions = [
+                d for d in dispositions if d not in current_dispositions]
 
             # Remove dispositions that are no longer in the updated list
-            remove_dispositions = [d for d in current_dispositions if d not in dispositions]
+            remove_dispositions = [
+                d for d in current_dispositions if d not in dispositions]
 
             # Insert new dispositions into the pet_dispositions table
             for disposition in new_dispositions:
@@ -915,7 +919,8 @@ def update_pet(pet_id):
                     VALUES (:pet_id, :disposition)
                     '''
                 )
-                conn.execute(stmt, parameters={'pet_id': pet_id, 'disposition': disposition})
+                conn.execute(stmt, parameters={
+                             'pet_id': pet_id, 'disposition': disposition})
 
             # Remove outdated dispositions
             for disposition in remove_dispositions:
@@ -923,7 +928,8 @@ def update_pet(pet_id):
                     '''DELETE FROM pet_dispositions WHERE pet_id = :pet_id AND disposition = :disposition
                     '''
                 )
-                conn.execute(stmt, parameters={'pet_id': pet_id, 'disposition': disposition})
+                conn.execute(stmt, parameters={
+                             'pet_id': pet_id, 'disposition': disposition})
 
             # Fetch the updated pet details
             stmt = sqlalchemy.text(
@@ -1394,7 +1400,8 @@ def add_favorite():
             ''')
             conn.execute(stmt, {'user_id': user_id, 'pet_id': pet_id})
             conn.commit()
-            new_favorite_id = conn.execute(sqlalchemy.text('SELECT LAST_INSERT_ID()')).scalar()
+            new_favorite_id = conn.execute(
+                sqlalchemy.text('SELECT LAST_INSERT_ID()')).scalar()
 
         return jsonify(
             {
@@ -1433,7 +1440,8 @@ def delete_favorite():
             stmt = sqlalchemy.text(
                 'SELECT id FROM favorites WHERE user_id = :user_id AND pet_id = :pet_id'
             )
-            result = conn.execute(stmt, {'user_id': user_id, 'pet_id': pet_id}).one_or_none()
+            result = conn.execute(
+                stmt, {'user_id': user_id, 'pet_id': pet_id}).one_or_none()
 
             if result is None:
                 return jsonify({"Error": "Favorite not found"}), 404

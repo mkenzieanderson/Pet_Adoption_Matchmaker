@@ -3,7 +3,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-PROJECT_ID = 'pet-adoption-448417'  # Replace with your actual project ID
+PROJECT_ID = 'animal-adopt-453400'  # Replace with your actual project ID
+
 
 def access_secret_version(secret_id, version_id="latest"):
     """Get the secret stored in Google Secret Manager."""
