@@ -29,7 +29,7 @@ function ImgUpload ({ imageFile, setImageFile, avatarUrl, loadingAvatar }: ImgUp
                     className="text-espresso font-header font-semibold text-lg text-center cursor-pointer"
                     onClick={handleClick}
                 >                
-                    {imageFile ? ( // PRIORITIZE imageFile first
+                    {imageFile ? (
                         <div className="w-[245px] h-[220px] overflow-hidden">
                             <img
                                 src={URL.createObjectURL(imageFile)}
@@ -37,16 +37,18 @@ function ImgUpload ({ imageFile, setImageFile, avatarUrl, loadingAvatar }: ImgUp
                                 alt="Uploaded Image"
                             />
                         </div>
-                    ) : loadingAvatar ? (
-                        <p>Loading avatar...</p>
                     ) : avatarUrl ? (
-                        <div className="w-[245px] h-[220px] overflow-hidden">
-                            <img
-                                src={avatarUrl}
-                                className="w-full h-full object-cover"
-                                alt="Pet Avatar"
-                            />
-                        </div>
+                        loadingAvatar ? (
+                            <p>Loading avatar...</p>
+                        ) : (
+                            <div className="w-[245px] h-[220px] overflow-hidden">
+                                <img
+                                    src={avatarUrl}
+                                    className="w-full h-full object-cover"
+                                    alt="Pet Avatar"
+                                />
+                            </div>
+                        )
                     ) : (
                         <>
                             <p className="mt-10">UPLOAD IMAGE</p>

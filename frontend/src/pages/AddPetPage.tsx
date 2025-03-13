@@ -13,15 +13,13 @@ export const AddPetPage = () => {
     const { shelter }  = useShelterStore();
     const { addPet, addDisposition, uploadAvatar } = usePetStore();
 
-    // Mackenzie: I'll change this later so that it has better error handling if unable
-    // to grab the shelter data from global state
     if (!shelter) {
         return <div>Error: Failed to load shelter data</div>; 
     }
 
-    async function submitHandler(_petId: number, petData: Omit<PetData, 'pet_id'>) {
+    async function submitHandler(token: string, petData: Omit<PetData, 'pet_id'>) {
         try {
-            if (!auth.token) {
+            if (!token) {
                 console.error("No authorization token available");
                 return;
             }
